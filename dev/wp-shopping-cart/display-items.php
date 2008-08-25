@@ -3,6 +3,13 @@ include_once('tagging_functions.php');
 include_once('google_base_functions.php');
 $category_data = null;
 
+
+
+$current_user = wp_get_current_user();
+
+$closed_postboxes = get_usermeta( $current_user->ID, 'closedpostboxes_products');
+
+
 function topcategorylist() {
   global $wpdb,$category_data;
   $siteurl = get_option('siteurl'); 
@@ -220,7 +227,7 @@ if($_POST['submit_action'] == 'add') {
 	
 				
 			//modified for USPS
-		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` ( `name` , `description` , `additional_description` , `price`, `weight`, `weight_unit`, `pnp`, `international_pnp`, `file` , `image` , `brand`, `quantity_limited`, `quantity`, `special`, `special_price`, `display_frontpage`,`notax`, `donation`, `no_shipping`, `thumbnail_image`, `thumbnail_state`) VALUES ('".$wpdb->escape($_POST['name'])."', '".$wpdb->escape($_POST['description'])."', '".$wpdb->escape($_POST['additional_description'])."','".(float)$wpdb->escape(str_replace(",","",$_POST['price']))."','".$wpdb->escape($_POST['weight'])."','".$wpdb->escape($_POST['weight_unit'])."', '".$wpdb->escape((float)$_POST['pnp'])."', '".$wpdb->escape($_POST['international_pnp'])."', '".(int)$file."', '".$image."', '0', '$quantity_limited','$quantity','$special','$special_price', '$display_frontpage', '$notax', '$is_donation', '$no_shipping', '".$wpdb->escape($thumbnail_image)."', '" . $wpdb->escape($_POST['image_resize']) . "');";
+		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` ( `name` , `description` , `additional_description` , `price`, `weight`, `weight_unit`, `pnp`, `international_pnp`, `file` , `image` , `brand`, `quantity_limited`, `quantity`, `special`, `special_price`, `display_frontpage`,`notax`, `donation`, `no_shipping`, `thumbnail_image`, `thumbnail_state`) VALUES ('".$wpdb->escape($_POST['name'])."', '".$wpdb->escape($_POST['description'])."', '".$wpdb->escape($_POST['additional_description'])."','".(float)$wpdb->escape(str_replace(",","",$_POST['price']))."','".$wpdb->escape((float)$_POST['weight'])."','".$wpdb->escape($_POST['weight_unit'])."', '".$wpdb->escape((float)$_POST['pnp'])."', '".$wpdb->escape($_POST['international_pnp'])."', '".(int)$file."', '".$image."', '0', '$quantity_limited','$quantity','$special','$special_price', '$display_frontpage', '$notax', '$is_donation', '$no_shipping', '".$wpdb->escape($thumbnail_image)."', '" . $wpdb->escape($_POST['image_resize']) . "');";
 		
 		
 		if($wpdb->query($insertsql)) {  
@@ -1041,6 +1048,7 @@ echo "        </div>";
 <div id='additem'>
 <div class="categorisation_title"><strong class="form_group"><?php echo TXT_WPSC_PRODUCTDETAILS;?> <span><?php echo TXT_WPSC_ENTERPRODUCTDETAILSHERE;?></span></strong></div>
 
+  <?php wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false ); ?>
   <form method='POST' enctype='multipart/form-data'>
   <table class='additem'>
     <tr>
@@ -1115,7 +1123,7 @@ echo "        </div>";
 
    
     
-<tr><td  colspan='2'><div id='price_and_stock' class='postbox'>
+<tr><td  colspan='2'><div id='price_and_stock' class='postbox <?php echo ((array_search('price_and_stock', $closed_postboxes) !== false) ? 'closed' : ''); ?>'>
 	<h3>
 		<a class="togbox">+</a>
 		<?php echo TXT_WPSC_PRICE_AND_STOCK_CONTROL;?>
@@ -1168,7 +1176,7 @@ echo "        </div>";
   ?>
     <tr>
     <td colspan="2">
-	<div id='variation' class='postbox closed'>
+	<div id='variation' class='postbox <?php echo ((array_search('variation', $closed_postboxes) !== false) ? 'closed' : ''); ?>'>
         <h3>
 		<a class="togbox">+</a>
 		<?php echo TXT_WPSC_VARIATION_CONTROL; ?>
@@ -1192,7 +1200,7 @@ echo "        </div>";
 	</table></div></div></td></tr>
     <tr>
       <td colspan='2'>
-	      <div class='postbox closed' id='shipping'>
+	      <div class='postbox <?php echo ((array_search('shipping', $closed_postboxes) !== false) ? 'closed' : ''); ?>' id='shipping'>
 	     <h3>
 		     <a class="togbox">+</a>
 		     <?php echo TXT_WPSC_SHIPPING_DETAILS; ?>
@@ -1233,7 +1241,7 @@ echo "        </div>";
       </td>
     </tr>
     </table></div></div></td></tr>
-    <tr><td colspan='2'><div id='advanced' class='postbox closed'>
+    <tr><td colspan='2'><div id='advanced' class='postbox <?php echo ((array_search('advanced', $closed_postboxes) !== false) ? 'closed' : ''); ?>'>
 	    <h3>
 		    <a class="togbox">+</a>
 		    <?php echo TXT_WPSC_ADVANCED_OPTIONS;?>
@@ -1331,7 +1339,7 @@ echo "        </div>";
     </table></div></div></td></tr>
     <tr>
       <td colspan='2'>
-        <div id='product_image' class='postbox'>
+        <div id='product_image' class='postbox <?php echo ((array_search('product_image', $closed_postboxes) !== false) ? 'closed' : ''); ?>'>
         <h3> 
 		<a class="togbox">+</a>
 		<?php echo TXT_WPSC_PRODUCTIMAGES;?>
@@ -1407,7 +1415,7 @@ echo "        </div>";
     
     <tr>
       <td colspan='2'>
-        <div id='product_download' class='postbox closed'>
+        <div id='product_download' class='postbox <?php echo ((array_search('product_download', $closed_postboxes) !== false) ? 'closed' : ''); ?>'>
         <h3>
 		<a class='togbox'>+</a>
 		<?php echo TXT_WPSC_PRODUCTDOWNLOAD;?>
