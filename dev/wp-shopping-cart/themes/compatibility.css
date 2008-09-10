@@ -21,3 +21,7 @@ li.widget_wp_shopping_cart ul li:before{
 a.additional_description_link img {
   margin:0px 3px 0px 0px;
 }
+
+#sidebar ul ul li:before{
+	content:"" !important;
+}

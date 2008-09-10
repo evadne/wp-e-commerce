@@ -245,6 +245,7 @@ div.single_product_display div.textcol{
 }
 
 div.producttext{
+ margin-left:30px;
  font-size: 10pt;
  width: 100%;
  text-align: left !important;
@@ -974,4 +975,10 @@ div.breadcrumb {
  /*
 End of modified By allen
 */
+
+td.shipping_header {
+	background-color:#E5E5E5;
+	text-transform: uppercase;
+	font-weight:bold;
+}
 

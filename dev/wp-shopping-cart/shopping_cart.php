@@ -44,24 +44,47 @@ $number = null;
 $cart = $_SESSION['nzshpcrt_cart'];
 
 function wpsc_shipping_country_list($selected_country = null) {
-  global $wpdb;  
-  if($selected_country == null) {
-    $selected_country = get_option('base_country');
+	global $wpdb;
+	if($selected_country == null) {
+		$selected_country = get_option('base_country');
 	}
-  if($selected_region == null) {
-    $selected_region = get_option('base_region');
+	if($selected_region == null) {
+		$selected_region = get_option('base_region');
 	}
-  $country_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."currency_list` ORDER BY `country` ASC",ARRAY_A);
-  $output .= "<select name='country' id='current_country' onchange='submit_change_country();' >";
-  foreach ($country_data as $country) {
-    $selected ='';
-    if($selected_country == $country['isocode']) {
-      $selected = "selected='true'";
+	$country_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."currency_list` ORDER BY `country` ASC",ARRAY_A);
+	$output .= "<select name='country' id='current_country' onchange='submit_change_country();' >";
+	foreach ($country_data as $country) {
+		$selected ='';
+		if($selected_country == $country['isocode']) {
+			$selected = "selected='true'";
 		}
-    $output .= "<option value='".$country['isocode']."' $selected>".$country['country']."</option>";
-	} 
-  $output .= "</select>";
-  return $output;
+		$output .= "<option value='".$country['isocode']."' $selected>".$country['country']."</option>";
+	}
+	$output .= "</select>";
+	
+	if ($selected_country == 'US') {
+		$region_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."region_tax` WHERE country_id='136'",ARRAY_A);
+		$output .= "<select>";
+		foreach ($region_data as $region) {
+			$output .= "<option>".$region['name']."</option>";
+		}
+		$output .= "";
+		
+		$output .= "</select>";
+	} else {
+		$output .= " ";
+	}
+	
+// 	$output .= "ZipCode:";
+	if ($_POST['zipcode']=='') {
+		$zipvalue = 'Your Zipcode';
+		$color = '#999';
+	} else {
+		$zipvalue = $_POST['zipcode'];
+		$color = '#000';
+	}
+	$output .= " <input type='text' style='color:".$color.";' onclick='if (this.value==\"Your Zipcode\") {this.value=\"\";this.style.color=\"#000\";}' onblur='if (this.value==\"\") {this.style.color=\"#999\"; this.value=\"Your Zipcode\"; }' value='".$zipvalue."' size='10' name='zipcode' id='zipcode'>";
+	return $output;
 }
 ?>
 <div class="wrap wpsc_container">
@@ -177,28 +200,25 @@ function wpsc_shipping_country_list($selected_country = null) {
 	}
 	
 	//End of written by allen
-    
+    $total_weight = shopping_cart_total_weight();
+    if ($total_weight > 0) {
   if((get_option('do_not_use_shipping') != 1) && (get_option('base_country') != null))
     {
 	//if (!function_exists('getdistance')) {
-		if (get_option("payment_gateway")!='google') {
-		echo "<tr class='product_shipping'>\n\r";
-		echo "  <td colspan='2'>\n\r";
-	
-	  
-	?>
-	
-      <h2><?php echo TXT_WPSC_SHIPPING_COUNTRY; ?></h2>
-    <?php
-	  
-    echo "  </td>\n\r";
-    echo "  <td colspan='2' style='vertical-align: middle;'>";
-    echo "</td>\n\r";
-    echo "</tr>\n\r";
-	   }
+		
+		
+			if (get_option("payment_gateway")!='google') {
+				echo "<tr class='product_shipping'>\n\r";
+				echo "  <td colspan='2'>\n\r";
+				echo "<h2>".TXT_WPSC_SHIPPING_COUNTRY."</h2>";
+				echo "  </td>\n\r";
+				echo "  <td colspan='2' style='vertical-align: middle;'>";
+				echo "</td>\n\r";
+				echo "</tr>\n\r";
+			}
 
     echo "<tr class='total_price'>\n\r";
-    echo "  <td colspan='2' >\n\r";
+    echo "  <td colspan='3' >\n\r";
     if (get_option('payment_gateway')=='google') {
 	    echo TXT_WPSC_POSTAGE.":";
     } else {
@@ -210,278 +230,48 @@ function wpsc_shipping_country_list($selected_country = null) {
       <?php
       echo wpsc_shipping_country_list($_SESSION['delivery_country'], $_SESSION['selected_region']);
       ?>
-      </form>
-            <!--usps changes-->
-      <div id='usps_shipping_methods'>
-		<?php
-			$dest = $_SESSION['delivery_country'];
-			if ($dest == get_option('base_country')) {
-// 				$request  = '<RateV3Request USERID="' . "221ALLEN1967" . '" PASSWORD="' . "651AC00ZD570" . '">';
-// 				$allowed_types = explode(", ", MODULE_SHIPPING_USPS_TYPES);
-// 
-// 				while (list($key, $value) = each($this->types)) {
-// 					 if ( !in_array($key, $allowed_types) ) continue;
-// 
-// 					if ($key == 'FIRST CLASS'){
-// 						$this->FirstClassMailType = '<FirstClassMailType>LETTER</FirstClassMailType>';
-// 					} else {
-// 						$this->FirstClassMailType = '';
-// 					}
-// 
-// 					if ($key == 'PRIORITY'){
-// 						$this->container = 'FLAT RATE ENVELOPE';
-// 					}
-// 
-// 					if ($key == 'EXPRESS'){
-// 						$this->container = 'FLAT RATE ENVELOPE';
-// 					}
-// 
-// 					if ($key == 'PARCEL POST'){
-// 						$this->container = 'REGULAR';
-// 						$this->machinable = 'false';
-// 					}
-// 
-// 					$request .= '<Package ID="' . $services_count . '">' .
-// 					'<Service>' . $key . '</Service>' .
-// 					$this->FirstClassMailType .
-// 					'<ZipOrigination>' . SHIPPING_ORIGIN_ZIP . '</ZipOrigination>' .
-// 					'<ZipDestination>' . $dest_zip . '</ZipDestination>' .
-// 					'<Pounds>' . $this->pounds . '</Pounds>' .
-// 					'<Ounces>' . $this->ounces . '</Ounces>' .
-// 					'<Container>' . $this->container . '</Container>' .
-// 					'<Size>' . $this->size . '</Size>' .
-// 					'<Machinable>' . $this->machinable . '</Machinable>' .
-// 					'</Package>';
-// 
-// 					if ($transit) {
-// 						$transitreq  = 'USERID="' . MODULE_SHIPPING_USPS_USERID .
-// 						 '" PASSWORD="' . MODULE_SHIPPING_USPS_PASSWORD . '">' .
-// 						 '<OriginZip>' . STORE_ORIGIN_ZIP . '</OriginZip>' .
-// 						 '<DestinationZip>' . $dest_zip . '</DestinationZip>';
-// 
-// 					switch ($key) {
-// 						case 'EXPRESS':  $transreq[$key] = 'API=ExpressMail&XML=' .
-// 							urlencode( '<ExpressMailRequest ' . $transitreq . '</ExpressMailRequest>');
-// 							break;
-// 						case 'PRIORITY': $transreq[$key] = 'API=PriorityMail&XML=' .
-// 							urlencode( '<PriorityMailRequest ' . $transitreq . '</PriorityMailRequest>');
-// 							break;
-// 						case 'PARCEL':   $transreq[$key] = 'API=StandardB&XML=' .
-// 							urlencode( '<StandardBRequest ' . $transitreq . '</StandardBRequest>');
-// 							break;
-// 						default: $transreq[$key] = '';
-// 						break;
-// 					}
-// 				}
-// 
-// 				$services_count++;
-// 			}
-// 			$request .= '</RateV3Request>'; //'</RateRequest>'; //Changed by Greg Deeth April 30, 2008
-// 			$request = 'API=RateV3&XML=' . urlencode($request);
-		} else {
-			$dest=$wpdb->get_var("SELECT country FROM ".$wpdb->prefix."currency_list WHERE isocode='".$dest."'");
-			$weight = shopping_cart_total_weight();
-			$request  = '<IntlRateRequest USERID="' . get_option('usps_user_id') . '" PASSWORD="' . get_option('usps_user_password') . '">' .
-			'<Package ID="0">' .
-			'<Pounds>' . $weight . '</Pounds>' .
-			'<Ounces>' . '0' . '</Ounces>' .
-			'<MailType>Package</MailType>' .
-			'<Country>' . $dest . '</Country>' .
-			'</Package>' .
-			'</IntlRateRequest>';
-			
-			$request = 'API=IntlRate&XML=' . urlencode($request);
-		}
-		
-		//$http = new httpClient();
-		$usps_server = 'production.shippingapis.com'; //'stg-production.shippingapis.com'; // or  stg-secure.shippingapis.com //'production.shippingapis.com';
-		$api_dll = 'shippingapi.dll'; //'shippingapi.dll';
-		//if ($http->Connect($usps_server, 80)) {
-		
-		$url = 'http://'.$usps_server.'/' . $api_dll . '?' . $request;
-			$ch=curl_init(); 
-			curl_setopt($ch, CURLOPT_URL, $url); 
-			curl_setopt($ch, CURLOPT_NOPROGRESS, 1); 
-			curl_setopt($ch, CURLOPT_VERBOSE, 1); 
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1); 
-			curl_setopt($ch, CURLOPT_TIMEOUT, 120); 
-			curl_setopt($ch, CURLOPT_USERAGENT, 'osCommerce'); 
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-			$body = curl_exec($ch);
-			
-			curl_close($ch);
-			//exit();
-				
-//			$http->addHeader('Host', $usps_server);
-//			$http->addHeader('User-Agent', 'osCommerce');
-//			$http->addHeader('Connection', 'Close');
-
-			//if ($http->Get('/' . $api_dll . '?' . $request)) $body = $http->getBody();
-// 			if ($transit && is_array($transreq) && ($order->delivery['country']['id'] == STORE_COUNTRY)) {
-// 				while (list($key, $value) = each($transreq)) {
-// 					if ($http->Get('/' . $api_dll . '?' . $value)) $transresp[$key] = $http->getBody();
-// 				}
-// 			}
-			//$http->Disconnect();
-		 if($body == '') {
-			//return false;
-		}
-		$response=array();
-		while (true) {
-			if ($start = strpos($body, '<Package ID=')) {
-				$body = substr($body, $start);
-				$end = strpos($body, '</Package>');
-				$response[] = substr($body, 0, $end+10);
-				$body = substr($body, $end+9);
-			} else {
-				break;
-			}
-		}
-	$rates = array();
-	if ($dest == get_option('base_country')) {
-		if (sizeof($response) == '1') {
-			if (ereg('<Error>', $response[0])) {
-				$number = ereg('<Number>(.*)</Number>', $response[0], $regs);
-				$number = $regs[1];
-				$description = ereg('<Description>(.*)</Description>', $response[0], $regs);
-				$description = $regs[1];
-				 //return array('error' => $number . ' - ' . $description);
-			}
-		}
-
-	$n = sizeof($response);
-	for ($i=0; $i<$n; $i++) {
-		if (strpos($response[$i], '<Rate>')) {
-			$service = ereg('<MailService>(.*)</MailService>', $response[$i], $regs);
-			$service = $regs[1];
-			$postage = ereg('<Rate>(.*)</Rate>', $response[$i], $regs);
-			$postage = $regs[1];
-			$rates[] = array($service => $postage);
-			if ($transit) {
-				switch ($service) {
-					case 'EXPRESS':     $time = ereg('<MonFriCommitment>(.*)</MonFriCommitment>', $transresp[$service], $tregs);
-						$time = $tregs[1];
-						if ($time == '' || $time == 'No Data') {
-							$time = 'Estimated 1 - 2 ' . 'Days';
-						} else {
-							$time = 'Tomorrow by ' . $time;
-						}
-						break;
-					case 'PRIORITY':    $time = ereg('<Days>(.*)</Days>', $transresp[$service], $tregs);
-						$time = $tregs[1];
-						if ($time == '' || $time == 'No Data') {
-							$time = 'Estimated 1 - 3 ' . 'Days';
-						} elseif ($time == '1') {
-							$time .= ' ' . 'Day';
-						} else {
-							$time .= ' ' . 'Days';
-						}
-						break;
-					case 'PARCEL':      $time = ereg('<Days>(.*)</Days>', $transresp[$service], $tregs);
-						$time = $tregs[1];
-						if ($time == '' || $time == 'No Data') {
-							$time = 'Estimated 2 - 9 ' . 'Days';
-						} elseif ($time == '1') {
-							$time .= ' ' . 'Day';
-						} else {
-							$time .= ' ' . 'Days';
-						}
-						break;
-					case 'First-Class Mail': 
-						$time = 'Estimated 1 - 5 ' . 'Days';
-						break;
-					case 'MEDIA':
-						$time = 'Estimated 2 - 9 ' . 'Days';
-						break;
-					case 'BPM':
-						$time = 'Estimated 2 - 9 ' . 'Days';
-						break;
-					default:
-						$time = '';
-						break;
-					}
-					if ($time != '') $transittime[$service] = ': ' . $time . '';
-				}
-			}
-		}
-	} else {
-		if (ereg('<Error>', $response[0])) {
-			$number = ereg('<Number>(.*)</Number>', $response[0], $regs);
-			$number = $regs[1];
-			$description = ereg('<Description>(.*)</Description>', $response[0], $regs);
-			$description = $regs[1];
-			return array('error' => $number . ' - ' . $description);
-		} else {
-			$body = $response[0];
-			$services = array();
-			while (true) {
-				if ($start = strpos($body, '<Service ID=')) {
-				$body = substr($body, $start);
-				$end = strpos($body, '</Service>');
-				$services[] = substr($body, 0, $end+10);
-				$body = substr($body, $end+9);
-			} else {
-				break;
-			}
-		}
-
-          $allowed_types = Array( 'EXPRESS MAIL INT' => "Express Mail International (EMS)", 'EXPRESS MAIL INT FLAT RATE ENV' => "Express Mail International (EMS) Flat-Rate Envelope", 'PRIORITY MAIL INT' => "Priority Mail International", 'PRIORITY MAIL INT FLAT RATE ENV' => "Priority Mail International Flat-Rate Envelope", 'PRIORITY MAIL INT FLAT RATE BOX' => "Priority Mail International Flat-Rate Box", 'FIRST-CLASS MAIL INT' => "First Class Mail International Letters" );
-          //foreach( explode(", ", MODULE_SHIPPING_USPS_TYPES_INTL) as $value ) $allowed_types[$value] = $this->intl_types[$value];
-	
-          $size = sizeof($services);
-          for ($i=0, $n=$size; $i<$n; $i++) {
-            if (strpos($services[$i], '<Postage>')) {
-              $service = ereg('<SvcDescription>(.*)</SvcDescription>', $services[$i], $regs);
-		  $service = $regs[1];
-              $postage = ereg('<Postage>(.*)</Postage>', $services[$i], $regs);
-              $postage = $regs[1];
-              $time = ereg('<SvcCommitments>(.*)</SvcCommitments>', $services[$i], $tregs);
-              $time = $tregs[1];
-              $time = preg_replace('/Weeks$/', 'Weeks',$time);
-              $time = preg_replace('/Days$/', 'Days', $time);
-              $time = preg_replace('/Day$/', 'Day', $time);
-              if( !in_array($service, $allowed_types) ) continue;
-//               if (isset($this->service) && ($service != $this->service) ) {
-//                 continue;
-//               }
-		$rates[] = array($service => $postage);
-		if ($time != '') $transittime[$service] = ' (' . $time . ')';
-		}
-		
-
-		}
-		$uspsQuote=$rates;
-        }
-      }
-      // usps changes ends
-		?>
-      </div>
-
     </div>
     <?php
     }
     echo "  </td>\n\r";
-    echo "  <td  colspan='2' style='vertical-align: middle;'>\n\r";
-    if($all_donations == false)
-      {
-      echo "" . nzshpcrt_currency_display($total_shipping, 1) . "";
-      }
-      else
-        {
-        echo TXT_WPSC_DONATION_SHIPPING;
-        }
-    echo "  </td>\n\r";
+    echo "<td>";
+    echo "<input type='submit' onclick='' value='Rate'>";
+    echo "</td>";
+    echo "</form>";
+//     echo "  <td  colspan='2' style='vertical-align: middle;'>\n\r";
+//     if($all_donations == false)
+//       {
+//       echo "" . nzshpcrt_currency_display($total_shipping, 1) . "";
+//       }
+//       else
+//         {
+//         echo TXT_WPSC_DONATION_SHIPPING;
+//         }
+//     echo "  </td>\n\r";
     echo "</tr>\n\r";
 	}
 	
 		//// usps changes
-	$_SESSION['uspsQuote']=$uspsQuote;
-		foreach ((array)$uspsQuote as $quotes) {
+	$custom_shipping = get_option('custom_shipping_options');
+	foreach($custom_shipping as $shipping) {
+		foreach ($GLOBALS['wpsc_shipping_modules'] as $available_shipping) {
+			if ($shipping == $available_shipping->internal_name)
+				$shipping_quotes[$available_shipping->internal_name] = $available_shipping->getQuote();
+		}
+	}
+//	echo ('<pre>'.print_r($shipping_quotes,1)."</pre>");
+	$_SESSION['uspsQuote']=$shipping_quotes;
+	foreach ($shipping_quotes as $key1 => $shipping_quote) {
+		echo "<tr><td class='shipping_header' colspan='4'>$key1</td></tr>";
+		if (empty($shipping_quote)) {
+			echo "<tr><td colspan='4'>No Shipping Data available</td></tr>";
+		}
+		foreach ((array)$shipping_quote as $quotes) {
 			foreach($quotes as $key=>$quote) {
-				echo "<tr><td colspan='2'>".$key."</td><td>".nzshpcrt_currency_display($quote,1)."</td><td><input type='radio' onclick='switchmethod(\"$key\")' value='$key' name='shipping_method'></td></tr>";
+				echo "<tr><td colspan='2'>".$key."</td><td>".nzshpcrt_currency_display($quote,1)."</td><td><input type='radio' onclick='switchmethod(\"$key\", \"$key1\")' value='$key' name='shipping_method'></td></tr>";
 			}
 		}
-		
+	}
 	// usps changes ends
     
   //echo "<tr style='total-price'>\n\r";
@@ -518,16 +308,23 @@ if(!empty($_SESSION['coupon_num'])) {
 		echo "  </td>\n\r";
 		echo "</tr>\n\r";
 	}
-		
+
   echo "<tr class='total_price'>\n\r";
   echo "  <td colspan='2'>\n\r";
   echo "".TXT_WPSC_TOTALPRICE.":";
   echo "  </td>\n\r";
   echo "  <td colspan='2' id='checkout_total' style='vertical-align: middle;'>\n\r";
-  echo nzshpcrt_overall_total_price($_SESSION['selected_country'],true,false,$total);
+  if (isset($_SESSION['quote_shipping_total'])) {
+	  echo nzshpcrt_currency_display($_SESSION['quote_shipping_total'],1);
+  } else {
+	  echo nzshpcrt_overall_total_price($_SESSION['selected_country'],true,false,$total);
+  }
+  echo "<input id='shopping_cart_total_price' type='hidden' value='".$total."'>";
   echo "  </td>\n\r";
   echo "</tr>\n\r";
+    }
   echo "</table>";
+
   if ($_POST['coupon_num']) {
   	$_SESSION['nzshpcrt_totalprice'] = $total_after_discount;
   } else {

@@ -247,6 +247,10 @@ if(preg_match("/[a-zA-Z]{2,4}/",$_GET['isocode'])) {
     if(isset($_POST['base_local_shipping'])) {
       update_option('base_local_shipping', $_POST['base_local_shipping']);
     }
+    
+    if(isset($_POST['base_zipcode'])) {
+      update_option('base_zipcode', $_POST['base_zipcode']);
+    }
       
     if(isset($_POST['base_international_shipping'])) {
       update_option('base_international_shipping', $_POST['base_international_shipping']);
@@ -484,8 +488,6 @@ if($_GET['clean_categories'] == 'true') {
 								<!-- <li><a href="#wpsc_options_payment"><?php echo TXT_WPSC_OPTIONS_PAYMENT_TAB; ?></a></li> -->
                 <li><a href="#options_admin"><?php echo TXT_WPSC_OPTIONS_ADMIN_TAB; ?></a></li>
             </ul>
-            
-            
 						<div id="options_general">
 						  <h2><?php echo TXT_WPSC_OPTIONS_GENERAL_HEADER; ?></h2>
 						  <?php
@@ -513,12 +515,24 @@ if($_GET['clean_categories'] == 'true') {
 											}
 											echo "<option value='".$region['id']."' $selected>".$region['name']."</option>\n\r";
 										}
-										echo "</select>\n\r";    
+										echo "</select>\n\r";
 									}
 									?>
 									</span>
 									</td>
 								</tr>
+								<?php
+									if (get_option('base_country') == 'US') {
+										echo "<tr>";
+										echo "<td>";
+										echo "Zipcode:";
+										echo "</td>";
+										echo "<td>";
+										echo "<input type='text' name='base_zipcode' value='".get_option('base_zipcode')."'>";
+										echo "</td>";
+										echo "</tr>";
+									}
+								?>
 								<tr>
 									<th scope="row">
 									<?php echo TXT_WPSC_TAX_SETTINGS;?>:
@@ -1507,26 +1521,6 @@ if($_GET['clean_categories'] == 'true') {
 									<?php echo TXT_WPSC_SHIPPING_NOTE;?>
 									</td>
 								</tr>
-								
-								<tr>
-									<th scope="row">
-									<?php echo TXT_WPSC_USPS_USERID;?>:
-									</th>
-									<td>
-									<input type='text' size='20' value='<?php echo get_option('usps_user_id'); ?>' name='usps_user_id' />
-									</td>
-								</tr>
-					
-								<tr>
-									<th scope="row">
-									<?php echo TXT_WPSC_USPS_PASSWORD;?>:
-									</th>
-									<td>
-									<input type='text' size='20' value='<?php echo get_option('usps_user_password'); ?>' name='usps_user_password' />
-									</td>
-								</tr>
-								
-								
 									<?php
 									$shipwire1 = "";
 									$shipwire2 = "";

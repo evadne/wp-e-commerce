@@ -734,3 +734,7 @@ function wpsc_save_postboxes_state(page, container) {
 		page: page
 	});
 }
+
+function addlayer(){
+	jQuery("tr.update_gateway").before("<tr><td><input type='text' name='layer[]'> and above</td><td><input type='text' name='shipping[]'></td></tr>");
+}

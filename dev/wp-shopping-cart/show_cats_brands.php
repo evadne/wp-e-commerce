@@ -80,7 +80,7 @@ function show_cats_brands($category_group = null , $display_method = null, $orde
 		if (!$image) {
 			$output .= "<li class='MainCategory'><strong class='category'><a class='productlink' href='".wpsc_category_url($option['id'])."'>".stripslashes($option['name']).$addCount."</a></strong>";
 		} else {
-			$output .= "<li class='MainCategory'><img src='".get_option('siteurl')."/wp-content/uploads/wpsc/category_images/".$option['image']."'><br><strong class='category'><a class='productlink' href='".wpsc_category_url($option['id'])."'>".stripslashes($option['name']).$addCount."</a></strong>";
+			$output .= "<li class='MainCategory'><a class='productlink' href='".wpsc_category_url($option['id'])."'><img src='".get_option('siteurl')."/wp-content/uploads/wpsc/category_images/".$option['image']."'></a><br><strong class='category'><a class='productlink' href='".wpsc_category_url($option['id'])."'>".stripslashes($option['name']).$addCount."</a></strong>";
 		}
 	}//end get_option
         $subcategory_sql = "SELECT * FROM `".$wpdb->prefix."product_categories` WHERE `group_id` IN ('$category_group') AND `active`='1' AND `category_parent` = '".$option['id']."' ORDER BY `id`";

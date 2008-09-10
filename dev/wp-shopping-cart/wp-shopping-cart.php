@@ -657,15 +657,16 @@ function nzshpcrt_submit_ajax()
 
 		////changes for usps
 	if ($_POST['uspsswitch']) {
-		foreach ($_SESSION['uspsQuote'] as $quotes) {
-			$total=$_POST['total'];
-			if ($quotes[$_POST['key']]!='') {
-				echo nzshpcrt_currency_display($total+$quotes[$_POST['key']],1);
-					echo "<input type='hidden' value='".$total."' id='shopping_cart_total_price'>";
-				$_SESSION['usps_shipping']= $quotes[$_POST['key']];
+		$total=$_POST['total'];
+		$quotes = $_SESSION['uspsQuote'];
+		foreach ($quotes[$_POST['key1']] as $quote) {
+			if ($quote[$_POST['key']] != '') {
+				echo nzshpcrt_currency_display($total+$quote[$_POST['key']],1);
+				echo "<input type='hidden' value='".$total."' id='shopping_cart_total_price'>";
+				$_SESSION['quote_shipping']= $quote[$_POST['key']];
+				$_SESSION['quote_shipping_total'] = $total+$quote[$_POST['key']];
 			}
 		}
-		
 		exit();
 	}
 	//changes for usps ends

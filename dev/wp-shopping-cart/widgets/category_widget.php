@@ -162,10 +162,11 @@ function widget_wpsc_categorisation_control( $widget_args = 1 ) {
 	if ($options[$number]['image'] == true) {
 		$checked = "checked='true'";
 	}
+	echo "<hr>";
 	echo "	<label for='sidebar_category_image'>\n\r";
 	echo "		<input type='checkbox' name='{$option_name}[$number][image]' id='sidebar_category_image' value='true' class='checkbox' {$checked} />\n\r";
-	echo "		Display Images</label>\n\r";
-	echo "	<br/>\n\r";
+	echo "		Show thumbnail images</label>\n\r";
+	echo "	<br/><br>\n\r";
 }
 
 // Registers each instance of our widget on startup

@@ -64,7 +64,10 @@ function nzshpcrt_overall_total_price($country_code = null, $for_display = false
         $total .= "<span class='pluspostagetax'> + ".TXT_WPSC_POSTAGE_AND_TAX."</span>";
 			}
 		}
-    return $total;
+	if (isset($_SESSION['quote_shipping_total'])) {
+		return $total+$_SESSION['quote_shipping_total'];
+	}
+	return $total;
 	}
 	
 	//written by allen

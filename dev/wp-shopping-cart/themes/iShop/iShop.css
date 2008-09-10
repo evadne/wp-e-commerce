@@ -1024,3 +1024,8 @@ div.breadcrumb {
  /*
 End of modified By allen
 */
+td.shipping_header {
+	background-color:#E5E5E5;
+	text-transform: uppercase;
+	font-weight:bold;
+}

@@ -14,6 +14,9 @@ if(!$wpdb->get_results("SHOW FULL COLUMNS FROM `{$wpdb->prefix}cart_contents` LI
 	$wpdb->query("ALTER TABLE `{$wpdb->prefix}cart_contents` ADD `files` TEXT NOT NULL AFTER `no_shipping`");
 }
 
+if(!$wpdb->get_results("SHOW FULL COLUMNS FROM `{$wpdb->prefix}currency_list` LIKE 'continent';",ARRAY_A)) {
+	$wpdb->query("ALTER TABLE `{$wpdb->prefix}currency_list` ADD `continent` VARCHAR(20) NOT NULL");
+}
 
 
 // here isthe code to update the payment gateway options.

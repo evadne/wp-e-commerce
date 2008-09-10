@@ -18,7 +18,7 @@ Author URI: http://instinct.co.nz
 
 div.productdisplay img {
 	max-width: none !important;
-	padding: 8px 0 0 0;
+	padding: 0px 0 0 0;
 	border: none;
 }
 
@@ -31,7 +31,7 @@ div.item_image {
 div#sidebar div.item_image img {
 	border:medium none;
 	max-width:none !important;
-	padding:8px 0pt 0pt 9px;
+	padding:8px 0pt 0pt 8px;
 }
  
 /*
@@ -267,7 +267,7 @@ div.producttext{
  width: 100%;
  text-align: left !important; 
  font-style: 'Lucida Grande',Geneva,Arial,Verdana,Helvetica,sans-serif;
- margin: 0px 0px 30px 5px
+ margin: 0px 0px 30px 30px
  }
  
  div.producttext strong{
@@ -1103,4 +1103,10 @@ div.item_image img {
 	border:medium none;
 	max-width:none !important;
 /* 	padding:8px 0pt 0pt 9px; */
+}
+
+td.shipping_header {
+	background-color:#E5E5E5;
+	text-transform: uppercase;
+	font-weight:bold;
 }
