@@ -1,5 +1,4 @@
 <?php
-ini_set('display_errors','1');
 function nzshpcrt_getproductform($prodid)
   {
   global $wpdb,$nzshpcrt_imagesize_info;

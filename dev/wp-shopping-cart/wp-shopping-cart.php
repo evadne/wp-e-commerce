@@ -8,7 +8,7 @@ Author: Instinct Entertainment
 Author URI: http://www.instinct.co.nz/e-commerce/
 /* Major version for "major" releases */
 define('WPSC_VERSION', '3.6');
-define('WPSC_MINOR_VERSION', '88');
+define('WPSC_MINOR_VERSION', '89');
 
 
 define('WPSC_PRESENTABLE_VERSION', '3.6.8 RC2');
@@ -72,6 +72,8 @@ if(get_option('language_setting') != '') {
 } else {
   require(WPSC_FILE_PATH.'/languages/EN_en.php');
 }
+
+require(WPSC_FILE_PATH.'/classes/wpsc_query.php');
 require(WPSC_FILE_PATH.'/classes/variations.class.php');
 require(WPSC_FILE_PATH.'/classes/extra.class.php');
 // require(WPSC_FILE_PATH.'/classes/http_client.php');
@@ -533,9 +535,9 @@ var borderSize = 10;
 /* LightBox Configuration end*/
 /* custom admin functions start*/
 <?php
-	$hidden_boxes = get_option('wpsc_hidden_box');
-	$hidden_boxes = implode(',', $hidden_boxes);
-	echo "var hidden_boxes = '".$hidden_boxes."';";\
+		$hidden_boxes = get_option('wpsc_hidden_box');
+		$hidden_boxes = implode(',', (array)$hidden_boxes);
+		echo "var hidden_boxes = '".$hidden_boxes."';";
     echo "var TXT_WPSC_DELETE = '".TXT_WPSC_DELETE."';\n\r";
     echo "var TXT_WPSC_TEXT = '".TXT_WPSC_TEXT."';\n\r";
     echo "var TXT_WPSC_EMAIL = '".TXT_WPSC_EMAIL."';\n\r";
@@ -2706,6 +2708,7 @@ function wpsc_merchant_sort($a, $b) {
 } 
 uasort($nzshpcrt_gateways, 'wpsc_merchant_sort'); 
 
+
 require_once(WPSC_FILE_PATH."/currency_converter.inc.php"); 
 require_once(WPSC_FILE_PATH."/form_display_functions.php"); 
 require_once(WPSC_FILE_PATH."/shopping_cart_functions.php"); 
@@ -3033,7 +3036,7 @@ function wpsc_swfupload_images() {
 		$pid = (int)$_POST['prodid'];
 		if(function_exists('gold_shpcrt_display_gallery')) {
 		  // if more than one image is permitted
-      $existing_image_data = $wpdb->get_row("SELECT COUNT(*) AS `count`,  MAX(image_order) AS `order` FROM {$wpdb->prefix}product_images WHERE product_id='$pid'", ARRAY_A);
+      $existing_image_data = $wpdb->get_row("SELECT COUNT(*) AS `count`,  MAX(`image_order`) AS `order` FROM `{$wpdb->prefix}product_images` WHERE `product_id`='$pid'", ARRAY_A);
       $order = $existing_image_data['order'];
       $count = $existing_image_data['count'];
       
@@ -3058,7 +3061,7 @@ function wpsc_swfupload_images() {
 			  // if thereare no images
 				$src = wpsc_item_process_image($product_id, $file['tmp_name'], $file['name']);
 				if($src != null) {
-					$wpdb->query("UPDATE `".$wpdb->prefix."product_list` SET `image` = '{$src}' WHERE `id`='{$pid}' LIMIT 1");
+					$wpdb->query("UPDATE `{$wpdb->prefix}product_list` SET `image` = '{$src}' WHERE `id`='{$pid}' LIMIT 1");
 					echo "src='".$src."';id='0';";
 				} else {
 					echo "file uploading error";
@@ -3066,10 +3069,16 @@ function wpsc_swfupload_images() {
 			}
 		} else {
       // Otherwise...
+      $previous_image = $wpdb->get_var("SELECT `image` FROM `{$wpdb->prefix}product_list` WHERE `id`='{$pid}' LIMIT 1");
+      
       $src = wpsc_item_process_image($product_id, $file['tmp_name'], $file['name']);
       if($src != null) {
-        $wpdb->query("UPDATE `".$wpdb->prefix."product_list` SET `image` = '{$src}' WHERE `id`='{$pid}' LIMIT 1");
-        echo "replacement_src='".WPSC_IMAGE_URL.$src."';";
+        $wpdb->query("UPDATE `{$wpdb->prefix}product_list` SET `image` = '{$src}' WHERE `id`='{$pid}' LIMIT 1");
+        if(strlen($previous_image) > 0) {
+					echo "replacement_src='".WPSC_IMAGE_URL.$src."';"; 
+        } else {
+					echo "src='".$src."';id='0';";        
+        }
       } else {
         echo "file uploading error";
       }
@@ -3334,5 +3343,11 @@ function save_hidden_box() {
 	    exit(print_r($hidden_box,1));
 	}
 }
+
 add_action('init', 'save_hidden_box');
+if(!function_exists('add_contextual_help')) {
+  function add_contextual_help() {
+  
+  }  
+}
 ?>

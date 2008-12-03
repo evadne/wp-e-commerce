@@ -1256,6 +1256,7 @@ if (function_exists('add_object_page')){
 		echo "<div id='normal-sortables' class='meta-box-sortables'>";
 	}
 	$order = get_option('wpsc_product_page_order');
+	//echo "<pre>".print_r($order,true)."</pre>";
 	if (($order == '') || ($order[0]=='')){
 		$order=array("price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
 	}
