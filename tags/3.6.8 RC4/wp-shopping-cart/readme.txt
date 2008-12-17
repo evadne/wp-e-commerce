@@ -2,11 +2,9 @@
 Contributors: Dan Milward, Thomas Howard, Chris Beavan, Allen Han
 Donate link: http://www.instinct.co.nz/e-commerce
 Tags: e-commerce, shop, cart, dropshop, ajax, web2.0, paypal, authorize, exchange, stock control
-Requires at least: 2.3
-Tested up to: 2.7
-Stable tag: 3.6.8 RC4
-
-WP e-Commerce is a Web 2.0 application designed with usability, aesthetics, and presentation in mind. 
+Requires at least: 2.0.2
+Tested up to: 2.5.1
+Stable tag: 3.6.7
 
 == Description ==
 
@@ -38,7 +36,7 @@ If you experience database errors try de-activating and re-activating your plugi
 
 = Where do I find DropShop and Grid View =
 
-From the BlogShop of course http://www.instinct.co.nz/e-commerce/shop/
+From the BlogShop of course www.instinct.co.nz/blogshop
 
 = How do I customize WP e-Commerce =
 
