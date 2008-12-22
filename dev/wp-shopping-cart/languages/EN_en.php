@@ -2,6 +2,32 @@
 /*
 This is a language file for the WP Shopping Cart plugin version 3.6.8
 */
+
+
+define('TXT_WPSC_SHIPPING_BUT_NO_CURL', 'The following shipping modules all need cURL which is not installed on this server, you may need to contact your web hosting provider to get it set up. ');
+define('TXT_WPSC_PLEASE_ENTER_ZIPCODE', 'Please enter a zipcode.');
+define('TXT_WPSC_PLEASE_SELECT_SHIPPING', 'Please select a shipping option.');
+define('TXT_WPSC_ADD_NEW_VARIATIONS', '+ Add New Variations');
+define('TXT_WPSC_ADMIN_ENGRAVE', 'Users can personalize this product by leaving a message during checkout');
+define('TXT_WPSC_PERSONALISATION_OPTIONS','Personalisation Options');
+
+define('TXT_WPSC_CHOOSE_SHIPPING', "To enable shipping in WP e-Commerce you must select  which shipping methods you want to enable on your site");
+define('TXT_WPSC_FLAT_RATE_SETTINGS', "Flat Rate Settings");
+define('TXT_WPSC_OFF_SITE_LINK', "Off Site Product Link");
+define('TXT_WPSC_NOTE_ONLY_AVAILABLE_HERE', 'These notes are only available here.');
+define('TXT_WPSC_CATEGORY_AND_TAG_CONTROL', 'Categories and Tags');
+define('TXT_WPSC_USPS_DESC', 'If you are based in America then you need to set your own Zipcode for UPS and USPS to work. This should be the Zipcode for your Base of Operations.');
+
+define('TXT_WPSC_SHIPPING_DETAILS', 'Shipping Details');
+define('TXT_WPSC_SHIPPING_METHOD', 'Shipping Method');
+define('TXT_WPSC_SHIPPING_OPTION', 'Shipping Option');
+define('TXT_WPSC_CHOOSE_EXTERNAL_SHIPPING_MODULES', 'External Shipping Calculators');
+define('TXT_WPSC_CHOOSE_INTERNAL_SHIPPING_MODULES', 'Internal Shipping Calculators');
+
+define('TXT_DISPLAY_DESCRIPTION', 'Display Description');
+define('TXT_DISPLAY_ADDTOCART', 'Display "Add To Cart" Button');
+define('TXT_DISPLAY_MOREDETAILS', 'Display "More Details" Button');
+
 define('TXT_WPSC_GOOGLE_BASE', 'Google Base');
 define('TXT_WPSC_GRANT_ACCESS', 'Grant Access');
 define('TXT_WPSC_LABEL_CONTROL', 'Label Control');
@@ -177,7 +203,7 @@ define('TXT_WPSC_SHOW_BREADCRUMBS', 'Show Breadcrumbs');
 define('TXT_WPSC_PAYMENT_INSTRUCTIONS_DESCR', 'Enter the payment instructions that you wish to display to your customers when they make a purchase');
 define('TXT_WPSC_PAYMENT_INSTRUCTIONS_BELOW_DESCR', 'For example, this is where you the Shop Owner might enter your bank account details or address so that your customer can make their manual payment.');
 
-define('TXT_WPSC_ALLOW_UPLOADING_IMAGE', 'Users can upload an image when ordering this product.');
+define('TXT_WPSC_ALLOW_UPLOADING_IMAGE', 'Users can upload images at checkout to purchase logs.');
 
 define('TXT_WPSC_OPTIONS_GENERAL_HEADER', 'General Settings');
 define('TXT_WPSC_OPTIONS_PRESENTATION_HEADER', 'Presentation Settings');
@@ -235,7 +261,8 @@ define('TXT_WPSC_ADDDETAILS', 'Add Details');
 define('TXT_WPSC_EDITDETAILS', 'Edit Details');
 define('TXT_WPSC_ADDNEWCATEGORY', 'Add New Item &raquo;');
 define('TXT_WPSC_VALUE', 'Value');
-define('TXT_WPSC_ADD_CUSTOM_FIELD', 'Add Custom Field');
+define('TXT_WPSC_CUSTOM_META', 'Custom Meta');
+define('TXT_WPSC_ADD_CUSTOM_FIELD', 'Add Custom Meta');
 define('TXT_WPSC_EDIT_CUSTOM_FIELDS', 'Edit Custom Fields');
 define('TXT_WPSC_SAVE', 'Save');
 
@@ -285,7 +312,7 @@ define('TXT_WPSC_PROHIBITED', 'Prohibited');
 define('TXT_WPSC_ADMINNOTES', 'Merchant Notes');
 define('TXT_WPSC_HIDEADDNAMELINK', 'Hide Product Name Links');
 define('TXT_WPSC_ADMINMENU', 'Admin Menu');
-define('TXT_WPSC_USEONLYEXTERNALLINK', 'Note: Use only if you have external links');
+define('TXT_WPSC_USEONLYEXTERNALLINK', 'If this product is for sale on another website enter the link here. For instance if your product is an MP3 file for sale on itunes you could put the link here. This option over rides the buy now and add to cart links and takes you to the site linked here.');
 define('TXT_WPSC_EXTERNALLINK', 'External Link');
 define('TXT_WPSC_BUTTONTYPE', 'Button Type');
 define('TXT_WPSC_BUYNOW', 'Buy Now');
@@ -433,7 +460,7 @@ define('TXT_WPSC_PLEASEENTERAVALIDPHONENUMBER', 'Please enter a valid phone numb
 define('TXT_WPSC_TERMSANDCONDITIONS', 'You have not agreed to the terms and conditions');
 define('TXT_WPSC_NOTHINGINYOURSHOPPINGCART', 'There is nothing in your shopping cart');
 
-define('TXT_WPSC_PROCESSING_PROBLEM', 'There was a problem with processing the puchase, please email the site owner.');
+define('TXT_WPSC_PROCESSING_PROBLEM', 'There was a problem with processing the purchase, please email the site owner.');
 
 
 define('TXT_WPSC_SPECIALS', 'Specials');
@@ -512,7 +539,7 @@ define('TXT_WPSC_CATEGORYHASBEENEDITED', 'The product group has been edited.');
 define('TXT_WPSC_DISPLAYCATEGORIES', 'Display Product Groups');
 define('TXT_WPSC_ADDCATEGORY', 'Add Product Group');
 define('TXT_WPSC_EDITCATEGORY', 'Edit Product Group');
-define('TXT_WPSC_ALLCATEGORIES', 'All Product Groups');
+define('TXT_WPSC_ALLCATEGORIES', 'View All Product Categories');
 
 define('TXT_WPSC_DISPLAYVARIATIONS', 'Display Variations');
 define('TXT_WPSC_ADDVARIATION', 'Add Variation Set');
@@ -527,7 +554,7 @@ define('TXT_WPSC_ADDPRODUCT', 'Add Product');
 define('TXT_WPSC_DISPLAYPRODUCTS', 'Display Products');
 define('TXT_WPSC_PLEASESELECTACATEGORY', 'Please Select a Product Group');
 define('TXT_WPSC_STOCK', 'Stock');
-define('TXT_WPSC_PNP', 'PnP');
+define('TXT_WPSC_PNP', 'P&amp;P');
 define('TXT_WPSC_EDITITEM', 'Edit Item');
 define('TXT_WPSC_PRODUCTDETAILS', 'Product Details');
 define('TXT_WPSC_SELECT_PRODUCT', 'Select an Existing Product');
@@ -843,7 +870,7 @@ define('TXT_WPSC_ITEM_GONE_OUT_OF_STOCK', 'It appears that an item has gone out 
 define('TXT_WPSC_DISPLAY_FANCY_NOTIFICATIONS', 'Display Fancy Purchase Notifications');
 define('TXT_WPSC_IF_USER_CHECKOUT', 'If you have a user account, Please ');
 define('TXT_WPSC_LOG_IN', 'log in.');
-define('TXT_WPSC_IS_DONATION', 'Is the product a donation?');
+define('TXT_WPSC_IS_DONATION', 'This is a donation only show it in the donations widget');
 define('TXT_WPSC_DONATION', 'Donation');
 define('TXT_WPSC_DONATION_LC', 'donation');
 define('TXT_WPSC_DONATION_SHIPPING', 'No shipping for donations');

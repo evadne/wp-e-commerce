@@ -3,7 +3,7 @@ function nzshpcrt_submit_checkout() {
  /*
   * This is the function used for handling the submitted checkout page
   */
-  global $wpdb, $nzshpcrt_gateways, $user_ID;
+  global $wpdb, $nzshpcrt_gateways, $user_ID, $wpsc_shipping_modules;
   session_start();
   if(get_option('permalink_structure') != '') {
     $seperator ="?";
@@ -219,6 +219,25 @@ function nzshpcrt_submit_checkout() {
 			$any_bad_inputs = true;
  		}
 
+	 if(get_option('do_not_use_shipping') == 0) {
+			if($_SESSION['quote_shipping_method'] == null) {
+				$bad_input_message .= TXT_WPSC_PLEASE_SELECT_SHIPPING . "";
+				$bad_input_message .= "\n\r";
+				$any_bad_inputs = true;
+			} else {
+				if(($_SESSION['quote_shipping_option'] == null)) {
+				  if(array_search($_SESSION['quote_shipping_method'], array('ups','usps')) !== false) {
+						$bad_input_message .= TXT_WPSC_PLEASE_ENTER_ZIPCODE . "";
+				  } else {
+						$bad_input_message .= TXT_WPSC_PLEASE_SELECT_SHIPPING . "";
+					}
+					$bad_input_message .= "\n\r";
+					$any_bad_inputs = true;
+				}
+			}
+ 		}
+ 		
+ 		
    list($bad_input_message, $any_bad_inputs) = apply_filters('wpsc_additional_checkout_checks', array($bad_input_message, $any_bad_inputs));
    //exit("<pre>".print_r($bad_input_message, true)."</pre>");
 
@@ -251,10 +270,19 @@ function nzshpcrt_submit_checkout() {
 		$base_shipping = nzshpcrt_determine_base_shipping(0, $_SESSION['delivery_country']);
     }
 
+
+  $shipping_module = '';
+  $shipping_option = '';
+
+  if($_SESSION['quote_shipping_method']) {
+		$shipping_module = $wpsc_shipping_modules[$_SESSION['quote_shipping_method']]->getName();
+		$shipping_option = $wpdb->escape($_SESSION['quote_shipping_option']);
+	}
+
     
     //insert the record into the purchase log table
-	$price = nzshpcrt_overall_total_price($_SESSION['selected_country'],false);
-	$sql = "INSERT INTO `".$wpdb->prefix."purchase_logs` ( `totalprice` , `sessionid` , `date`, `billing_country`, `shipping_country`,`base_shipping`,`shipping_region`, `user_ID`, `discount_value`, `discount_data`, `find_us`, `engravetext`, `google_status`) VALUES ( '".$wpdb->escape($price)."', '".$sessionid."', '".time()."', '".$_SESSION['selected_country']."', '".$_SESSION['delivery_country']."', '".$base_shipping."','".$_SESSION['selected_region']."' , '".(int)$user_ID."' , '".(float)$_SESSION['wpsc_discount']."', '".$wpdb->escape($_SESSION['coupon_num'])."', '', '{$engrave}', ' ')";
+	$price = nzshpcrt_overall_total_price($_SESSION['delivery_country'],false);
+	$sql = "INSERT INTO `".$wpdb->prefix."purchase_logs` ( `totalprice` , `sessionid` , `date`, `billing_country`, `shipping_country`,`base_shipping`,`shipping_region`, `user_ID`, `discount_value`, `discount_data`, `find_us`, `engravetext`, `google_status`, `shipping_method`, `shipping_option`) VALUES ( '".$wpdb->escape($price)."', '".$sessionid."', '".time()."', '".$_SESSION['selected_country']."', '".$_SESSION['delivery_country']."', '".$base_shipping."','".$_SESSION['selected_region']."' , '".(int)$user_ID."' , '".(float)$_SESSION['wpsc_discount']."', '".$wpdb->escape($_SESSION['coupon_num'])."', '', '{$engrave}', ' ','$shipping_module','$shipping_option')";
 	//exit($sql);
 	$wpdb->query($sql) ;
 	$email_user_detail = '';
@@ -344,7 +372,7 @@ function nzshpcrt_submit_checkout() {
       $wpdb->query($cartsql);
       
       // get the cart id
-      $cart_id = $wpdb->get_var("SELECT LAST_INSERT_ID() AS `id` FROM `".$wpdb->prefix."product_variations` LIMIT 1");
+      $cart_id = $wpdb->get_var("SELECT LAST_INSERT_ID() AS `id` FROM `".$wpdb->prefix."cart_contents` LIMIT 1");
       
       
       $extra_var='';
@@ -396,34 +424,13 @@ function nzshpcrt_submit_checkout() {
         if($wpdb->get_var("SELECT `id` FROM `{$wpdb->prefix}product_files` WHERE `id` IN ('$file_id')")) {
           $unique_id = sha1(uniqid(mt_rand(), true));
           $wpdb->query("INSERT INTO `{$wpdb->prefix}download_status` ( `fileid` , `purchid` , `cartid`, `uniqueid`, `downloads` , `active` , `datetime` ) VALUES ( '{$file_id}', '{$log_id}', '{$cart_id}', '{$unique_id}', '$downloads', '0', NOW( ));");
+          //echo "INSERT INTO `{$wpdb->prefix}download_status` ( `fileid` , `purchid` , `cartid`, `uniqueid`, `downloads` , `active` , `datetime` ) VALUES ( '{$file_id}', '{$log_id}', '{$cart_id}', '{$unique_id}', '$downloads', '0', NOW( ));<br />";
         }
       }
       
-      
-      //echo "<pre>".print_r($variations,true)."</pre>";
-      /*
-        * This code decrements the stock quantity
-      */
-      //$debug .= "<pre>".print_r($variations,true)."</pre>";
-      /*
-			if($product_data['quantity_limited'] == 1) {
-        if(count($variation_values) > 0) {
-        
-          $variation_ids = $wpdb->get_col("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` IN ('".implode("','",$variation_values)."')");
-          asort($variation_ids);         
-          $all_variation_ids = implode(",", $variation_ids);
-        
-          $priceandstock_id = $wpdb->get_var("SELECT `priceandstock_id` FROM `{$wpdb->prefix}wpsc_variation_combinations` WHERE `product_id` = '".(int)$product_data['id']."' AND `value_id` IN ( '".implode("', '",$variation_values )."' ) AND `all_variation_ids` IN('{$all_variation_ids}') GROUP BY `priceandstock_id` HAVING COUNT( `priceandstock_id` ) = '".count($variation_values)."' LIMIT 1");
-          
-          $variation_stock_data = $wpdb->get_row("SELECT * FROM `{$wpdb->prefix}variation_priceandstock` WHERE `id` = '{$priceandstock_id}' LIMIT 1", ARRAY_A);
-          $wpdb->query("UPDATE `{$wpdb->prefix}variation_priceandstock` SET `stock` = '".($variation_stock_data['stock']-$quantity)."'  WHERE `id` = '{$variation_stock_data['id']}' LIMIT 1",ARRAY_A);
-        } else {
-          $wpdb->query("UPDATE `{$wpdb->prefix}product_list` SET `quantity`='".($product_data['quantity']-$quantity)."' WHERE `id`='{$product_data['id']}' LIMIT 1");
-        }
-      }
-*/
     }
    
+      //exit("<pre>".print_r($variations,true)."</pre>");
    
    $unneeded_value = null; //this is only used to store the quantity for the item we are working on, so that we can get the array key
    $assoc_quantity = null;

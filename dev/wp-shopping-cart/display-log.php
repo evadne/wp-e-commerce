@@ -5,12 +5,12 @@
 if(is_numeric($_GET['id']) && is_numeric($_GET['value'])) {
   $max_stage = $wpdb->get_var("SELECT MAX(*) AS `max` FROM `".$wpdb->prefix."purchase_statuses` WHERE `active`='1'");
   if(is_numeric($_GET['value']) && ($_GET['value'] <= $max_stage)) {
-    $newvalue = $_GET['value'];
+    $newvalue = (int)$_GET['value'];
 	} else {
 		$newvalue = 1;
 	}
   $log_data = $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."purchase_logs` WHERE `id` = '".$_GET['id']."' LIMIT 1");  
-  $update_sql = "UPDATE `".$wpdb->prefix."purchase_logs` SET `processed` = '".$newvalue."' WHERE `id` = '".$_GET['id']."' LIMIT 1";  
+  $update_sql = "UPDATE `".$wpdb->prefix."purchase_logs` SET `processed` = '{$newvalue}' WHERE `id` = '".$_GET['id']."' LIMIT 1";  
   $wpdb->query($update_sql);
   if(($newvalue > $log_data['processed']) && ($log_data['processed'] <=1)) {
     transaction_results($log_data['sessionid'], false);
@@ -187,14 +187,15 @@ if(is_numeric($_GET['email_buyer_id'])) {
 				} else {
 					$report_id = "Purchase No.: ".$purchase_log['id']."\n\r";
 				}
-				
-				if(($email != '') && ($purchase_log['email_sent'] != 1)) {
+				//exit( mail($email, TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED, $message, "From: ".get_option('return_email').""));
+				//echo mail($email, TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED, $message, "From: ".get_option('return_email')."");
+				if(($email != '')) {
 					if($purchase_log['processed'] < 2) {
 						$payment_instructions = strip_tags(get_option('payment_instructions'));
 						$message = TXT_WPSC_ORDER_PENDING . "\n\r" . $payment_instructions ."\n\r". $message;
-						$resent = mail($email, TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED, $message, "From: ".get_option('return_email')."");
+						$resent = (bool)mail($email, TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED, $message, "From: ".get_option('return_email')."");
 					} else {
-						$resent = mail($email, TXT_WPSC_PURCHASERECEIPT, $message, "From: ".get_option('return_email')."");
+						$resent = (bool)mail($email, TXT_WPSC_PURCHASERECEIPT, $message, "From: ".get_option('return_email')."");
 					}
 				}
 		}
@@ -415,11 +416,12 @@ if($_GET['filter'] !== 'true') {
         <img src='<?php echo WPSC_URL; ?>/images/gold-cart.png' alt='' title='' /><a href='http://www.instinct.co.nz/e-commerce/shop/'><?php echo TXT_WPSC_UPGRADE_TO_GOLD; ?></a><?php echo TXT_WPSC_UNLEASH_MORE; ?>
         </div>
       </div>
-      </div>
-      </div>
+      
       <?php
     }
     ?>
+    </div>
+      </div>
 <?php
 	echo "</div>";
 	echo "<div id='post-body' class='has-sidebar'>
@@ -694,7 +696,7 @@ if($_GET['filter'] !== 'true') {
               
             echo "<tr>";
             echo " <td colspan='$col_count'>";
-            echo "<strong>Total:</strong> ".nzshpcrt_currency_display($subtotal ,1);
+            echo "<strong>Total:</strong> ".nzshpcrt_currency_display(admin_display_total_price($date_pair['start'], $date_pair['end']),1);
             echo "<br /><a class='admin_download' href='index.php?purchase_log_csv=true&rss_key=key&start_timestamp=".$date_pair['start']."&end_timestamp=".$date_pair['end']."' ><img align='absmiddle' src='".WPSC_URL."/images/download.gif' alt='' title='' /><span>".TXT_WPSC_DOWNLOAD_CSV."</span></a>";
             echo " </td>";      
             echo "</tr>";
@@ -775,43 +777,35 @@ if($_GET['filter'] !== 'true') {
 				{
 				$alternate = "";
 				$j++;
-				if(($j % 2) != 0)
-					{
+				if(($j % 2) != 0) {
 					$alternate = "class='alt'";
-					}
+				}
 				$productsql= "SELECT * FROM `".$wpdb->prefix."product_list` WHERE `id`=".$cart_row['prodid']."";
 				$product_data = $wpdb->get_results($productsql,ARRAY_A); 
 			
 				$variation_sql = "SELECT * FROM `".$wpdb->prefix."cart_item_variations` WHERE `cart_id`='".$cart_row['id']."'";
 				$variation_data = $wpdb->get_results($variation_sql,ARRAY_A); 
 				$variation_count = count($variation_data);
-				if($variation_count > 1)
-					{
+				if($variation_count > 1) {
 					$variation_list = " (";
 					$i = 0;
-					foreach($variation_data as $variation)
-						{
-						if($i > 0)
-							{
+					foreach($variation_data as $variation) {
+						if($i > 0) {
 							$variation_list .= ", ";
-							}
+						}
 						$value_id = $variation['value_id'];
 						$value_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."variation_values` WHERE `id`='".$value_id."' LIMIT 1",ARRAY_A);
 						$variation_list .= $value_data[0]['name'];
 						$i++;
-						}
-					$variation_list .= ")";
 					}
-					else if($variation_count == 1)
-						{
-						$value_id = $variation_data[0]['value_id'];
-						$value_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."variation_values` WHERE `id`='".$value_id."' LIMIT 1",ARRAY_A);
-						$variation_list = " (".$value_data[0]['name'].")";
-						}
-						else
-							{
-							$variation_list = '';
-							}
+					$variation_list .= ")";
+				} else if($variation_count == 1) {
+					$value_id = $variation_data[0]['value_id'];
+					$value_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."variation_values` WHERE `id`='".$value_id."' LIMIT 1",ARRAY_A);
+					$variation_list = " (".$value_data[0]['name'].")";
+				} else {
+					$variation_list = '';
+				}
 
 				if($purch_data[0]['shipping_country'] != '') {
 					$billing_country = $purch_data[0]['billing_country'];
@@ -979,7 +973,7 @@ if($_GET['filter'] !== 'true') {
             break;
                 
             case 'heading':
-            echo "  <tr><td colspan='2'><strong>".$form_field['name'].":</strong></td></tr>\n\r";
+            echo "  <tr><td colspan='2'><br /><strong>".$form_field['name'].":</strong></td></tr>\n\r";
             break;
             
             default:
@@ -1058,6 +1052,16 @@ if($_GET['filter'] !== 'true') {
 		} else {
 			echo "<br />".TXT_WPSC_USERSCARTWASEMPTY;
 		}
+		if($purch_data[0]['shipping_method'] != '') {
+		  echo "<br />";
+			echo "<strong>".TXT_WPSC_SHIPPING_METHOD."</strong>\n\r";
+			echo "<table style=''>\n\r";
+			echo "  <tr><td>".TXT_WPSC_SHIPPING_METHOD.":</td><td> ".$purch_data[0]['shipping_method']."</td></tr>\n\r";
+			echo "  <tr><td>".TXT_WPSC_SHIPPING_OPTION.":</td><td> ".$purch_data[0]['shipping_option']."</td></tr>\n\r";
+			echo "</table>\n\r";
+		}
+		
+		
 		echo "<br><b>".TXT_WPSC_ACTIONS."</b>";
 		
 		echo "<br /><br class='small' /><img src='".WPSC_URL."/images/lock_open.png'>&ensp;<a href='admin.php?page=".WPSC_DIR_NAME."/display-log.php&amp;purchaseid=".$_GET['purchaseid']."&amp;clear_locks=true'>".TXT_WPSC_CLEAR_IP_LOCKS."</a>";
@@ -1072,9 +1076,11 @@ if($_GET['filter'] !== 'true') {
 		echo "<br /><br class='small' />&emsp;&ensp; <a href='admin.php?page=".WPSC_DIR_NAME."/display-log.php'>".TXT_WPSC_GOBACK."</a>";
 	
 	} elseif (is_numeric($_GET['email_buyer_id'])) {
-		if ($resent){
-			if (IS_WP27)
+	  echo $resent;
+		if ($resent != 0){
+			if (IS_WP27) {
 				echo "<div class='email_buyer'>";
+			}
 			echo "The folowing purchase recipt have has been resent:<br>";
 		    echo nl2br($message_html);
 		} else {

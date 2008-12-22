@@ -318,6 +318,11 @@ if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}wpsc_variation_combinati
     
     asort($keys);    
     $all_value_ids = implode(",", $keys);
+			
+			
+		$variation_ids = $wpdb->get_col("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` IN ('".implode("','",$keys)."')");
+		asort($variation_ids);
+		$all_variation_ids = implode(",", $variation_ids);
     
     $variation_priceandstock_id = $variation_priceandstock_item['id'];
     $product_id = $variation_priceandstock_item['product_id'];
@@ -325,13 +330,46 @@ if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}wpsc_variation_combinati
       if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}wpsc_variation_combinations` WHERE `priceandstock_id` = '{$variation_priceandstock_id}' AND `value_id` = '$key'") < 1) {
         $variation_id = $wpdb->get_var("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` = '{$key}'");
         if($variation_id > 0) {
-          $wpdb->query("INSERT INTO `{$wpdb->prefix}wpsc_variation_combinations` ( `product_id` , `priceandstock_id` , `value_id`, `variation_id`, `all_value_ids` ) VALUES ( '$product_id', '{$variation_priceandstock_id}', '$key', '$variation_id', '$all_value_ids' )");
+          $wpdb->query("INSERT INTO `{$wpdb->prefix}wpsc_variation_combinations` ( `product_id` , `priceandstock_id` , `value_id`, `variation_id`, `all_value_ids` ) VALUES ( '$product_id', '{$variation_priceandstock_id}', '$key', '$variation_id', '$all_variation_ids' )");
         }
       }
     }
   }
 }
 
+
+$product_ids = $wpdb->get_col("SELECT `id` FROM `".$wpdb->prefix."product_list` WHERE `active` IN('1')");
+foreach($product_ids as $product_id) {
+  if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}wpsc_variation_combinations` WHERE `product_id` = '{$product_id}'") < 1 ) {
+		$variation_priceandstock = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}variation_priceandstock` WHERE `product_id` = '{$product_id}'",ARRAY_A);
+		
+  
+		foreach((array)$variation_priceandstock as $variation_priceandstock_item) {
+			$keys = array();
+			$keys[] = $variation_priceandstock_item['variation_id_1'];
+			$keys[] = $variation_priceandstock_item['variation_id_2'];
+			
+			asort($keys);    
+			$all_value_ids = implode(",", $keys);
+			
+			$variation_ids = $wpdb->get_col("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` IN ('".implode("','",$keys)."')");
+			asort($variation_ids);
+			$all_variation_ids = implode(",", $variation_ids);
+			
+			$variation_priceandstock_id = $variation_priceandstock_item['id'];
+			$product_id = $variation_priceandstock_item['product_id'];
+			
+			foreach((array)$keys as $key) {
+				if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}wpsc_variation_combinations` WHERE `priceandstock_id` = '{$variation_priceandstock_id}' AND `value_id` = '$key'") < 1) {
+					$variation_id = $wpdb->get_var("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` = '{$key}'");
+					if($variation_id > 0) {
+						$wpdb->query("INSERT INTO `{$wpdb->prefix}wpsc_variation_combinations` ( `product_id` , `priceandstock_id` , `value_id`, `variation_id`, `all_variation_ids` ) VALUES ( '$product_id', '{$variation_priceandstock_id}', '$key', '$variation_id', '$all_variation_ids' )");
+					}
+				}
+			}
+		}
+	}
+}
 
 // Update the variation combinations table to have the all_variation_ids column
 if($wpdb->get_var("SELECT COUNT( * ) FROM `{$wpdb->prefix}wpsc_variation_combinations` WHERE `all_variation_ids` IN ( '' )") > 0 ) {
@@ -344,8 +382,11 @@ if($wpdb->get_var("SELECT COUNT( * ) FROM `{$wpdb->prefix}wpsc_variation_combina
     }
     asort($all_value_array);    
     
-    $all_value_ids = implode(",", $all_value_array);
-    $update_sql = "UPDATE `{$wpdb->prefix}wpsc_variation_combinations` SET `all_variation_ids` = '".$all_value_ids."' WHERE `priceandstock_id` IN( '$variation_priceandstock_id' );";
+		$variation_ids = $wpdb->get_col("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` IN ('".implode("','",$all_value_array)."')");
+		asort($variation_ids);
+		$all_variation_ids = implode(",", $variation_ids);
+		
+    $update_sql = "UPDATE `{$wpdb->prefix}wpsc_variation_combinations` SET `all_variation_ids` = '".$all_variation_ids."' WHERE `priceandstock_id` IN( '$variation_priceandstock_id' );";
     
     //echo "<pre>".print_r($update_sql,true)."</pre>";
     $wpdb->query($update_sql);
@@ -464,15 +505,15 @@ if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}currency_list` WHERE `co
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='africa' WHERE id='109'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='110'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='southamerica' WHERE id='111'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='112'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='112'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='113'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='africa' WHERE id='114'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='northamerica' WHERE id='115'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='116'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='117'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='southamerica' WHERE id='118'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='119'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='120'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='119'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='120'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='northamerica' WHERE id='121'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='122'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='123'");
@@ -507,14 +548,14 @@ if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}currency_list` WHERE `co
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='152'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='153'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='africa' WHERE id='154'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='155'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='155'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='156'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='northamerica' WHERE id='157'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='africa' WHERE id='158'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='africa' WHERE id='159'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='160'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='161'");
-	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapasific' WHERE id='162'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='160'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='161'");
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='162'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='163'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='164'");
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='asiapacific' WHERE id='165'");
@@ -597,6 +638,11 @@ if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}currency_list` WHERE `co
 	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET continent='europe' WHERE id='242'");
 }
 
+
+if($wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}currency_list` WHERE `continent` IN ('asiapasific')") > 0) {
+	$wpdb->query("UPDATE `{$wpdb->prefix}currency_list` SET `continent`='asiapacific' WHERE `continent`='asiapasific'");
+}
+
 add_option('wpsc_email_receipt', '', TXT_WPSC_DEFAULT_PURCHASE_RECEIPT, 'yes');
 add_option('wpsc_email_admin', '', TXT_WPSC_DEFAULT_PURCHASE_REPORT, 'yes');
 
@@ -626,5 +672,42 @@ if($coldata['Type'] != "bigint(20) unsigned")	{
     $wpdb->query("UPDATE `{$wpdb->prefix}variation_priceandstock` SET `file` = '{$new_file_id}' WHERE `id` IN ('{$variation['id']}') LIMIT 1");
   }
    
-	}
+}
+
+//   echo "<pre>".print_r(geast_option('flat_rates'),true)."</pre>";
+
+
+// update_option('base_local_shipping',8);
+// 	update_option('base_international_shipping',12);
+
+if((get_option('flat_rates') == null) || (count(get_option('flat_rates')) < 1)) {
+	$local_shipping = get_option('base_local_shipping');
+	$international_shipping = get_option('base_international_shipping');  
+// 	echo $international_shipping;
+	// Local Shipping Settings
+	$shipping['local'] = $local_shipping;
+	
+	$shipping['southisland'] = $local_shipping;
+	$shipping['northisland'] = $local_shipping;	
+	
+	// International Shipping Settings
+	$shipping['continental'] = $international_shipping;
+	$shipping['all'] = $international_shipping;
+	$shipping['canada'] = $international_shipping;
+	
+	$shipping['northamerica'] = $international_shipping;
+	$shipping['southamerica'] = $international_shipping;
+	$shipping['asiapacific'] = $international_shipping;
+	$shipping['europe'] = $international_shipping;
+	$shipping['africa'] = $international_shipping;
+	
+	//echo "<pre>".print_r($shipping,true)."</pre>";
+	
+	update_option('flat_rates',$shipping);
+}
+
+if(get_option('custom_shipping_options') == null ) {
+	update_option('custom_shipping_options',array('flatrate'));
+}
+
 ?>

@@ -1,5 +1,21 @@
 <?php
-global $wpdb, $user_ID;
+global $wpdb, $user_ID, $wpsc_shipping_modules;
+
+			$shipping_quotes = null;
+			if($_SESSION['quote_shipping_method'] != null) {
+			   // use the selected shipping module
+			  $shipping_quotes = $wpsc_shipping_modules[$_SESSION['quote_shipping_method']]->getQuote();
+			} else {
+			  // otherwise select the first one with any quotes
+				foreach((array)$custom_shipping as $shipping_module) {
+					$_SESSION['quote_shipping_method'] = $shipping_module;
+					$shipping_quotes = $wpsc_shipping_modules[$_SESSION['quote_shipping_method']]->getQuote();
+					if(count($shipping_quotes) > 0) { // if we have any shipping quotes, break the loop.
+					  break;
+					}
+				}
+			}
+$shipping_quotes = null;
 //$_SESSION['coupon_num'] = '';
 
 
@@ -33,7 +49,7 @@ if(get_option('permalink_structure') != '') {
 	$seperator ="&amp;";
 }
  
-if($_POST['coupon_num']){
+if($_POST['coupon_num']) {
 	$_SESSION['coupon_num'] = $_POST['coupon_num'];
 }
 
@@ -76,16 +92,24 @@ function wpsc_shipping_country_list($selected_country = null) {
 	}
 	
 // 	$output .= "ZipCode:";
-	if ($_POST['zipcode']=='') {
-	$zipvalue = 'Your Zipcode';
-	$color = '#999';
-	} else {
-		$zipvalue = $_POST['zipcode'];
-		$color = '#000';
+if(isset($_POST['zipcode'])) {
+		if ($_POST['zipcode']=='') {
+			$zipvalue = 'Your Zipcode';
+			$_SESSION['wpsc_zipcode'] = $_POST['zipcode'];
+			$color = '#999';
+		} else {
+			$zipvalue = $_POST['zipcode'];
+			$_SESSION['wpsc_zipcode'] = $_POST['zipcode'];
+			$color = '#000';
+		}
+	} else if(isset($_SESSION['wpsc_zipcode'])) {
+			$zipvalue = $_SESSION['wpsc_zipcode'];
+			$color = '#000';
 	}
 	$output .= " <input type='text' style='color:".$color.";' onclick='if (this.value==\"Your Zipcode\") {this.value=\"\";this.style.color=\"#000\";}' onblur='if (this.value==\"\") {this.style.color=\"#999\"; this.value=\"Your Zipcode\"; }' value='".$zipvalue."' size='10' name='zipcode' id='zipcode'>";
 	return $output;
 }
+
 ?>
 		<div class="wrap wpsc_container">
 		<?php
@@ -199,10 +223,7 @@ function wpsc_shipping_country_list($selected_country = null) {
 		echo "</tr>";
 	}
 	
-	//End of written by allen
-			$total_weight = shopping_cart_total_weight();
-	if ($total_weight > 0) {
-		if(get_option('base_country') != null) {
+		if((get_option('base_country') != null) && (get_option('do_not_use_shipping') == 0)) {
 			//if (!function_exists('getdistance')) {
 		
 		
@@ -231,45 +252,65 @@ function wpsc_shipping_country_list($selected_country = null) {
 				echo "<input type='submit' onclick='' value='Rate'>";
 				echo "</td>";
 				echo "</form>";
-//     echo "  <td  colspan='2' style='vertical-align: middle;'>\n\r";
-//     if($all_donations == false)
-//       {
-//       echo "" . nzshpcrt_currency_display($total_shipping, 1) . "";
-//       }
-//       else
-//         {
-//         echo TXT_WPSC_DONATION_SHIPPING;
-//         }
-//     echo "  </td>\n\r";
     echo "</tr>\n\r";
 		}
-	
-		//// usps changes
-				$custom_shipping = get_option('custom_shipping_options');
-		foreach((array)$custom_shipping as $shipping) {
-			foreach ($GLOBALS['wpsc_shipping_modules'] as $available_shipping) {
-				if ($shipping == $available_shipping->internal_name)
-					$shipping_quotes[$available_shipping->internal_name] = $available_shipping->getQuote();
+	 if(get_option('do_not_use_shipping') == 0) {
+			//// usps changes
+			$custom_shipping = get_option('custom_shipping_options');
+			foreach((array)$custom_shipping as $shipping) {
+				foreach ($wpsc_shipping_modules as $available_shipping) {
+					if ($shipping == $available_shipping->internal_name) {
+						$shipping_quotes[$available_shipping->internal_name] = $available_shipping->getQuote(true);
+					}
+				}
 			}
-		}
-// 	echo ('<pre>'.print_r($shipping_quotes,1)."</pre>");
-	$_SESSION['uspsQuote']=$shipping_quotes;
-	foreach ((array)$shipping_quotes as $key1 => $shipping_quote) {
-		echo "<tr><td class='shipping_header' colspan='4'>$key1</td></tr>";
-		if (empty($shipping_quote)) {
-			echo "<tr><td colspan='4'>No Shipping Data available</td></tr>";
-		}
-		foreach ((array)$shipping_quote as $quotes) {
-			foreach($quotes as $key=>$quote) {
-				echo "<tr><td colspan='2'><label for='$key$key1'>".$key."</label></td><td><label for='$key$key1'>".nzshpcrt_currency_display($quote,1)."</label></td><td style='text-align:center;'><input type='radio' id='$key$key1' onclick='switchmethod(\"$key\", \"$key1\")' value='$quote' name='shipping_method'></td></tr>";
+		
+			if(array_search($_SESSION['quote_shipping_method'], $custom_shipping) === false) {
+			  unset($_SESSION['quote_shipping_method']);
 			}
+		//echo ('<pre>'.print_r($_SESSION['quote_shipping_option'],1)."</pre>");
+		$_SESSION['uspsQuote']=$shipping_quotes;
+		$i=0;
+		$shipping_is_selected = false;
+		if(($_SESSION['quote_shipping_method'] != null) && ($_SESSION['quote_shipping_option']  != null)) {
+			$shipping_is_selected = true;
 		}
-	}
-	// usps changes ends
+		foreach ((array)$shipping_quotes as $key1 => $shipping_quote) {
+			$shipping_method_name = $wpsc_shipping_modules[$key1]->name;
+			echo "<tr><td class='shipping_header' colspan='4'>$shipping_method_name</td></tr>";
+			if (empty($shipping_quote)) {
+				echo "<tr><td colspan='4'>No Shipping Data available</td></tr>";
+			}
+			$j=0;
+			foreach ((array)$shipping_quote as $quotes) {
+				foreach((array)$quotes as $key=>$quote) {
+					if($shipping_is_selected == true) {
+						if(($_SESSION['quote_shipping_method'] == $key1) && ($_SESSION['quote_shipping_option']  == $key)) {
+							$selected = "checked='checked'";
+						} else {
+							$selected ="";
+						}
+					} else {
+						if (($i == 0) && ($j == 0)) {
+							$selected = "checked='checked'";
+						} else {
+							$selected ="";
+						}
+					}
+					
+					echo "<tr><td colspan='2'><label for='{$key1}_{$j}'>".$key."</label></td><td><label for='{$key1}_{$j}'>".nzshpcrt_currency_display($quote,1)."</label></td><td style='text-align:center;'><input type='radio' id='{$key1}_{$j}' $selected onclick='switchmethod(\"$key\", \"$key1\")' value='$quote' name='shipping_method'></td></tr>";
+					$j++;
+				}
+			}
+			$i++;
+		}
+		// usps changes ends
+    
+  }
+    
     
   //echo "<tr style='total-price'>\n\r";
-	if($tax > 0)
-	{
+	if($tax > 0) {
 		echo "<tr class='total_price'>\n\r";
 		echo "  <td colspan='2'>\n\r";
 		echo "".TXT_WPSC_TAX.":";
@@ -307,15 +348,19 @@ function wpsc_shipping_country_list($selected_country = null) {
 	echo "".TXT_WPSC_TOTALPRICE.":";
 	echo "  </td>\n\r";
 	echo "  <td colspan='2' id='checkout_total' style='vertical-align: middle;'>\n\r";
-	if (isset($_SESSION['quote_shipping_total'])) {
-		echo nzshpcrt_currency_display($_SESSION['quote_shipping_total'],1);
-	} else {
-		echo nzshpcrt_overall_total_price($_SESSION['selected_country'],true,false,$total);
-	}
+// 	if (isset($_SESSION['quote_shipping_total'])) {
+// 		if ($discount <= 0) 
+// 			echo nzshpcrt_currency_display($_SESSION['quote_shipping_total'],1);
+// 		else 
+// 			echo nzshpcrt_currency_display($_SESSION['quote_shipping_total'] - $discount,1);
+// 	} else {
+		echo nzshpcrt_overall_total_price($_SESSION['delivery_country'],true,false,$total);
+// 	}
 	echo "<input id='shopping_cart_total_price' type='hidden' value='".$total."'>";
+	
+
 	echo "  </td>\n\r";
 	echo "</tr>\n\r";
-	}
 	echo "</table>";
 
 	if ($_POST['coupon_num']) {
@@ -324,65 +369,10 @@ function wpsc_shipping_country_list($selected_country = null) {
 		$_SESSION['nzshpcrt_totalprice'] = $total;
 	}
   
-// 	if (get_option('payment_gateway') == 'google') {
-// 		$google_cart = unserialize($_SESSION['google_shopping_cart']);
-// 		if($_SESSION['coupon_num']){
-// 			$overall_total = nzshpcrt_overall_total_price_numeric(null,true);
-// 			$discount = $overall_total - nzshpcrt_apply_coupon($overall_total,$_SESSION['coupon_num']);
-// 			$total_after_discount = $overall_total-$discount;
-// 			$_SESSION['wpsc_discount']= $discount;
-// 		} else {
-// 			$_SESSION['wpsc_discount']= 0;
-// 		}
-// 	 
-// 		if ($_POST["quantity"]) {
-// 		
-// 			$pnp=$wpdb->get_var("SELECT SUM(`pnp`) FROM `".$wpdb->prefix."product_list` WHERE `id` IN ('".(int)$cart_item->product_id."')");
-// 			$local_shipping_price= nzshpcrt_determine_base_shipping(0, get_option('base_country'));
-// 			$google_local_shipping = $local_shipping_price+$pnp*$_POST["quantity"];
-// 			$pnp=$wpdb->get_var("SELECT SUM(`international_pnp`) FROM `".$wpdb->prefix."product_list` WHERE `id` IN ('".(int)$cart_item->product_id."')");
-// 			$international_shipping_price= nzshpcrt_determine_base_shipping(0, get_option('base_country')."-");
-// 			$google_international_shipping = $international_shipping_price+$pnp*$_POST["quantity"];
-// 			$google_cart->shipping_arr[0]->price=$google_local_shipping;
-// 			$google_cart->shipping_arr[1]->price=$google_international_shipping;
-// 			$google_cart->item_arr[$_POST["key"]]->quantity=$_POST["quantity"];
-// 		}
-// 	
-// 		$state_name = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."region_tax WHERE country_id='136'",ARRAY_A);
-// // 	echo "<pre>".print_r($tax_rate,1)."</pre>";
-// 	foreach ($state_name as $state) {
-// // 		$tax_rate = $wpdb->get_results("SELECT tax FROM ".$wpdb->prefix."region_tax WHERE id='".$state['id']."'",ARRAY_A);
-// 		$tax_rule = new GoogleDefaultTaxRule($state['tax']/100);
-// 		$tax_rule->SetStateAreas($state['code']);
-// 		$google_cart->AddDefaultTaxRules($tax_rule);
-// 	}
-// 	 
-// 	if ($discount > 0) {
-// 		$google_item = new GoogleItem(utf8_decode("Coupon Code: '".$_SESSION['coupon_num']."'"),      // Item name
-// 				utf8_decode("A coupon redeem"), // Item      description
-// 						1, // Quantity
-// 								-$discount); // Unit price
-// 		//echo serialize($cart_item->product_variations);
-// 		$google_item->SetMerchantPrivateItemData("Coupon Deduction");
-// 		$google_cart->AddItem($google_item);
-// 	}
-// 	 //exit("---><pre>".print_r($_SESSION,1)."</pre>");
-// 	 if (get_option('payment_gateway') == 'google') {
-// 		 if (get_option('google_button_size') == '0'){
-// 			 $google_button_size = 'BIG';
-// 		 } elseif(get_option('google_button_size') == '1') {
-// 			 $google_button_size = 'MEDIUM';
-// 		 } elseif(get_option('google_button_size') == '2') {
-// 			 $google_button_size = 'SMALL';
-// 		 }
-// 	 }
-// 	 echo "<br>".$google_cart->CheckoutButtonCode($google_button_size);
-// 	} else {
-		echo "<h2>".TXT_WPSC_ENTERDETAILS."</h2>";
-// 	} 
+	echo "<h2>".TXT_WPSC_ENTERDETAILS."</h2>";
 	include('checkout.php');
-		} else {
-			echo TXT_WPSC_NOITEMSINTHESHOPPINGCART;
-		}
-		?>
+} else {
+	echo TXT_WPSC_NOITEMSINTHESHOPPINGCART;
+}
+?>
 				</div>

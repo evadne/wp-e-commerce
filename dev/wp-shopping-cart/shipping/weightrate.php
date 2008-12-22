@@ -4,6 +4,7 @@ class weightrate {
 	function weightrate () {
 		$this->internal_name = "weightrate";
 		$this->name="Weight Rate";
+		$this->is_external=false;
 		return true;
 	}
 	
@@ -25,7 +26,7 @@ class weightrate {
 	}
 	
 	function getForm() {
-		$output.="<tr><th>Total weight(in Pound)</th><th>Shipping price</th></tr>";
+		$output.="<tr><th>Total weight(in Pounds)</th><th>Shipping price</th></tr>";
 		$layers = get_option("weight_rate_layers");
 		if ($layers != '') {
 			foreach($layers as $key => $shipping) {
@@ -50,8 +51,9 @@ class weightrate {
 				}
 			}
 		}
-		if ($_POST['checkpage'] == 'weight')
+		if ($_POST['checkpage'] == 'weight') {
 			update_option('weight_rate_layers',$new_layer);
+		}
 		return true;
 	}
 	
@@ -61,9 +63,9 @@ class weightrate {
 		$weight = shopping_cart_total_weight();
 		$layers = get_option('weight_rate_layers');
 		if ($layers != '') {
-			$layers = array_reverse($layers);
+			$layers = array_reverse($layers,true);
 			foreach ($layers as $key => $shipping) {
-				if ($weight >= (double)$key) {
+				if ($weight >= (float)$key) {
 					return array(array("Weight Rate"=>$shipping));
 				}
 			}

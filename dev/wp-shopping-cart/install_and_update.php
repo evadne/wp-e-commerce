@@ -282,13 +282,13 @@ function nzshpcrt_install()
   add_option('paypal_multiple_business', '', TXT_WPSC_PAYPALBUSINESS, 'yes');
   
   if(get_option('paypal_multiple_url') == null) {
-    add_option('paypal_multiple_url', '', TXT_WPSC_PAYPALURL, 'yes');
+    add_option('paypal_multiple_url', TXT_WPSC_PAYPALURL, 'yes');
     update_option('paypal_multiple_url', "https://www.paypal.com/cgi-bin/webscr");
 	}
 
   add_option('product_ratings', '0', TXT_WPSC_SHOWPRODUCTRATINGS, 'yes');
-  add_option('email_receipt', '0', TXT_WPSC_DEFAULT_PURCHASE_RECEIPT, 'yes');
-  add_option('email_admin', '0', TXT_WPSC_DEFAULT_PURCHASE_REPORT, 'yes');
+  add_option('wpsc_email_receipt', TXT_WPSC_DEFAULT_PURCHASE_RECEIPT, 'yes');
+  add_option('wpsc_email_admin', TXT_WPSC_DEFAULT_PURCHASE_REPORT, 'yes');
   if(get_option('wpsc_selected_theme') == '') {
     add_option('wpsc_selected_theme', 'default', 'Selected Theme', 'yes');
     update_option('wpsc_selected_theme', "default");
@@ -564,7 +564,19 @@ function wpsc_uninstall_plugin() {
 		$option_list[] = 'wpsc_version'; 
 		$option_list[] = 'wpsc_incomplete_file_transfer'; 
 		$option_list[] = 'wpsc_ip_lock_downloads'; 
-		$option_list[] = 'wpsc_database_check'; 
+		$option_list[] = 'wpsc_database_check'; 		
+		$option_list[] = 'wpsc_default_category'; 
+		$option_list[] = 'wpsc_email_receipt'; 
+		$option_list[] = 'wpsc_email_admin'; 
+		$option_list[] = 'wpsc_email_receipt'; 
+		$option_list[] = 'wpsc_email_admin'; 
+		$option_list[] = 'shipwire'; 
+		$option_list[] = 'base_zipcode'; 
+		$option_list[] = 'custom_gateway_options'; 
+		$option_list[] = 'paypal_certified_apiuser'; 
+		$option_list[] = 'paypal_certified_apipass'; 
+		$option_list[] = 'paypal_certified_apisign'; 
+		
 		
 		foreach($option_list as $wpsc_option) {
 			delete_option($wpsc_option);
@@ -730,7 +742,6 @@ function wpsc_create_or_update_tables() {
   if(get_option('wpsc_database_check') == $template_hash) {
     return true;
   }
-  
   $failure_reasons = array();
   $upgrade_failed = false;
   foreach((array)$wpsc_database_template as $table_name => $table_data) {
@@ -812,7 +823,6 @@ function wpsc_create_or_update_tables() {
       }
     }
   }
-  
   
 	if($upgrade_failed !== true) {
 		update_option('wpsc_database_check', $template_hash);

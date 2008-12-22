@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors','1');
 function nzshpcrt_getproductform($prodid)
   {
   global $wpdb,$nzshpcrt_imagesize_info;
@@ -72,15 +73,17 @@ function nzshpcrt_getproductform($prodid)
 		$output .= "        <div id='productform'>";
 		$output .= "<div class='categorisation_title'><strong class='form_group'>". TXT_WPSC_PRODUCTDETAILS." <span>".TXT_WPSC_ENTERPRODUCTDETAILSHERE."</span></strong></div>";
 	}
-  $output .= "        <table class='product_editform'>\n\r";
+  $output .= "        <table class='product_editform' style='width:100%;'>\n\r";
   $output .= "          <tr>\n\r";
-  $output .= "            <td class='itemfirstcol'>\n\r";
+/*
+  $output .= "            <td class='itemformcol'>\n\r";
   $output .= TXT_WPSC_PRODUCTNAME.": ";
   $output .= "            </td>\n\r";
-  $output .= "            <td class='itemformcol'>\n\r";
+*/
+  $output .= "            <td colspan='2' class='itemfirstcol'>\n\r";
   
 	$output .= "        <div class='admin_product_name'>\n\r";
-  $output .= "          <input  size='30' type='text' class='text'  name='title' value='".htmlentities(stripslashes($product['name']), ENT_QUOTES, 'UTF-8')."' />\n\r";
+  $output .= "          <input class='wpsc_product_name' size='30' type='text' class='text'  name='title' value='".htmlentities(stripslashes($product['name']), ENT_QUOTES, 'UTF-8')."' />\n\r";
 	$output .= "				   <a href='#' class='shorttag_toggle'></a>\n\r";
 	$output .= "				   <div class='admin_product_shorttags'>\n\r";
 	$output .= "				     <dl>\n\r";
@@ -89,8 +92,7 @@ function nzshpcrt_getproductform($prodid)
 	$output .= "				       <dt>Buy Now Shortcode:</dt><dd>[buy_now_button={$product['id']}]</dd>\n\r";
 	$output .= "				       <dt>Buy Now PHP:</dt><dd>&lt;?php echo wpsc_buy_now_button({$product['id']}); ?&gt;</dd>\n\r";
 	$output .= "				     </dl>\n\r";
-	$output .= "				     <br clear='both' />\n\r";
-	
+	$output .= "				     <br clear='both' />\n\r";	
 	$output .= "				   </div>\n\r";
 	$output .= "        </div>\n\r";
         
@@ -99,34 +101,47 @@ function nzshpcrt_getproductform($prodid)
   
   
   $output .= "          <tr>\n\r";
-  $output .= "            <td class='itemfirstcol'>\n\r";
-  $output .="<abbr alt='".TXT_WPSC_SKU_FULL."' title='". TXT_WPSC_SKU_FULL."' >".TXT_WPSC_SKU."</abbr>";
+  $output .= "            <td  class='skuandprice'>\n\r";
+  $output .= TXT_WPSC_SKU_FULL." :<br />";
+/*
   $output .= "            </td>\n\r";
   $output .= "            <td class='itemformcol'>\n\r";
+*/
   $sku = get_product_meta($product['id'], 'sku');
   $sku = $sku[0];
-  $output .= "<input  size='30' type='text' class='text'  name='productmeta_values[sku]' value='".htmlentities(stripslashes($sku), ENT_QUOTES, 'UTF-8')."' />\n\r";
+  $output .= "<input size='30' type='text' class='text'  name='productmeta_values[sku]' value='".htmlentities(stripslashes($sku), ENT_QUOTES, 'UTF-8')."' />\n\r";
   $output .= "            </td>\n\r";
+  $output .= "<td  class='skuandprice'>";
+  $output .= TXT_WPSC_PRICE." :<br />";
+  $output .= "<input type='text' class='text' size='30' name='price' value='".$product['price']."'>";
+  $output .= "</td>";
   $output .= "          </tr>\n\r";
   
   $output .= "          <tr>\n\r";
-  $output .= "            <td class='itemfirstcol'>\n\r";
+  $output .= "            <td colspan='2'>\n\r";
+/*
   $output .= TXT_WPSC_PRODUCTDESCRIPTION.": ";
   $output .= "            </td>\n\r";
   $output .= "            <td class='itemformcol'>\n\r";
-  $output .= "<textarea name='description' cols='40' rows='8' >".stripslashes($product['description'])."</textarea>";
+*/
+  $output .= "<div id='editorcontainer'>";
+  $output .= "<textarea name='description' class='mceEditor' cols='40' rows='8' >".stripslashes($product['description'])."</textarea>";
+  $output .= "</div>";
   $output .= "            </td>\n\r";
   $output .= "          </tr>\n\r";
   
   $output .= "          <tr>\n\r";
-  $output .= "            <td class='itemfirstcol'>\n\r";
-  $output .= TXT_WPSC_ADDITIONALDESCRIPTION.": ";
+  $output .= "            <td class='itemfirstcol' colspan='2'>\n\r";
+  $output .= "<strong >".TXT_WPSC_ADDITIONALDESCRIPTION." :</strong><br />";
+/*
   $output .= "            </td>\n\r";
   $output .= "            <td class='itemformcol'>\n\r";
-  $output .= "<textarea name='additional_description' cols='40' rows='8' >".stripslashes($product['additional_description'])."</textarea>";
+*/
+
+ $output .= "<textarea name='additional_description' cols='40' rows='8' >".stripslashes($product['additional_description'])."</textarea>";
   $output .= "            </td>\n\r";
   $output .= "          </tr>\n\r";
-    
+ /*    
   $output .= "          <tr>\n\r";
   $output .= "            <td class='itemfirstcol'>\n\r";
   $output .= TXT_WPSC_PRODUCT_TAGS.": ";
@@ -156,6 +171,7 @@ function nzshpcrt_getproductform($prodid)
 
 	$output .= "            </td>\n\r";
 	$output .= "          </tr>\n\r";
+*/
 	if (IS_WP27) {
 		 $output .= "          </table>\n\r";
 	   $output .= "</div></div>";
@@ -165,8 +181,8 @@ function nzshpcrt_getproductform($prodid)
 		$output .= "<tr><td  colspan='2'>";
 	}
 	$order = get_option('wpsc_product_page_order');
-	if ($order == ''){
-		$order=array("price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
+	if (($order == '') || (count($order < 7 ))){
+		$order=array("category_and_tag", "price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
 	}
 	update_option('wpsc_product_page_order', $order);
 	foreach((array)$order as $key => $box) {
@@ -189,53 +205,6 @@ function nzshpcrt_getproductform($prodid)
   		}
 	}
 	
-	/*
-$output .= price_and_stock_box($product);
-	
-	if (!IS_WP27) {
-		$output .= "            </td>\n\r";
-		$output .= "          </tr>\n\r";
-  	}
-  
-	ob_start();
-	do_action('wpsc_product_form', $product['id']);
-	$output .= ob_get_contents();
-	ob_end_clean();
-    
-	if (!IS_WP27) {
-		$output .= "          <tr>\n\r";
-		$output .= "            <td colspan='2'>\n\r";
-	}
-	$output .= variation_box($product);
-
-	if (!IS_WP27){
-		$output .= "</td></tr>";
-		$output .= "    <tr><td colspan='2'>\n\r";
-	}
-	
-	$output .= shipping_box($product);
-
-	if (!IS_WP27) {
-		$output .="</td></tr>";
-		$output .= "<tr><td colspan='2'>";
-	}
-	
-	$output .= advanced_box($product);
-	
-	if (!IS_WP27) {
-		$output.="</td></tr>";
-		
-		$output .= "          <tr class='edit_product_image'>\n\r";
-		$output .= "            <td colspan='2'>\n\r";
-	}
-  	$output .= product_image_box($product);
-	if (!IS_WP27) {
-		$output .="</td></tr>";
-		$output .= "          <tr>\n\r";
-		$output .= "            <td colspan='2'>\n\r";
-	}
-	$output .= product_download_box($product);
-*/
 	if (!IS_WP27) {
 		$output .= "</td></tr>";
 		$output .= "          <tr>\n\r";
@@ -635,9 +604,9 @@ function setting_button(){
 	$output.="<span id='settings_button' style='width:180px;background-color:#f1f1f1;position:absolute; right: 10px; border:1px solid black; display:none;'>";
 	$output.="<ul class='settings_button'>";
 	
-	$output.="<li><a href='?page=wp-shopping-cart/options.php'>".TXT_WPSC_SHOP_SETTINGS."</a></li>";
-	$output.="<li><a href='?page=wp-shopping-cart/getwayoptions.php'>".TXT_WPSC_MONEY_AND_PAYMENT."</a></li>";
-	$output.="<li><a href='?page=wp-shopping-cart/form_fields.php'>".TXT_WPSC_CHECKOUT_PAGE_SETTINGS."</a></li>";
+	$output.="<li><a href='admin.php?page=wp-shopping-cart/options.php'>".TXT_WPSC_SHOP_SETTINGS."</a></li>";
+	$output.="<li><a href='admin.php?page=wp-shopping-cart/options.php#ui-tabs-76'>".TXT_WPSC_MONEY_AND_PAYMENT."</a></li>";
+	$output.="<li><a href='admin.php?page=wp-shopping-cart/options.php#ui-tabs-78'>".TXT_WPSC_CHECKOUT_PAGE_SETTINGS."</a></li>";
 	//$output.="<li><a href='?page=wp-shopping-cart/instructions.php'>Help/Upgrade</a></li>";
 	//$output.="<li><a href='{$redirect_url}'>".TXT_WPSC_LOGIN_TO_GOOGLE_BASE."</a></li>";
 	$output.="</ul>";
@@ -680,7 +649,7 @@ function wpsc_right_now() {
   $replace_values[":pendingcount:"] .= " " . (($replace_values[":pendingcount:"] == 1) ? TXT_WPSC_PENDINGCOUNT_SINGULAR : TXT_WPSC_PENDINGCOUNT_PLURAL);
   $pending_sales_unit = (($replace_values[":pendingcount:"] == 1) ? TXT_WPSC_PENDINGCOUNT_SINGULAR : TXT_WPSC_PENDINGCOUNT_PLURAL);
   
-  $accept_sales = $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."purchase_logs` WHERE `processed` IN ('2')");
+  $accept_sales = $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."purchase_logs` WHERE `processed` IN ('2' ,'3', '4')");
   $accept_sales_unit = (($accept_sales == 1) ? TXT_WPSC_PENDINGCOUNT_SINGULAR : TXT_WPSC_PENDINGCOUNT_PLURAL);
 
   
@@ -691,7 +660,7 @@ function wpsc_right_now() {
 		$output="";	
 		$output.="<div id='dashboard_right_now' class='postbox'>";
 		$output.="	<h3 class='hndle'>";
-		$output.="		<span>"._('Right Now')."</span>";
+		$output.="		<span>"._('Current Month')."</span>";
 		//$output.="		<a class='rbutton' href='admin.php?page=wp-shopping-cart/display-items.php'><strong>".TXT_WPSC_ADDNEWPRODUCT."</strong></a>";
 		$output.="		<br class='clear'/>";
 		$output.="	</h3>";
@@ -710,7 +679,7 @@ function wpsc_right_now() {
 		$output .= ucfirst($product_unit);
 		$output .= "<td>";
 		$output .= "<td class='b'>";
-		$output .= "<a href='?page=wp-shopping-cart/display-logs.php'>".$sales_count."</a>";
+		$output .= "<a href='?page=wp-shopping-cart/display-log.php'>".$sales_count."</a>";
 		$output .= "<td>";
 		$output .= "<td class='last'>";
 		$output .= ucfirst($sales_unit);
@@ -725,7 +694,7 @@ function wpsc_right_now() {
 		$output .= ucfirst($group_unit);
 		$output .= "<td>";
 		$output .= "<td class='b'>";
-		$output .= "<a href='?page=wp-shopping-cart/display-logs.php'>".$pending_sales."</a>";
+		$output .= "<a href='?page=wp-shopping-cart/display-log.php'>".$pending_sales."</a>";
 		$output .= "<td>";
 		$output .= "<td class='last t waiting'>Pending ";
 		$output .= ucfirst($pending_sales_unit);
@@ -734,7 +703,7 @@ function wpsc_right_now() {
 		
 		$output .= "<tr>";
 		$output .= "<td class='first b'>";
-		$output .= "<a href='?page=wp-shopping-cart/display-variations.php'>".$variation_count."</a>";
+		$output .= "<a href='?page=wp-shopping-cart/display_variations.php'>".$variation_count."</a>";
 		$output .= "<td>";
 		$output .= "<td class='t'>";
 		$output .= ucfirst($variation_unit);
@@ -742,7 +711,7 @@ function wpsc_right_now() {
 		$output .= "<td class='b'>";
 		$output .= "<a href='?page=wp-shopping-cart/display-log.php'>".$accept_sales."</a>";
 		$output .= "<td>";
-		$output .= "<td class='last t approved'>Cleared ";
+		$output .= "<td class='last t approved'>Closed ";
 		$output .= ucfirst($accept_sales_unit);
 		$output .= "<td>";
 		$output .= "</tr>";
@@ -866,7 +835,18 @@ function wpsc_packing_slip($purchase_id) {
 			
 			
       echo "<table class='packing_slip'>";
-		
+				
+				echo "<tr>";
+				echo " <th>".TXT_WPSC_QUANTITY." </th>";
+				
+				echo " <th>".TXT_WPSC_NAME."</th>";
+				
+				
+				echo " <th>".TXT_WPSC_PRICE." </th>";
+				
+				echo " <th>".TXT_WPSC_SHIPPING." </th>";
+							
+				echo '</tr>';
 			$endtotal = 0;
 			$all_donations = true;
 			$all_no_shipping = true;
@@ -880,9 +860,12 @@ function wpsc_packing_slip($purchase_id) {
 				$productsql= "SELECT * FROM `".$wpdb->prefix."product_list` WHERE `id`=".$cart_row['prodid']."";
 				$product_data = $wpdb->get_results($productsql,ARRAY_A); 
 			
+			
+			
 				$variation_sql = "SELECT * FROM `".$wpdb->prefix."cart_item_variations` WHERE `cart_id`='".$cart_row['id']."'";
 				$variation_data = $wpdb->get_results($variation_sql,ARRAY_A); 
 				$variation_count = count($variation_data);
+				
 				if($variation_count > 1) {
 					$variation_list = " (";
 					$i = 0;
@@ -903,6 +886,26 @@ function wpsc_packing_slip($purchase_id) {
         } else {
 							$variation_list = '';
         }
+				
+				
+				if($cart_row['donation'] != 1) {
+					$all_donations = false;
+				}
+				if($cart_row['no_shipping'] != 1) {
+					$shipping = $cart_row['pnp'] * $cart_row['quantity'];
+					$total_shipping += $shipping;            
+					$all_no_shipping = false;
+				} else {
+					$shipping = 0;
+				}
+				
+				$price = $cart_row['price'] * $cart_row['quantity'];
+				$gst = $price - ($price  / (1+($cart_row['gst'] / 100)));
+				
+				if($gst > 0) {
+				  $tax_per_item = $gst / $cart_row['quantity'];
+				}
+				
 
 				echo "<tr $alternate>";
 		
@@ -914,6 +917,15 @@ function wpsc_packing_slip($purchase_id) {
 				echo " <td>";
 				echo $product_data[0]['name'];
 				echo $variation_list;
+				echo " </td>";
+				
+				
+				echo " <td>";
+				echo nzshpcrt_currency_display( $price, 1);
+				echo " </td>";
+				
+				echo " <td>";
+				echo nzshpcrt_currency_display($shipping, 1);
 				echo " </td>";
 							
 				echo '</tr>';
@@ -1033,6 +1045,18 @@ function edit_multiple_image_gallery($id) {
     }
   }
   return $output;
+}
+
+
+
+function wpsc_product_item_row() {
+/*
+"<tr class='products'>	<td class='imagecol' style='width: 25%;'>
+<input type='checkbox' value='3' class='deletecheckbox' name='productdelete[]'/><img width='35' height='35' alt='Praying Mantis' title='Drag to a new position' src='http://apps.instinct.co.nz/wp_2.6.5/wp-content/uploads/wpsc/product_images/thumbnails/mantis-3.jpg'/></td><td width='25%'><a onclick='filleditform(3);return false;' href='#'>Praying Mantis</a></td><td id='3'><span class='pricedisplay' id='3' title='Click to edit...'>$32.00</span>            </td><td>
+
+<a href='?page=wp-shopping-cart/display-items.php&amp;catid=1'>Arthropods</a></td>				
+</tr>
+";*/
 }
 
 ?>

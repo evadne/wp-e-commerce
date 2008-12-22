@@ -19,7 +19,9 @@ function topcategorylist() {
 	$options = "";
 	$options .= "<option value='$url'>".TXT_WPSC_ALLCATEGORIES."</option>\r\n";
 	$options .= top_category_options(null, 0, $_GET['catid']);
-	$concat .= "<select name='category' onChange='categorylist(this.options[this.selectedIndex].value)'>".$options."</select>\r\n";
+	//$concat .= "<select name='category' id='category_select' onChange='categorylist(this.options[this.selectedIndex].value);'>".$options."</select>\r\n";
+	$concat .= "<select name='category' id='category_select'>".$options."</select>\r\n";
+	$concat .= "<button class='button' id='submit_category_select'>Filter</button>";
 	return $concat;
 }
 
@@ -686,11 +688,13 @@ if($_POST['submit_action'] == "edit") {
 }
 
 if(is_numeric($_GET['deleteid'])) { 
-  $wpdb->query("DELETE FROM `".$wpdb->prefix."wpsc_productmeta` WHERE `product_id` = '".$_GET['deleteid']."' AND `meta_key` IN ('url_name')");  
-  $wpdb->query("UPDATE `".$wpdb->prefix."product_list` SET  `active` = '0' WHERE `id`='".$_GET['deleteid']."' LIMIT 1");
+  	$wpdb->query("DELETE FROM `".$wpdb->prefix."wpsc_productmeta` WHERE `product_id` = '".$_GET['deleteid']."' AND `meta_key` IN ('url_name')");  
+  	$wpdb->query("UPDATE `".$wpdb->prefix."product_list` SET  `active` = '0' WHERE `id`='".$_GET['deleteid']."' LIMIT 1");
+	product_tag_init();
+	$term = wp_get_object_terms($_GET['deleteid'], 'product_tag');
+	if ($term->errors == '')
+		wp_delete_object_term_relationships($_GET['deleteid'], 'product_tag');
 }
-
-
 
 /*
  * Sort out the searching of the products
@@ -792,9 +796,11 @@ $num_products = $wpdb->get_var("SELECT COUNT(DISTINCT `id`) FROM `".$wpdb->prefi
 		echo "
 			<div id='dashboard-widgets' class='metabox-holder'>";
 	}
+$baseurl = includes_url('js/tinymce');
 ?>
-
-
+<script type="text/javascript" src="<?php echo $baseurl; ?>/tiny_mce.js"></script>
+<script type="text/javascript" src="<?php echo $baseurl; ?>/langs/wp-langs-en.js"></script>
+  <script src="../../wp-includes/js/tinymce/tiny_mce_popup.js" language="javascript" type='text/javascript' ></script>
   <script language='javascript' type='text/javascript'>
   jQuery('.hide-postbox-tog').click( function() {
 	    var box = jQuery(this).val();
@@ -812,7 +818,25 @@ $num_products = $wpdb->get_var("SELECT COUNT(DISTINCT `id`) FROM `".$wpdb->prefi
 	    postboxes.save_state('products');
 	} );
 	
-		
+tinyMCE.init({
+	theme : "advanced",
+	mode : "specific_textareas",
+	width : '100%',
+	height : '194px',
+	skin : 'wp_theme',
+	editor_selector : "mceEditor",
+	plugins : "spellchecker,pagebreak",
+	theme_advanced_buttons1 : "bold,italic,strikethrough,|,bullist,numlist,blockquote,|,justifyleft,justifycenter,justifyright,|,link,unlink,|,pagebreak",
+	theme_advanced_buttons2 : "",
+	theme_advanced_buttons3 : "",
+	theme_advanced_toolbar_location : "top",
+	theme_advanced_toolbar_align : "left",
+	theme_advanced_statusbar_location : "bottom",
+	theme_advanced_resizing : true,
+	content_css : WPSC_URL+"/js/tinymce3/mce.css",
+	theme_advanced_resize_horizontal : false
+});
+
 	
 function conf() {
   var check = confirm("<?php echo TXT_WPSC_SURETODELETEPRODUCT;?>");
@@ -844,11 +868,12 @@ if (function_exists('add_object_page')) {
 }
 ?>
 	<div style="width: 500px;" class="alignleft">
-		<a href='' onclick='return showaddform()' class='add_item_link'><img src='<?php echo WPSC_URL; ?>/images/package_add.png' alt='<?php echo TXT_WPSC_ADD; ?>' title='<?php echo TXT_WPSC_ADD; ?>' />&nbsp;<span><?php echo TXT_WPSC_ADDPRODUCT;?></span></a>
+	  <?php //onclick='return showaddform()' ?>
+		<a href='admin.php?page=wp-shopping-cart/display-items.php' class='add_item_link'><img src='<?php echo WPSC_URL; ?>/images/package_add.png' alt='<?php echo TXT_WPSC_ADD; ?>' title='<?php echo TXT_WPSC_ADD; ?>' />&nbsp;<span><?php echo TXT_WPSC_ADDPRODUCT;?></span></a>
 		<?php
 		do_action('wpsc_admin_products_tablenav');
 		?>
-		
+		<?php echo topcategorylist();?>
 	</div>
 	
 	
@@ -867,7 +892,7 @@ $num = 0;
 
 
 echo "    <table id='productpage'>\n\r";
-echo "      <tr><td style='padding: 0px;'>\n\r";
+echo "      <tr><td style='padding-right: 15px;'>\n\r";
 if (function_exists('add_object_page')){
 	echo "<div class='postbox'>";
 	echo "<h3 class='hndle'>".TXT_WPSC_SELECT_PRODUCT."</h3>";
@@ -899,19 +924,23 @@ if(($num_products > 20) || ($search_string != '')) {
 }
 
 if (function_exists('add_object_page')){
-	echo topcategorylist();
+	//echo topcategorylist();
 }else{
 echo "          <tr class='selectcategory'>\n\r";
-echo "            <td colspan='3'>\n\r";
+echo "            <td colspan='4'>\n\r";
 echo TXT_WPSC_PLEASESELECTACATEGORY.": ";
 echo "            </td>\n\r";
+/*
 echo "            <td colspan='1'>\n\r";
 echo "<div>\n\r";
 echo topcategorylist();
+*/
 //echo "<div style='float: right; width: 160px;'>". topcategorylist() ."</div>";
+/*
 echo "</div>\n\r";
 
 echo "            </td>\n\r";
+*/
 echo "          </tr>\n\r";
 }
 if(is_numeric($_GET['catid'])) {
@@ -995,7 +1024,7 @@ if($product_list != null)
     	echo "	<div class='itemHeader pli_img'>\n\r";
 		echo "<a class='noline' title='Drag to a new position'>";
 	} else {
-		echo "	<td style='width: 25%;' class='imagecol'>\r\n";
+		echo "	<td style='width: 20%;' class='imagecol'>\r\n";
 	}
 	echo "<input type='checkbox' name='productdelete[]' class='deletecheckbox' value='{$product['id']}'>";
 	if(($product['thumbnail_image'] != null) && file_exists(WPSC_THUMBNAIL_DIR.$product['thumbnail_image'])) { // check for custom thumbnail images
@@ -1010,7 +1039,7 @@ if($product_list != null)
   if(is_numeric($_GET['catid'])){ 
     echo "	</div>\n\r";
 	} else {
-	echo "</td><td width='25%'>";
+	echo "</td><td width='40%'>";
 	}
     
 	if(is_numeric($_GET['catid'])) { 
@@ -1030,6 +1059,7 @@ if($product_list != null)
 	if(is_numeric($_GET['catid'])){
 		echo "            </div>\n\r";    
 	} else {
+		echo '<div class="wpsc-row-actions"><span class="edit"><a title="Edit this post" style="cursor:pointer;" onclick="filleditform('.$product['id'].');return false;">Edit</a></span> | <span class="delete"><a onclick="if ( confirm(\'Are you sure to delete this product?\') ) { return true;}return false;" href="?page=wp-shopping-cart/display-items.php&deleteid='.$product['id'].'" title="Delete this product">Delete</a></span> | <span class="view"><a target="_blank" rel="permalink" title=\'View "'.$product['name'].'"\' href="'.wpsc_product_url($product['id']).'">View</a></span> | <span class="view"><a rel="permalink" title=\'Duplicate "'.$product['name'].'"\' href="?page=wp-shopping-cart/display-items.php&duplicate='.$product['id'].'">Duplicate</a></span></div>';
 		echo "</td><td id=".$product['id'].">";
 	}
 		if(is_numeric($_GET['catid'])){ 
@@ -1048,7 +1078,7 @@ if($product_list != null)
 				if($i > 0) {
 					echo "<br />";
 				}
-				echo "<a href='?page=".$_GET['page']."&amp;catid=".$category_row['id']."'>".stripslashes($category_row['name'])."</a>";
+				echo "<a class='category_link' href='?page=".$_GET['page']."&amp;catid=".$category_row['id']."'>".stripslashes($category_row['name'])."</a>";
 				$i++;
 			}        
 		}
@@ -1126,7 +1156,11 @@ if($product_list != null)
 	
 	
   }
-
+$product_data_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}product_list WHERE active='1'");
+if (isset($_GET['catid'])) {
+	if (($product_data_count >= 1) && (IS_WP27))
+ 		echo "</table>";
+}
 if (function_exists('add_object_page')){
 	echo "</div>"; //id major-publishing-actions ends
 	echo "</div>"; //class inside ends
@@ -1134,27 +1168,24 @@ if (function_exists('add_object_page')){
 } else {
 	echo "</table>\n\r";
 }
+//No product closing table fix
+
+if (($product_data_count < 1)&& (IS_WP27)){
+	echo "</table>";	
+}
+
 //First column ends here
 echo "      </td><td class='secondcol'>\n\r";
-echo "<form method='POST' enctype='multipart/form-data' name='editproduct$num'>";
-
-
-/*
-echo "        <table class='producttext'>\n\r"; 
-
-
-echo "        </table>\n\r";
-*/
-echo "        <div id='formcontent' style='width:100%;'>\n\r";
-echo "        </div>\n\r";
+echo "<form method='POST' enctype='multipart/form-data' class='edititem' name='editproduct$num'>";
+echo "<div id='formcontent' style='width:100%;'>";
+echo "</div>";
 echo "</form>";
 echo "</div>";
 ?>
-
 <form method='POST' enctype='multipart/form-data' class='additem'>
 <?php
 if (function_exists('add_object_page')){
-	echo "        <div id='additem'>";
+	echo "<div id='additem'>";
 	echo "        <div id='additem27' class='postbox'>";
 	echo "<h3 class='hndle'>". TXT_WPSC_PRODUCTDETAILS." ".TXT_WPSC_ENTERPRODUCTDETAILSHERE."</h3>";
 	
@@ -1163,24 +1194,17 @@ if (function_exists('add_object_page')){
 	echo "<div class='categorisation_title'><strong class='form_group'>". TXT_WPSC_PRODUCTDETAILS." <span>".TXT_WPSC_ENTERPRODUCTDETAILSHERE."</span></strong></div>";
 }
 ?>
-<!-- <div class="categorisation_title"><strong class="form_group"><?php echo TXT_WPSC_PRODUCTDETAILS;?> <span><?php echo TXT_WPSC_ENTERPRODUCTDETAILSHERE;?></span></strong></div> -->
-
   <?php wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false ); ?>
-  
 <?php
 	if(function_exists('add_object_page')) {
 		echo "<div class='inside'>";
 	}
-?>
-  <table class='additem'>
+?><table class='additem' style='width:100%;'>
     <tr>
-      <td class='itemfirstcol'>
-        <?php echo TXT_WPSC_PRODUCTNAME;?>:
-      </td>
-      <td class='itemformcol'>
+      <td colspan="2" class='itemfirstcol'>
       
         <div class='admin_product_name'>
-					<input size='30' type='text' name='name' value='' class='text' />
+					<input size='40' class='wpsc_product_name' type='text' name='name' value='' class='text'/>
 					<a href='#' class='shorttag_toggle'></a>					
 					<div class='admin_product_shorttags'>
 					<?php echo TXT_WPSC_NO_SHORTCODE;?>
@@ -1190,59 +1214,32 @@ if (function_exists('add_object_page')){
       </td>
     </tr>
     <tr>
-      <td class='itemfirstcol'>
-        <abbr alt='<?php echo TXT_WPSC_SKU_FULL; ?>' title='<?php echo TXT_WPSC_SKU_FULL; ?>' ><?php echo TXT_WPSC_SKU;?></abbr>:
-      </td>
-      <td class='itemformcol'>
+      <td>
+        <strong><?php echo TXT_WPSC_SKU_FULL;?>:</strong> <br />
         <input size='30' type='text' name='productmeta_values[sku]' value='' class='text' />
       </td>
-    </tr>
-    <tr>
-      <td class='itemfirstcol'>
-        <?php echo TXT_WPSC_PRODUCTDESCRIPTION;?>:
-      </td>
-      <td class='itemformcol'>
-        <textarea name='description' cols='40' rows='8'></textarea><br />
+      <td >
+      	<strong><?php echo TXT_WPSC_PRICE;?> :</strong> <br />
+        <input size='30' type='text' name='price' value='' class='text' />
       </td>
     </tr>
     <tr>
-      <td class='itemfirstcol'>
-       <?php echo TXT_WPSC_ADDITIONALDESCRIPTION;?>:
-      </td>
-      <td class='itemformcol'>
-        <textarea name='additional_description' cols='40' rows='8'></textarea><br />
-      </td>
-    </tr>
-    <tr>
-      <td class='itemfirstcol'>
-       <?php echo TXT_WPSC_PRODUCT_TAGS;?>:
-      </td>
-      <td class='itemformcol'>
-        <input type='text' class='text' name='product_tag' id='product_tag'><br /><span class='small_italic'>Seperate with commas</span>
+      <td colspan="2" class='itemfirstcol'>
+      	<div id='editorcontainer'>
+        	<textarea name='description' class='mceEditor' id='description' cols='50' rows='10'></textarea>
+      	</div>
       </td>
     </tr>
     <tr>
-      <td class='itemfirstcol'>
-			<?php echo TXT_WPSC_CATEGORISATION; ?>
-      </td>
-      <td>
-        <?php
-         $categorisation_groups =  $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}wpsc_categorisation_groups` WHERE `active` IN ('1')", ARRAY_A);
-					foreach($categorisation_groups as $categorisation_group){
-					  $category_count = $wpdb->get_var("SELECT COUNT(*) FROM `{$wpdb->prefix}product_categories` WHERE `group_id` IN ('{$categorisation_group['id']}')");
-					  if($category_count > 0) {
-							echo "<p>";
-						  $category_group_name = str_replace("[categorisation]", $categorisation_group['name'], TXT_WPSC_PRODUCT_CATEGORIES);
-						  echo "<strong>".$category_group_name.":</strong><br>";
-						  echo categorylist($categorisation_group['id'], false, 'add_');
-						  echo "</p>";
-						}
-					}
-				?>
+      <td colspan="2" class='itemfirstcol'>
+      	<strong><?php echo TXT_WPSC_ADDITIONALDESCRIPTION;?>:</strong> <br />
+        <textarea name='additional_description' cols='40' rows='8'></textarea>
       </td>
     </tr>
+ 
    
 <?php
+
 	if(function_exists('add_object_page')){
 		echo "</table>
    </div></div>
@@ -1256,9 +1253,8 @@ if (function_exists('add_object_page')){
 		echo "<div id='normal-sortables' class='meta-box-sortables'>";
 	}
 	$order = get_option('wpsc_product_page_order');
-	//echo "<pre>".print_r($order,true)."</pre>";
-	if (($order == '') || ($order[0]=='')){
-		$order=array("price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
+	if (($order == '') || ($order[0]=='') || (count($order) < 7)){
+		$order=array("category_and_tag", "price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
 	}
 	foreach((array)$order as $key => $box) {
 		$box_function_name = $box."_box";

@@ -4,6 +4,8 @@ class usps {
 	function usps () {
 		$this->internal_name = "usps";
 		$this->name="USPS";
+		$this->is_external=true;
+		$this->requires_curl=true;
 		return true;
 	}
 	
@@ -61,7 +63,16 @@ class usps {
 	}
 	
 	function getQuote() {
-		global $wpdb;
+		global $wpdb, $wpsc_usps_quote;
+		if(isset($wpsc_usps_quote) && (count($wpsc_usps_quote)> 0)) {
+		  return $wpsc_usps_quote;
+		}
+    if(isset($_POST['zipcode'])) {
+      $zipcode = $_POST['zipcode'];      
+      $_SESSION['wpsc_zipcode'] = $_POST['zipcode'];
+    } else if(isset($_SESSION['wpsc_zipcode'])) {
+      $zipcode = $_SESSION['wpsc_zipcode'];
+    }
 		$dest = $_SESSION['delivery_country'];
 		$weight = shopping_cart_total_weight();
 		$pound = floor($weight);
@@ -104,7 +115,7 @@ class usps {
 				'<Service>' . $key . '</Service>' .
 				$FirstClassMailType .
 				'<ZipOrigination>' . get_option("base_zipcode") . '</ZipOrigination>' .
-				'<ZipDestination>' . $_POST['zipcode'] . '</ZipDestination>' .
+				'<ZipDestination>' . $zipcode . '</ZipDestination>' .
 				'<Pounds>' . $pound . '</Pounds>' .
 				'<Ounces>' . $ounce . '</Ounces>' .
 				'<Container>' . $container . '</Container>' .
@@ -160,7 +171,7 @@ class usps {
 		curl_setopt($ch, CURLOPT_URL, $url); 
 		curl_setopt($ch, CURLOPT_NOPROGRESS, 1); 
 		curl_setopt($ch, CURLOPT_VERBOSE, 1); 
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1); 
+		@ curl_setopt($ch, CURLOPT_FOLLOWLOCATION,1); 
 		curl_setopt($ch, CURLOPT_TIMEOUT, 120); 
 		curl_setopt($ch, CURLOPT_USERAGENT, 'osCommerce'); 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
@@ -198,6 +209,9 @@ class usps {
 					$service = $regs[1];
 					$postage = ereg('<Rate>(.*)</Rate>', $response[$i], $regs);
 					$postage = $regs[1];
+					if($postage <= 0) {
+					  continue;
+					}
 					$rates[] = array($service => $postage);
 					if ($transit) {
 						switch ($service) {
@@ -246,6 +260,7 @@ class usps {
 					}
 				}
 			}
+			$wpsc_usps_quote = $rates;
 			return $rates;
 		} else {
 			if (ereg('<Error>', $response[0])) {
@@ -253,7 +268,7 @@ class usps {
 				$number = $regs[1];
 				$description = ereg('<Description>(.*)</Description>', $response[0], $regs);
 				$description = $regs[1];
-				return array('error' => $number . ' - ' . $description);
+				//return array('error' => $number . ' - ' . $description);
 			} else {
 				$body = $response[0];
 				$services = array();
@@ -283,7 +298,7 @@ class usps {
 						$time = preg_replace('/Weeks$/', 'Weeks',$time);
 						$time = preg_replace('/Days$/', 'Days', $time);
 						$time = preg_replace('/Day$/', 'Day', $time);
-						if( !in_array($service, $allowed_types) ) continue;
+						if( !in_array($service, $allowed_types) || ($postage < 0) ) continue;
 						$rates[] = array($service => $postage);
 						if ($time != '') $transittime[$service] = ' (' . $time . ')';
 					}
@@ -291,6 +306,7 @@ class usps {
 				$uspsQuote=$rates;
 			}
 		}
+		$wpsc_usps_quote = $rates;
 		return $uspsQuote;
 	}
 }

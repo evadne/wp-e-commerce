@@ -64,11 +64,12 @@ function transaction_results($sessionid, $echo_to_screen = true, $transaction_id
 				$link = "";
 				$product_data = $wpdb->get_row("SELECT * FROM `{$wpdb->prefix}product_list` WHERE `id`='{$row['prodid']}' LIMIT 1", ARRAY_A) ;
 				if($product_data['file'] > 0) {
-			
+				
 					if($purchase_log['email_sent'] != 1) {
 						$wpdb->query("UPDATE `{$wpdb->prefix}download_status` SET `active`='1' WHERE (`fileid` = '{$product_data['file']}' OR `cartid` = '{$row['id']}' ) AND `purchid` = '{$purchase_log['id']}'");
 					}
 					if (($purchase_log['processed'] >= 2)) {
+					  //echo "SELECT * FROM `".$wpdb->prefix."download_status` WHERE `active`='1' AND `purchid`='".$purchase_log['id']."' AND (`cartid` = '".$row['id']."' OR (`cartid` IS NULL AND `fileid` = '{$product_data['file']}') ) AND `id` NOT IN ('".implode("','",$previous_download_ids)."') LIMIT 1";
 						$download_data = $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."download_status` WHERE `active`='1' AND `purchid`='".$purchase_log['id']."' AND (`cartid` = '".$row['id']."' OR (`cartid` IS NULL AND `fileid` = '{$product_data['file']}') ) AND `id` NOT IN ('".implode("','",$previous_download_ids)."') LIMIT 1",ARRAY_A);
 						
 						if($download_data != null) {
@@ -181,8 +182,10 @@ function transaction_results($sessionid, $echo_to_screen = true, $transaction_id
 					}
 				}
 				//$wpdb->query("UPDATE `".$wpdb->prefix."download_status` SET `active`='1' WHERE `fileid`='".$product_data['file']."' AND `purchid` = '".$purchase_log['id']."' LIMIT 1");
-				if (!isset($_SESSION['quote_shipping']))
-					$total_shipping = nzshpcrt_determine_base_shipping($total_shipping, $shipping_country);
+				//if (!isset($_SESSION['quote_shipping']))
+					//$total_shipping = nzshpcrt_determine_base_shipping($total_shipping, $shipping_country);
+			  $total_shipping += $purchase_log['base_shipping'];
+					
 				$total = (($total+$total_shipping) - $purchase_log['discount_value']);
 			// $message.= "\n\r";
 				$product_list.= "Your Purchase No.: ".$purchase_log['id']."\n\r";
@@ -228,9 +231,9 @@ function transaction_results($sessionid, $echo_to_screen = true, $transaction_id
 					if($purchase_log['processed'] < 2) {
 						$payment_instructions = strip_tags(get_option('payment_instructions'));
 						$message = TXT_WPSC_ORDER_PENDING . "\n\r" . $payment_instructions ."\n\r". $message;
-						mail($email, TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED, nl2br($message), "From: ".get_option('return_email')."");
+						mail($email, TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED, $message, "From: ".get_option('return_email')."");
 					} else {
-						mail($email, TXT_WPSC_PURCHASERECEIPT, nl2br($message), "From: ".get_option('return_email')."");
+						mail($email, TXT_WPSC_PURCHASERECEIPT, $message, "From: ".get_option('return_email')."");
 					}
 				}
 				$report_user = TXT_WPSC_CUSTOMERDETAILS."\n\r";

@@ -327,6 +327,24 @@ if($_POST['do_not_use_shipping'] == 1) {
 			update_option('display_variations', 0);
     }
     
+    if($_POST['display_description'] == 1) {
+      update_option('display_description', 1);
+		} else {
+			update_option('display_description', 0);
+    }
+    
+    if($_POST['display_addtocart'] == 1) {
+      update_option('display_addtocart', 1);
+		} else {
+			update_option('display_addtocart', 0);
+    }
+    
+    if($_POST['display_moredetails'] == 1) {
+      update_option('display_moredetails', 1);
+		} else {
+			update_option('display_moredetails', 0);
+    }
+    
     if($_POST['show_images_only'] == 1) {
       update_option('show_images_only', 1);
 		} else {
@@ -369,7 +387,13 @@ if($_POST['do_not_use_shipping'] == 1) {
 	} else {
 		update_option('wpsc_category_description', 'false');
 	}
-
+	
+	if(is_numeric($_POST['wpsc_page_number_position'])) {
+		update_option('wpsc_page_number_position', (int)$_POST['wpsc_page_number_position']);
+	} else {
+		update_option('wpsc_page_number_position', 1);
+	}
+	
 	if($_POST['shipwire'] == 1) {
 		update_option('shipwire', 1);
 	} else {
@@ -392,7 +416,7 @@ if($_POST['do_not_use_shipping'] == 1) {
 	}
 
 	
-	do_action('wpsc_save_theme_options', null);
+	
 	echo "<div class='updated'><p align='center'>".TXT_WPSC_THANKSAPPLIED."</p></div>";
 }
     
@@ -972,6 +996,21 @@ if($_GET['clean_categories'] == 'true') {
 									} else {
 										$display_variations = '';
 									}
+									if(get_option('display_description') == 1) {
+										$display_description = "checked='true'";
+									} else {
+										$display_description = '';
+									}
+									if(get_option('display_addtocart') == 1) {
+										$display_addtocart = "checked='true'";
+									} else {
+										$display_addtocart = '';
+									}
+									if(get_option('display_moredetails') == 1) {
+										$display_moredetails= "checked='true'";
+									} else {
+										$display_moredetails = '';
+									}
 									?>
 									<select name='product_view' onchange="toggle_display_options(this.options[this.selectedIndex].value)">
 									<option value='default' <?php echo $product_view1; ?>><?php echo TXT_WPSC_DEFAULT;?></option>
@@ -1011,7 +1050,14 @@ if($_GET['clean_categories'] == 'true') {
 											<input type='checkbox' value='1' name='show_images_only' id='show_images_only' <?php echo $show_images_only_value;?> />
 											<label for='show_images_only'><?php echo TXT_SHOW_IMAGES_ONLY;?></label><br />
 											<input type='checkbox' value='1' name='display_variations' id='display_variations' <?php echo $display_variations;?> />
-											<label for='display_variations'><?php echo TXT_DISPLAY_VARIATIONS;?></label>
+											<label for='display_variations'><?php echo TXT_DISPLAY_VARIATIONS;?></label><br>
+											<input type='checkbox' value='1' name='display_description' id='display_description' <?php echo $display_description;?> />
+											<label for='display_description'><?php echo TXT_DISPLAY_DESCRIPTION;?></label><br />
+											<input type='checkbox' value='1' name='display_addtocart' id='display_addtocart' <?php echo $display_addtocart;?> />
+											<label for='display_addtocart'><?php echo TXT_DISPLAY_ADDTOCART;?></label><br />
+											<input type='checkbox' value='1' name='display_moredetails' id='display_moredetails' <?php echo $display_moredetails;?> />
+											<label for='display_moredetails'><?php echo TXT_DISPLAY_MOREDETAILS;?></label>
+
 										</div>
 									</td>
 								</tr>
@@ -1029,10 +1075,7 @@ if($_GET['clean_categories'] == 'true') {
 									?>
 									</td>
 								</tr>
-								<?php
-								do_action('wpsc_theme_options', null);
-								?>
-
+								
  
 								<tr>
 									<th scope="row">
@@ -1614,7 +1657,17 @@ if($_GET['clean_categories'] == 'true') {
 									</td>
 								</tr>
 								
-
+								<tr>
+									<th scope="row">
+										<?php echo TXT_WPSC_PAGE_NUMBER_POSITION;?>:
+									</th>
+									<td>
+										<input type='radio' value='1' name='wpsc_page_number_position' id='wpsc_page_number_position1' <?php if (get_option('wpsc_page_number_position') == 1) { echo "checked='true'"; } ?> /><label for='wpsc_page_number_position1'>Top</label>&nbsp;
+										<input type='radio' value='2' name='wpsc_page_number_position' id='wpsc_page_number_position2' <?php if (get_option('wpsc_page_number_position') == 2) { echo "checked='true'"; } ?> /><label for='wpsc_page_number_position2'>Bottom</label>&nbsp;
+										<input type='radio' value='3' name='wpsc_page_number_position' id='wpsc_page_number_position3' <?php if (get_option('wpsc_page_number_position') == 3) { echo "checked='true'"; } ?> /><label for='wpsc_page_number_position3'>Both</label>
+										<br />
+									</td>
+								</tr>   
 							</table> 
 							
 							<?php
@@ -1733,6 +1786,7 @@ if($_GET['clean_categories'] == 'true') {
 						
 						<div id="options_admin">
 						  <h2><?php echo TXT_WPSC_OPTIONS_ADMIN_HEADER; ?></h2>
+						  
 							<?php
 							/* here start the admin options */						  
 						  ?>

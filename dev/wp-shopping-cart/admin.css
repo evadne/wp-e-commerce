@@ -124,6 +124,7 @@ table#productpage tr td.secondcol{
 }
 
 table#itemlist{
+	min-width: 350px;
 	width: 100%;
 	border-collapse:collapse;
 	border:1px solid #bbb;
@@ -138,8 +139,9 @@ table#itemlist tr td{text-align: left; padding:10px 5px 8px 5px; }
 table#itemlist tr.products{border-left:1px solid #bbb;border-right:1px solid #bbb;}
 table#itemlist tr.productsalt{background-color:#f3f3f3;border-left:1px solid #bbb;border-right:1px solid #bbb;}
 */
-table#itemlist tr.products td{text-align: left;padding:0px; vertical-align: middle ; border-top:1px solid #bbb;border-bottom:1px solid #bbb;}
-table#itemlist tr.productsalt td{text-align: left;padding:0px; vertical-align: middle ; border-top:1px solid #bbb;border-bottom:1px solid #bbb;}
+
+table#itemlist tr.products td{text-align: left;padding-top:8px; vertical-align: top ; border-top:1px solid #bbb;border-bottom:1px solid #bbb;}
+table#itemlist tr.productsalt td{text-align: left;padding-top:8px; vertical-align: top ; border-top:1px solid #bbb;border-bottom:1px solid #bbb;}
 
 table#itemlist tr td.imagecol{ padding: 4px;}
  
@@ -193,15 +195,15 @@ div#edititem27{ display: none; width: 586px; }
 div#productform table tr td{ height: 11px !important; }
 div#productform table tr.settings_row td{ height: 0px !important; }
  
-div#additem{ display: block;border: 1px solid #dadada; border-top: none;}
+div#additem{ display: block;border: 1px solid #dadada;}
 
 /* div#additem table tr td{ height: 11px; } */
 
 div#productform table.additem td.itemfirstcol, div#additem table.additem td.itemfirstcol{ width: 120px !important; padding-left:8px; padding-top: 5px; vertical-align: top; }
 
 div#productform td.itemfirstcol{ width: 120px !important; padding-left:8px; vertical-align: top; }
-div#additem table.additem input.text,div#additem table.additem textarea{margin-right:6px;width:350px;border:1px solid #bbb;}
-div#productform input.text,div#productform textarea, div#additem input.text,div#additem textarea{margin-right:6px;width:350px;border:1px solid #bbb;}
+3
+div#productform input.text,div#productform textarea, div#additem input.text,div#additem textarea{margin-right:6px;width:250px;border:1px solid #bbb;}
 input.image_resize{ position: relative; top: 4px; }
  
 #loadingindicator_span{ visibility: hidden; }
@@ -588,7 +590,7 @@ border-right:1px solid #bbb;
 
 .groupItem{
  border-top:1px solid #bbb;
- width:385px;
+width:350px;
  height:35px;
  clear: both;
 /*  margin-left:-6px; */
@@ -1210,29 +1212,40 @@ div.admin_product_name input.text{
 
 div.admin_product_name a.shorttag_toggle {
 	background:#FFFFFF url(images/info_icon.jpg) no-repeat scroll 5px 4px;
-	border-bottom:1px solid #BBBBBB;
-	border-right:1px solid #BBBBBB;
-	border-top:1px solid #BBBBBB;
+/* 	border-bottom:1px solid #BBBBBB; */
+/* 	border-right:1px solid #BBBBBB; */
+/* 	border-top:1px solid #BBBBBB; */
 	display:block;
 	float:left;
 	height:17px;
 	padding:3px;
 	width:18px;
+	margin-top:1px;
 }
 
 div.admin_product_name a.shorttag_toggle.toggled {
 	background:#FFFFFF url(images/plus_icon.jpg) no-repeat scroll 5px 4px;
 }
 
+form.additem input.wpsc_product_name, form.edititem input.wpsc_product_name{
+/*
+	-moz-border-radius-topright:0px;
+	-moz-border-radius-bottomright:0px;
+*/
+	margin-bottom:0px;
+	float:left;
+	width:85%;
+}
+
 div.admin_product_name div.admin_product_shorttags {
-  width: 344px;
+  width: 328px;
   clear: both;
   padding: 6px;
   font-size: 8pt;
   margin: 0px 0px 0px 1px !important;
-	border-left:1px solid #BBBBBB;
-	border-right:1px solid #BBBBBB;
-	border-bottom:1px solid #BBBBBB;
+/* 	border-left:1px solid #BBBBBB; */
+/* 	border-right:1px solid #BBBBBB; */
+/* 	border-bottom:1px solid #BBBBBB; */
   display: none;
 }
 
@@ -1729,7 +1742,7 @@ table.packing_slip {
   width: 500px
 }
 
-table.packing_slip tr td  {
+table.packing_slip tr td, table.packing_slip tr th  {
   border: 1px solid black;
   padding: 6px 6px 6px 6px;
 }
@@ -1923,3 +1936,17 @@ h3.hndle {
 	font-size:12px !important;
 	padding:6px 7px !important;
 }
+
+.wpsc-row-actions {
+	font-size: 0.8em;
+	visibility: hidden;
+}
+
+#editorcontainer {
+	padding:0px;
+}
+
+label.variation_checkbox {
+  display: block;
+}
+
