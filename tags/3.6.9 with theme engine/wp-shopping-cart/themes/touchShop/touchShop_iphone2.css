@@ -1,0 +1,594 @@
+/*
+Theme Name: touchShop 1 Theme
+Theme URI: http://dev.xiligroup.com
+Description: touchShop Style Theme by GM and MS
+Version: 0.1
+Author: MSC
+Author URI: http://dev.xiligroup.com
+*/
+ 
+/*
+ * this .css will be used when iPod or iPhone 1.x will be used by surfers..
+ * 081004 - contain unused - need to be cleaned...
+ */
+
+.wpsc_container{
+  position: relative;
+/*   //border: 1px solid red; */
+  width: auto;
+  } 
+ 
+/*
+ * product default display styling
+ */
+div.productdisplay {
+ 	position:relative;
+    font-size:13px; /*reference size*/
+    font-family: inherit;
+ 	top:0px;
+ 	left: 0px;
+	margin: 5px 0 0;
+	border-collapse: collapse;
+ 	//width: 50%;
+ 	text-align: left !important;
+ 	overflow:auto;
+    
+}
+
+span#loadingindicator {
+  display: none;
+}
+
+strong.cattitles{
+ display: none;}
+
+/*from default in wpsc.php*/
+div.default_product_display div.textcol{
+			margin-left: 90px !important;
+			min-height: 80px;
+			//width: 320px;
+		}
+			
+			
+div.default_product_display  div.textcol div.imagecol{
+			position:absolute;
+			top:0px;
+			left: 0px;
+			margin-left: -90px !important;
+		}
+		
+div.default_product_display  div.textcol div.imagecol a img {
+      width: 80px;
+      height: 80px;
+    }
+/**/
+
+div.imagecol{
+	position:relative;
+	
+	padding-right: 5px;
+	margin-right: 5px;
+	border: 0px solid #005fFF;
+	vertical-align: top;
+	overflow:auto;
+ }
+  
+div.productdisplay div.imagecol img{
+
+	border:1px solid #F2F2F2;
+	padding:2px;
+	/**/
+ }
+
+div.productdisplay div.textcol{
+ position:relative;
+ 
+ top:0px;
+
+ padding: 0px;
+ margin: 0px 0 10px;
+
+ //width: 00px; /* */
+ text-align: left !important;
+ border: 0px solid #00f000;
+ 
+ }
+div.productdisplay div.single_product_display div.textcol{width: 340px; margin: 0px;}
+div.single_product_display div.textcol div.imagecol {
+	position:absolute !important;
+	//float:right !important;
+	margin:5px 0 0 0 !important;
+ 	width:160px !important;
+ 	top:40px;
+ 	left:68px;
+ 	//z-index:1;
+}
+div.single_product_display div.textcol div.imagecol img {width:160px !important; padding:0 ; border:none;
+z-index:1;}
+
+div.single_product_display div.textcol {
+	margin-left:0px !important;
+
+}
+
+div.producttext{
+ color: #232323;
+ font-size: 100%;
+ width: auto;
+ text-align: left !important; 
+ margin: 0px 20px 00px 0px;
+ //border: 1px solid #F0f000;
+}
+div.producttext h2.prodtitles {font-size:130%;}
+div.single_product_display div.textcol div.producttext { 
+ min-height:210px;
+ font-size: 90%;
+ //border: 1px solid #F0f000;
+ position:relative;
+ }
+div.single_product_display div.textcol div.producttext h2.prodtitles { margin:0px 10px 160px ; 
+font-size:160%; background: #666; height:34px; color:#fff; padding:8px 120px 0 15px;
+line-height:120%;
+-webkit-border-radius:17px;
+
+}
+ 
+ div.producttext strong{
+ color: #555;
+ }
+ 
+ span.additional{
+ color:#232323;
+line-height:185%;
+font-weight:bold;
+ }
+
+span.additional_description_span {display:block;
+ background: transparent url(images/starl.gif) center;
+ height:25px;
+ width:25px;
+ -webkit-border-radius:9px;
+ text-align:center;
+ text-weight:bold;
+ color: #DDD;
+ top:30px;
+ right:5px;
+ position:absolute;	
+}
+
+span.additional_description_span a, span.additional_description_span a:visited {color: #aaa;}
+
+span.single_additional_description{
+	margin:15px 0 5px 20px;
+	
+}
+p.single_additional_description{
+	margin:5px 0 5px 20px;
+	font-size: 90%;
+}
+
+span.price {
+	background-color:#9AC15C;
+	color:#FFFFFF;
+	margin-left:5px;
+	padding-left:2px;
+	padding-right:2px;
+}
+
+a.wpsc_product_title{
+ color:#44555f;
+ border-bottom: 1px solid #c8d2de;
+ display: block;
+ font-size: 100%;
+ margin: 0px 0px 5px 0px;
+ //border:1px blue solid;
+ 
+ } 
+ 
+a.wpsc_product_title:hover{
+ text-decoration: none;
+ } 
+ 
+div.breadcrumb {
+  margin: 0px 0px 10px 0px;
+}
+ 
+p.wpsc_description{
+ margin: 0px 0px 6px 0px;
+ 
+}
+div.single_product_display div.textcol div.producttext p.description{
+ margin: 0px 0px 0px 10px;
+ padding : 5px 0px 5px 10px;
+ display:block;
+ width:300px;
+ font-size:120%;
+ z-index:4;
+} 
+
+p.wpsc_variation_forms {display:block;
+	margin: 0 0 5px 5px;
+	display:block;
+	font-size:90%;
+	text-decoration:underline;
+	}
+p.xili_variation_forms {color:red;}	
+	 
+div.single_product_display div.textcol div.producttext p.wpsc_variation_forms {
+	margin: 0 0 5px 20px;
+	display:block;
+	font-size:120%;
+	text-decoration:none;
+	}
+p.wpsc_variation_forms label{
+  text-transform: uppercase;
+  }
+p.wpsc_variation_forms select{
+  font-size:120%;
+  }
+/* need verification */  
+p.wpsc_extras_forms label{
+ color: #333333;
+ font-size: 70%;
+ font-weight: bold;
+ }
+ 
+p.wpsc_product_price{
+ margin: 10px 0px 10px 0px;
+ color: #333333;
+ font-size: 90%;
+ font-weight: bold;
+ }
+/*single  */
+div.single_product_display div.textcol div.producttext p.wpsc_product_price { 
+position: absolute;
+top:0px;
+right:15px;
+margin:8px 0; padding:0;
+font-size:70%;
+font-weight:normal;
+color:#fff;
+width:110px; 
+text-align:right;
+//border:1px solid red;
+//display:float;
+}
+div.single_product_display div.textcol div.producttext p.wpsc_product_price span.pricedisplay{font-size:16px; font-weight:bold;
+} 
+
+span.special {
+	font-size:80% !important;
+ background:yellow;
+ padding:2px;
+ }
+ 
+span.oldprice {
+ text-decoration: line-through;
+ color: #999;
+ font-size:10px;
+}
+ 
+div.single_product_display span.special{
+ color: #DD0000;
+ font-size:120%;
+ display:block;
+ position: absolute;
+ top:50px;
+ text-decoration:underline !important;
+ }
+div.single_product_display span.oldprice {position:absolute; top:-5px; right:0;} 
+ 
+div.single_product_display span.oldprice,div.single_product_display span.oldprice span.pricedisplay {
+ color:#ff0;
+}
+div.single_product_display span.oldprice span.pricedisplay {font-size: 12px !important;} 
+
+  
+p.wpsc_product_extra_content{
+ margin: 10px 0px 10px 20px;
+ color: #333333;
+ font-size: 80%;
+ font-weight: bold;
+ }
+ 
+ input.wpsc_buy_button {
+/* 	text-indent:-9999px; */
+	//background-image: url(images/lancerachat.gif);
+	border: none;
+	width: 108px;
+	height: 34px;
+	text-align: center;
+	/*  vertical-align: top; */
+	padding: 0px 0px 0px 0px;
+	font-size: 80%;
+	margin-top: 3px;
+	color: #6a6c74;
+	cursor: pointer;
+
+}
+div.single_product_display div.textcol div.producttext input.wpsc_buy_button {
+	width: 130px;
+	height: 34px;
+	border : 0px solid #F00;
+	//left:60px;
+	display:inline;
+	position:relative;
+	-webkit-border-radius:17px;
+	font-size : 100%;
+	margin:0 20px 0 10px;
+	padding:auto 10px auto 10px;
+	}
+div.textcol div.producttext .navisingle {
+display:none;	
+}	
+div.single_product_display div.textcol div.producttext .navisingle {
+	font-size : 160%;
+	margin : 0 0 0 10px;
+	padding: 5px;
+	float:left;
+	display:block;
+	-webkit-tap-highlight-color:#8B0;
+	
+	}
+
+ 
+
+div.single_product_display div.textcol div.producttext .navisinglebanner{
+	width:100%;
+	background-color:#BABABA;
+	border : 0px solid #F00;
+	height:40px;
+	padding:5px 0 0;
+	text-align:right;
+} 
+div.textcol div.producttext #navigeneralbanner{display:none;}
+div.single_product_display div.textcol div.producttext #navigeneralbanner{
+	background-color:#000;
+	display:block;
+	color:#fff;
+	font-size:150%;
+	margin:0;
+	padding:2px 20px 5px;
+	line-height:20px;
+}
+#navigeneralbanner a, #navigeneralbanner a:link {color:#fff;}
+div.single_product_display div.textcol div.producttext #navigeneralbanner img{
+	vertical-align:-25%;
+} 
+span.flexible{display:inline;border : 0px solid #F00; margin:0;padding:0 30px;}
+
+/* styles the additional description */
+span.additional_description{
+display: none;
+}
+
+a.additional_description_link{
+display: inline;
+}
+
+a.additional_description_link img{
+margin-right: 3px;
+}
+
+     
+/*
+ * end default product display styling
+ */ 
+  
+/*
+ * loading indicator styling 
+ */ 
+ 
+#loadingindicator{
+ visibility: hidden; 
+ display:none;
+ font-size: 70%;
+ font-weight: normal;
+ }
+
+#loadingindicator img{
+ position: relative;
+ top: 3px;
+ margin-left: 6px;
+/*  visibility: hidden; */
+  border: none !important;
+ }
+ 
+#alt_loadingindicator{
+ visibility: hidden; 
+ font-size: 70%;
+ font-weight: normal;
+ }
+
+#alt_loadingindicator img{
+ position: relative;
+ top: 3px;
+ margin-left: 6px;
+/*  visibility: hidden; */
+  border: none !important;
+ }
+/*
+ * end loading indicator styling 
+ */ 
+ 
+ 
+
+div.select_country{
+ margin-bottom: 5px;
+ }
+ 
+div.select_country form{
+ text-align: left;
+ }
+
+tr.product_shipping td h2{
+ margin-bottom: 15px;
+/*  margin-top: 5px; */
+ }
+ 
+  
+  
+/* Verify your Order styling */
+table.productcart{
+ width: 100%;
+ margin-top: 10px;
+ margin-bottom: 10px;
+ padding: 0px;
+ border-collapse: collapse;
+ padding-top: 3px;
+ border: none;
+ font-size: inherit;
+ }
+
+table.productcart tr td{
+ padding-bottom: 5px;
+ font-size: inherit;
+ }
+
+table.productcart tr.product_row td{
+ padding-bottom: 5px;
+ font-size: inherit;
+ vertical-align: middle !important;
+ }
+
+table.productcart tr.product_row td{
+ padding-bottom: 5px;
+ font-size: inherit;
+ vertical-align: middle !important;
+ }
+
+
+form.adjustform{
+ display: inline;
+ }
+
+table.productcart tr.firstrow td{
+ font-weight:bold;
+ background-color: #e5e5e5;
+ border-left: 2px solid white;
+ }
+
+table.productcart tr.firstrow td.firstcol{
+ border-left: none;
+ }
+
+table.productcart tr.product_shipping td{
+ vertical-align: middle;
+ border-top: 1px solid #999999 !important;
+ padding-top: 4px;
+ }
+
+table.productcart tr.total_price td{
+ border-top: 1px solid #999999 !important;
+ border-bottom: 1px solid #999999 !important;
+ font-weight: bold;
+ padding-top: 4px;
+ }
+ 
+ul.checkout_links{
+  list-style-type: none;
+  padding-left: 0px;
+ }
+ 
+ 
+ul.checkout_links li{
+  list-style-type: none;
+  margin-left: 0px;
+ }
+ 
+ul.checkout_links li a{
+ color: #555555 !important;
+ font-weight: normal !important;
+ }
+ 
+ul.checkout_links li a:hover{
+ color: #000000 !important;
+ }
+ 
+a.termsandconds
+ {
+ text-decoration: underline;
+ }
+/* end Verify your Order styling */
+
+
+  
+  
+table.logdisplay{ width: 100%; }
+
+table.logdisplay tr.toprow td{ text-align: center; font-weight:bold; }
+
+table.logdisplay tr.toprow2 td{ text-align: left; font-weight:bold; }
+  
+table.logdisplay tr td{ padding-left: 5px; padding-top: 2px; padding-bottom: 2px;}
+  
+table.logdisplay tr.alt{ background-color: #eeeeee; }
+
+table.logdisplay tr.alt td{ background-color: #eeeeee; }
+
+td.processed{ text-align: left; min-width: 140px; width: 140px; white-space: nowrap; }
+td.processed a{ border-bottom: none; }
+td.processed a img{ margin-left: 5px; }
+div#form_field_form_container{ padding: 0px; margin: 0px; }  
+
+div#form_field_form_container div, div#form_field_form_container div table{  padding: 0px;  margin: 0px;  width: 100%;  border-collapse: collapse; }  
+
+div#form_field_form_container div table tr td{ padding: 0px; margin: 0px; }  
+
+div.order_status{ border: 1px solid #eeeeee; display: none; width: 100%; }
+
+div.order_status div{ width: 100%; padding:0px 0px 1ex 0px; display: block !important;}
+  
+div.order_status ul{ list-style-type: none; margin: 1ex 0px 0px 0px; padding: 0px; }
+  
+div.order_status ul li{ padding-left: 0px; }
+
+div.order_status ul li input{ margin: 0px 2px -2px 0px; }
+  
+img.log_expander_icon { margin-right: 3px; }
+
+div.wpsc_page_numbers{
+  margin-bottom: 5px;
+  }
+ 
+ 
+ 
+ 
+/*
+ * checkout registration styling
+ */  
+    
+table.wpsc_checkout_table tr td{
+ text-align: left;
+ }
+ 
+div#checkout_login_box{
+  display: none;
+/*  border: 1px solid #339933;
+  background-color: #e8fcea;*/
+  width: auto;
+  padding: 5px 5px 5px 15px;
+  margin: 20px 0px 0px 0px;
+  }
+ 
+div#checkout_login_box form{
+  text-align: left;
+  }
+  
+#TB_window img#register_loading_img{
+  display: inline;
+  border: none;
+  margin: 0px 0px -10px 5px;
+  padding: 0px;
+  display: none;
+  }
+/*
+ * end checkout registration styling
+ */ 
+div.wpsc_product_search .submit{
+ display: none;
+}
+span.rating_saved{
+    color: #990000;
+    display: none;
+    } 
