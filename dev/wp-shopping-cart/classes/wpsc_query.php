@@ -71,12 +71,12 @@ function wpsc_the_product_title() {
 function wpsc_the_product_description() {
 	global $wpsc_query;
 // 	echo "<pre>".print_r($wpsc_query->product,true)."</pre>";
-	return nl2br(stripslashes($wpsc_query->product['description']));
+	return wpautop(stripslashes($wpsc_query->product['description']));
 }
 
 function wpsc_the_product_additional_description() {
 	global $wpsc_query;
-	return nl2br(stripslashes($wpsc_query->product['additional_description']));
+	return wpautop(stripslashes($wpsc_query->product['additional_description']));
 }
 
 function wpsc_the_product_permalink() {

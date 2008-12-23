@@ -295,7 +295,7 @@ if($_GET['filter'] !== 'true') {
 					</ul>
 					<?php
 					if (!IS_WP27)
-					 echo "<a href='admin.php?page=<?php echo WPSC_DIR_NAME;?>/display-log.php&#038;hide_news=true' id='close_news_box'>X</a>";
+					 echo "<a href='admin.php?page=". WPSC_DIR_NAME."/display-log.php&#038;hide_news=true' id='close_news_box'>X</a>";
 					?>
 					</div>
 				</div>
@@ -309,7 +309,6 @@ if($_GET['filter'] !== 'true') {
 				<a href="?page=<?php echo WPSC_DIR_NAME;?>/options.php">Shop Settings</a><br>
 				<a href="?page=<?php echo WPSC_DIR_NAME;?>/gatewayoptions.php">Gateway Settings</a><br>
 				<a href="?page=<?php echo WPSC_DIR_NAME;?>/form_fields.php">Checkout Settings</a><br>
-				<a href="?page=<?php echo WPSC_DIR_NAME;?>/instructions.php">Help</a>
 			</div>
 	</div>
 	

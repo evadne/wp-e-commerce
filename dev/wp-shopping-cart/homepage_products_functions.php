@@ -89,11 +89,11 @@ function nszhpcrt_category_tag($content = '') {
 				// sorry about the global variable, but it was the best way I could think of to avoid people having to upgrade the gold cart	
 				$GLOBALS['wpsc_category_id'] = $category['id'];
 				if(function_exists('product_display_list') && (get_option('product_view') == 'list')) {
-					$output .= product_display_list($product_list, $group_type, $group_sql, $search_sql);
+					//$output .= product_display_list($product_list, $group_type, $group_sql, $search_sql);
 				} else if(function_exists('product_display_grid') && (get_option('product_view') == 'grid')) {
-					$output .= product_display_grid($product_list, $group_type, $group_sql, $search_sql);
+					//$output .= product_display_grid($product_list, $group_type, $group_sql, $search_sql);
 				} else {
-					$output .= product_display_default($product_list, $group_type, $group_sql, $search_sql);
+					//$output .= product_display_default($product_list, $group_type, $group_sql, $search_sql);
 				}
 		  
 		  } else {

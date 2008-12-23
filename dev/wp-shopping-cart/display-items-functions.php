@@ -424,9 +424,6 @@ function advanced_box($product_data='') {
       </td>
     </tr>";
 	
-  
-	$output .= "
-    </table></div></div>";
     
     return $output;
 }

@@ -783,7 +783,8 @@ function shopping_cart_total_weight(){
 			case "gram":
 			$weight = $weight['weight'] / 453.59237;
 			break;
-		
+			
+			case "once":
 			case "ounces":
 			$weight = $weight['weight'] / 16;
 			break;

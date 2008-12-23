@@ -129,6 +129,7 @@ function display_category_row($category,$subcategory_level = 0) {
     $tidied_name = trim($_POST['name']);
     $tidied_name = strtolower($tidied_name);
     $url_name = preg_replace(array("/(\s)+/","/[^\w-]+/"), array("-", ''), $tidied_name);
+		$url_name =  str_replace("---","-",$url_name);
     $similar_names = $wpdb->get_row("SELECT COUNT(*) AS `count`, MAX(REPLACE(`nice-name`, '$url_name', '')) AS `max_number` FROM `".$wpdb->prefix."product_categories` WHERE `nice-name` REGEXP '^($url_name){1}(\d)*$' ",ARRAY_A);
     $extension_number = '';
     if($similar_names['count'] > 0) {
@@ -221,6 +222,7 @@ function display_category_row($category,$subcategory_level = 0) {
       $tidied_name = trim($category_name);
       $tidied_name = strtolower($tidied_name);
       $url_name = preg_replace(array("/(\s)+/","/[^\w-]+/"), array("-", ''), $tidied_name);
+      $url_name =  str_replace("---","-",$url_name);
       if($url_name != $category_data['nice-name']) {
         $similar_names = $wpdb->get_row("SELECT COUNT(*) AS `count`, MAX(REPLACE(`nice-name`, '$url_name', '')) AS `max_number` FROM `".$wpdb->prefix."product_categories` WHERE `nice-name` REGEXP '^($url_name){1}(0-9)*$' AND `id` NOT IN ('".(int)$category_data['id']."') ",ARRAY_A);
         //exit("<pre>".print_r($similar_names,true)."</pre>");
