@@ -315,7 +315,7 @@ function shipping_box($product_data=''){
 }
 
 function advanced_box($product_data='') {
-	global $closed_postboxes,$wpdb;
+	global $closed_postboxes, $wpdb;
 	$merchant_note = get_product_meta($product_data['id'], 'merchant_notes');
 	$merchant_note = $merchant_note[0];
 	$engraved_text = get_product_meta($product_data['id'], 'engraved');
@@ -325,6 +325,7 @@ function advanced_box($product_data='') {
 	$external_link = get_product_meta($product_data['id'], 'external_link');
 	$external_link = $external_link[0];
 	$output ='';
+
 	if ($product_data == 'empty') {
 		$display = "style='display:none;'";
 	}
@@ -377,9 +378,22 @@ function advanced_box($product_data='') {
         <textarea cols='40' rows='3' type='text' name='productmeta_value[merchant_notes]' id='merchant_notes'>".stripslashes($merchant_note)."</textarea> 
       	<small>".TXT_WPSC_NOTE_ONLY_AVAILABLE_HERE."</small>
       </td>
-    </tr>
-	
-    <tr>
+    </tr>";
+/*
+/*   Insert Publish /No Publish Option on Product Edit (TRansom)
+*/
+		$output .= '<tr>
+		<td colspan="2" class="itemfirstcol"><br />
+			<strong>'.__("Publish:","wpsc").'</strong> <label for="publish_yes">'.__("Yes","wpsc").'
+</label><input name="publish" id="publish_yes" type="radio" value="yes" '.((!is_array($product_data) || $product_data['publish']) ? 'checked="true" ' : '' ).'>
+		 <label for="publish_no">'.__("No","wpsc").'
+		</label><input name="publish" id="publish_no" type="radio" value="no" '.((is_array($product_data) && !$product_data['publish']) ? 'checked="true" ' : '' ).'>
+		</td>
+	</tr>';
+/*
+/*   End Publish /No Publish Fields
+*/
+    	$output .="<tr>
       <td class='itemfirstcol' colspan='2'><br />
        <strong>". TXT_WPSC_PERSONALISATION_OPTIONS .":</strong><br />
         <input type='checkbox' name='productmeta_values[engraved]' ".(($engraved_text == 'on') ? 'checked="true"' : '')." id='add_engrave_text'>
@@ -425,6 +439,9 @@ function advanced_box($product_data='') {
     </tr>";
 	
     
+	$output .= "
+    </table></div></div>";
+    
     return $output;
 }
 
@@ -449,7 +466,7 @@ function product_image_box($product_data='') {
     	
     	
   		$output .= "  <table width='100%' class='flash-image-uploader'>";
-  		$output .= "    <td>";
+  		$output .= "    <tr>";
   		$output .= "      <td>";
   		
   		$output .= '      <span id=\'spanButtonPlaceholder\'></span>';
@@ -872,6 +889,40 @@ global $closed_postboxes;
 	</table></div></div>
 <?php
 }
+
+/*
+/* Code to support Publish/No Publish (TRansom)
+*/
+function wpsc_get_publish_status($product_id) {
+
+	$status = ( wpsc_publish_status($product_id) ) ? "Unpublish" : "Publish";
+	return $status;
+}
+
+function wpsc_toggle_publish_status($product_id) {
+	global $wpdb;
+
+	$status = (int) ( wpsc_publish_status($product_id) ) ? 0 : 1; // Flip the Publish flag True <=> False
+	$result = $wpdb->query("UPDATE `{$wpdb->prefix}product_list` SET `publish` = '{$status}' WHERE `id` = '{$product_id}'");
+	return $status;
+}
+
+function wpsc_publish_status($product_id) {
+	global $wpdb;
+	
+	$status = $wpdb->get_var("SELECT publish FROM `{$wpdb->prefix}product_list` WHERE `id` = '{$product_id}'");
+	return $status;
+}
+
+function wpsc_ajax_toggle_publish() {
+	$status = (wpsc_toggle_publish_status($_POST['productid'])) ? ('true') : ('false');
+	die( $status );
+}
+add_action('wp_ajax_wpsc_toggle_publish','wpsc_ajax_toggle_publish');
+/*
+/*  END - Publish /No Publish functions
+*/
+
 function wpsc_meta_boxes(){
 	add_meta_box('category_and_tag', 'Category and Tags', 'category_and_tag_box', 'wp-shopping-cart/display-items', 'normal', 'high');
 	add_meta_box('price_and_stock', 'Price and Stock', 'price_and_stock_box', 'wp-shopping-cart/display-items', 'normal', 'high');

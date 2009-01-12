@@ -589,6 +589,10 @@ function wpsc_display_invoice() {
   //wpsc_packing_slip($purchase_id);
   exit();
 }
+if($_GET['display_invoice']=='true') {
+  add_action('admin_init', 'wpsc_display_invoice', 0);
+
+}
 
 
 function wpsc_save_inline_price() {
@@ -599,16 +603,8 @@ function wpsc_save_inline_price() {
 	$wpdb->query("UPDATE {$wpdb->prefix}product_list SET price='$new_price1' WHERE id='$pid'");
 	exit($new_price);
 }
+add_action('wp_ajax_wpsc_save_inline_price','wpsc_save_inline_price');
 
-if($_GET['inline_price']=='true') { 
-	add_action('admin_init', 'wpsc_save_inline_price', 0);
-}
-
-
-if($_GET['display_invoice']=='true') {
-  add_action('admin_init', 'wpsc_display_invoice', 0);
-
-}
 
 
 add_action('admin_init','shipping_options');

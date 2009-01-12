@@ -156,7 +156,7 @@ if($_POST['submit_action'] == 'add') {
 		}
 				
 		
-	if(is_numeric((int)$_POST['quantity']) && ($_POST['quantity_limited'] == "yes")) {
+		if(is_numeric((int)$_POST['quantity']) && ($_POST['quantity_limited'] == "yes")) {
 				$quantity_limited = 1;
 				$quantity = (int)$_POST['quantity'];
 			} else {
@@ -164,42 +164,48 @@ if($_POST['submit_action'] == 'add') {
 				$quantity = 0;
 			}
 				
-			if($_POST['special'] == 'yes') {
-				$special = 1;
-				if(is_numeric($_POST['special_price'])) {
-					$special_price = $_POST['price'] - $_POST['special_price'];
-				}
-			} else {
-				$special = 0;
-				$special_price = '';
+		if($_POST['special'] == 'yes') {
+			$special = 1;
+			if(is_numeric($_POST['special_price'])) {
+				$special_price = $_POST['price'] - $_POST['special_price'];
 			}
+		} else {
+			$special = 0;
+			$special_price = '';
+		}
+		
+		if($_POST['publish'] == 'yes') {
+			$publish = 1;
+		} else {
+			$publish = 0;
+		}
+
+		if($_POST['notax'] == 'yes') {
+			$notax = 1;
+		} else {
+			$notax = 0;
+		}
+
 			
-			if($_POST['notax'] == 'yes') {
-				$notax = 1;
-			} else {
-				$notax = 0;
-			}
-	
-				
-			if($_POST['display_frontpage'] == "yes") {
-				$display_frontpage = 1;
-			} else {
-				$display_frontpage = 0;
-			}
-			
-			if($_POST['donation'] == "yes") {
-				$is_donation = 1;
-			} else {
-				$is_donation = 0;
-			}
-			
-			if($_POST['no_shipping'] == "yes") {
-				$no_shipping = 1;
-			} else {
-				$no_shipping = 0;
-			}
-	
-		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` ( `name` , `description` , `additional_description` , `price`, `weight`, `weight_unit`, `pnp`, `international_pnp`, `file` , `image` , `brand`, `quantity_limited`, `quantity`, `special`, `special_price`, `display_frontpage`,`notax`, `donation`, `no_shipping`, `thumbnail_image`, `thumbnail_state`) VALUES ('".$wpdb->escape($_POST['name'])."', '".$wpdb->escape($_POST['description'])."', '".$wpdb->escape($_POST['additional_description'])."','".(float)$wpdb->escape(str_replace(",","",$_POST['price']))."','".$wpdb->escape((float)$_POST['weight'])."','".$wpdb->escape($_POST['weight_unit'])."', '".$wpdb->escape((float)$_POST['pnp'])."', '".$wpdb->escape($_POST['international_pnp'])."', '".(int)$file."', '".$_POST['images'][0]."', '0', '$quantity_limited','$quantity','$special','$special_price', '$display_frontpage', '$notax', '$is_donation', '$no_shipping', '".$wpdb->escape($thumbnail_image)."', '" . $wpdb->escape($_POST['image_resize']) . "');";
+		if($_POST['display_frontpage'] == "yes") {
+			$display_frontpage = 1;
+		} else {
+			$display_frontpage = 0;
+		}
+		
+		if($_POST['donation'] == "yes") {
+			$is_donation = 1;
+		} else {
+			$is_donation = 0;
+		}
+		
+		if($_POST['no_shipping'] == "yes") {
+			$no_shipping = 1;
+		} else {
+			$no_shipping = 0;
+		}
+
+		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` ( `name` , `description` , `additional_description` , `price`, `weight`, `weight_unit`, `pnp`, `international_pnp`, `file` , `image` , `brand`, `quantity_limited`, `quantity`, `special`, `special_price`, `display_frontpage`, `publish`, `notax`, `donation`, `no_shipping`, `thumbnail_image`, `thumbnail_state`) VALUES ('".$wpdb->escape($_POST['name'])."', '".$wpdb->escape($_POST['description'])."', '".$wpdb->escape($_POST['additional_description'])."','".(float)$wpdb->escape(str_replace(",","",$_POST['price']))."','".$wpdb->escape((float)$_POST['weight'])."','".$wpdb->escape($_POST['weight_unit'])."', '".$wpdb->escape((float)$_POST['pnp'])."', '".$wpdb->escape($_POST['international_pnp'])."', '".(int)$file."', '".$_POST['images'][0]."', '0', '$quantity_limited','$quantity','$special','$special_price', '$display_frontpage', '$publish', '$notax', '$is_donation', '$no_shipping', '".$wpdb->escape($thumbnail_image)."', '" . $wpdb->escape($_POST['image_resize']) . "');";
 		
 		if($wpdb->query($insertsql)) {
 			$product_id= $wpdb->get_var("SELECT LAST_INSERT_ID() AS `id` FROM `".$wpdb->prefix."product_list` LIMIT 1");
@@ -551,6 +557,12 @@ if($_POST['submit_action'] == "edit") {
         $special_price = '';
 			}
   
+    if($_POST['publish'] == 'yes') {
+      	$publish = 1;
+	} else {
+		$publish = 0;
+	}
+
     if($_POST['notax'] == 'yes') {
       $notax = 1;
 		} else {
@@ -576,7 +588,7 @@ if($_POST['submit_action'] == "edit") {
 			$no_shipping = 0;
 		}
 		
-		$updatesql = "UPDATE `".$wpdb->prefix."product_list` SET `name` = '".$wpdb->escape($_POST['title'])."', `description` = '".$wpdb->escape($_POST['description'])."', `additional_description` = '".$wpdb->escape($_POST['additional_description'])."', `price` = '".$wpdb->escape(str_replace(",","",$_POST['price']))."', `pnp` = '".(float)$wpdb->escape($_POST['pnp'])."', `international_pnp` = '".(float)$wpdb->escape($_POST['international_pnp'])."', `brand` = '0', quantity_limited = '".$quantity_limited."', `quantity` = '".(int)$quantity."', `special`='$special', `special_price`='$special_price', `display_frontpage`='$display_frontpage', `notax`='$notax', `donation`='$is_donation', `no_shipping` = '$no_shipping', `weight` = '".$wpdb->escape($_POST['weight'])."', `weight_unit` = '".$wpdb->escape($_POST['weight_unit'])."'  WHERE `id`='".$_POST['prodid']."' LIMIT 1";
+		$updatesql = "UPDATE `".$wpdb->prefix."product_list` SET `name` = '".$wpdb->escape($_POST['title'])."', `description` = '".$wpdb->escape($_POST['description'])."', `additional_description` = '".$wpdb->escape($_POST['additional_description'])."', `price` = '".$wpdb->escape(str_replace(",","",$_POST['price']))."', `pnp` = '".(float)$wpdb->escape($_POST['pnp'])."', `international_pnp` = '".(float)$wpdb->escape($_POST['international_pnp'])."', `brand` = '0', quantity_limited = '".$quantity_limited."', `quantity` = '".(int)$quantity."', `special`='$special', `special_price`='$special_price', `display_frontpage`='$display_frontpage', `publish`='$publish', `notax`='$notax', `donation`='$is_donation', `no_shipping` = '$no_shipping', `weight` = '".$wpdb->escape($_POST['weight'])."', `weight_unit` = '".$wpdb->escape($_POST['weight_unit'])."'  WHERE `id`='".$_POST['prodid']."' LIMIT 1";
 
 		$wpdb->query($updatesql);
 		if(($_FILES['image']['name'] != null) && ($image != null)) {
@@ -1000,10 +1012,11 @@ if($product_list != null)
 		//echo "    <div class='itemHeader'></div>\n\r";
 		echo "    <div class='itemContent'>\n\r";
 	} else {
+		$published = ( wpsc_publish_status($product['id']) ) ? ' wpsc_published' : ' wpsc_not_published'; // TRansom - Publish /No Publish classes added
 		if ($tablei==1) {
-			echo "<tr class='products'>";
+			echo "<tr id='".$product['id']."' class='products".$published."'>";
 		} else {
-			echo "<tr class='productsalt'>";
+			echo "<tr id='".$product['id']."' class='productsalt".$published."'>";
 		}
 		$tablei*=-1;
 	}
@@ -1059,8 +1072,12 @@ if($product_list != null)
 	if(is_numeric($_GET['catid'])){
 		echo "            </div>\n\r";    
 	} else {
-		echo '<div class="wpsc-row-actions"><span class="edit"><a title="Edit this post" style="cursor:pointer;" onclick="filleditform('.$product['id'].');return false;">Edit</a></span> | <span class="delete"><a onclick="if ( confirm(\'Are you sure to delete this product?\') ) { return true;}return false;" href="?page=wp-shopping-cart/display-items.php&deleteid='.$product['id'].'" title="Delete this product">Delete</a></span> | <span class="view"><a target="_blank" rel="permalink" title=\'View "'.$product['name'].'"\' href="'.wpsc_product_url($product['id']).'">View</a></span> | <span class="view"><a rel="permalink" title=\'Duplicate "'.$product['name'].'"\' href="?page=wp-shopping-cart/display-items.php&duplicate='.$product['id'].'">Duplicate</a></span></div>';
-		echo "</td><td id=".$product['id'].">";
+		echo '<div class="wpsc-row-actions"><span class="edit"><a title="Edit this product" style="cursor:pointer;" onclick="filleditform('.$product['id'].');return false;">Edit</a></span> ';
+		echo '| <span class="delete"><a onclick="if ( confirm(\'Are you sure to delete this product?\') ) { return true;}return false;" href="?page=wp-shopping-cart/display-items.php&deleteid='.$product['id'].'" title="Delete this product">Delete</a></span> ';
+		echo '| <span class="view"><a target="_blank" rel="permalink" title=\'View "'.$product['name'].'"\' href="'.wpsc_product_url($product['id']).'">View</a></span>';
+		echo ' | <span class="view"><a rel="permalink" title=\'Duplicate "'.$product['name'].'"\' href="?page=wp-shopping-cart/display-items.php&duplicate='.$product['id'].'">Duplicate</a></span> ';
+		echo '| <span class="publish_toggle"><a title="Change publish status " style="cursor:pointer;" href="'.get_bloginfo("wpurl").'/wp-admin/admin-ajax.php">'.wpsc_get_publish_status($product['id']).'</a></span>';
+		echo "</div></td><td id=".$product['id'].">";
 	}
 		if(is_numeric($_GET['catid'])){ 
 			echo "            <div class='pli_price'>\n\r";
