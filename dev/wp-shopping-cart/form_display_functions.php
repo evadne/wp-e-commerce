@@ -176,25 +176,100 @@ $product_files = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}product_list",
   
 function wpsc_select_product_file($product_id = null) {
   global $wpdb;
+
+// Added by TRansom - put this somewhere else eventually
+	$mime_icons = array(
+			0 	=> 'image-x-generic.png'
+		,'exe' 	=> 'application-x-executable.png'
+		,'mp3' 	=> 'audio-x-generic.png'
+		,'zip' 	=> 'package-x-generic.png'
+		,'htm' 	=> 'text-html.png'
+		,'txt' 	=> 'text-x-generic.png'
+		,'php' 	=> 'text-x-script.png'
+		,'avi' 	=> 'video-x-generic.png'
+		,'doc' 	=> 'x-office-document.png'
+		,'ppt' 	=> 'x-office-presentation.png'
+		,'xls' 	=> 'x-office-spreadsheet.png'
+		,'pdf' 	=> 'x-pdf.png'
+		,'null'	=> 'null.png'
+	);
+// END - MimeIcons
   //return false;
+  
   $file_list = wpsc_uploaded_files();
   $file_id = $wpdb->get_var("SELECT `file` FROM `".$wpdb->prefix."product_list` WHERE `id` = '".$product_id."' LIMIT 1");
+  // Table Heading
   $output = "<span class='admin_product_notes select_product_note '>".TXT_WPSC_CHOOSE_DOWNLOADABLE_PRODUCT."</span>";
   $output .= "<div class='".((is_numeric($product_id)) ? "edit_" : "")."select_product_file'>";
   //$output .= "<div class='select_product_file'>";
+  $output .= "<table id='select_product_table'>";
   $num = 0;
-  $output .= "<p ".((($num % 2) > 0) ? '' : "class='alt'")."><input type='radio' name='select_product_file' value='.none.' id='select_product_file_$num' ".((!is_numeric($file_id) || ($file_id < 1)) ? "checked='checked'" : "")." /><label for='select_product_file_$num'>".TXT_WPSC_SHOW_NO_PRODUCT."</label></p>";
- //$output .= "<pre>".print_r($file_list,true)."</pre>";
+  // First row - No Product
+  $output .= "<tr ".((($num % 2) > 0) ? '' : "class='alt'  id='product-uploader-first' ").">";
+  $output .= "<td><img src='".WPSC_URL."/images/mimetypes/".$mime_icons['null']."' /></td>";
+  $output .= "<td><input type='radio' name='select_product_file' value='.none.' id='select_product_file_$num' ".((!is_numeric($file_id) || ($file_id < 1)) ? "checked='checked'" : "")." /></td>";
+  $output .= "<td><label for='select_product_file_$num'>".TXT_WPSC_SHOW_NO_PRODUCT."</label></td>";
+  $output .= '<td></td><td></td><td></td>';
+  $output .= "</tr>";
+  
+  $wpnonce = wp_create_nonce('wp-shopping-cart');
+  if ( is_ssl() ) $auth_cookie = $_COOKIE[SECURE_AUTH_COOKIE]; else $auth_cookie = $_COOKIE[AUTH_COOKIE];
   foreach((array)$file_list as $file) {
     $num++;
-    $output .= "<p ".((($num % 2) > 0) ? '' : "class='alt'")."><input type='radio' name='select_product_file' value='".$file['real_filename']."' id='select_product_file_$num' ".((is_numeric($file_id) && ($file_id == $file['file_id'])) ? "checked='checked'" : "")." /><label for='select_product_file_$num'>".$file['display_filename']."</label>  <img class='file_delete_button' src='".WPSC_URL."/images/cross.png'></p>";
+    $output .= "<tr id='select_product_row_".$file['file_id']."' ".((($num % 2) > 0) ? '' : "class='alt'").">";
+    
+// Insert Mime-type   added by TRansom
+	// determine extension
+	$extension = substr(strrchr($file['display_filename'], "."), 1);
+	// set icon to null
+	$ext_icon = $mime_icons[0];
+	// do we have an icon for this extension - insert it
+	if( array_key_exists($extension,$mime_icons) ) $ext_icon = $mime_icons[$extension];
+	$output .= "<td class='product_file_icon' ><img src='".WPSC_URL."/images/mimetypes/".$ext_icon."' /></td>";
+
+//	Radio Button and File Name
+    $output .="<td><input type='radio' name='select_product_file' value='".$file['real_filename']."' id='select_product_file_$num' ".((is_numeric($file_id) && ($file_id == $file['file_id'])) ? "checked='checked'" : "")." /></td>";
+    $output .="<td class='ellipsis product_file_name' ><label class='ellipsis' for='select_product_file_$num'>".$file['display_filename']."</label></td>";
+
+// Download - Added by transom
+    $output .= "<td class='product_file_actions' >";
+	$output .= "<a href='?page=".WPSC_DIR_NAME."/display-items.php&action=admin_preview&file_id=".$file['file_id']."&_wpnonce=".$wpnonce."' >";
+	$output .= "<img src='".WPSC_URL."/images/download.gif' alt='' title='".TXT_WPSC_CLICKTODOWNLOAD."' />";
+	$output .= "</a></td>";
+
+// Delete File
+    $output .= "<td class='product_file_actions' >";
+    // Handled via jQuery and
+    $output .= "<img id='select_product_delete_".$file['file_id']."' class='select_product_delete' src='".WPSC_URL."/images/trash.gif' title='".TXT_WPSC_DELETE_PRODUCT."' >";
+    $output .= "</td>";
+
+// Edit File
+    $output .= "<td class='product_file_actions' >";
+    $output .= "<a id='select_product_edit_".$file['file_id']."' class='select_product_edit' href='#' >";
+    $output .= __('Edit','wp-shopping-cart');
+    $output .= '</a>';
+    $output .= "</td>";
+
+// End of Row
+	$output .= "</tr>";
+
+// Preview (listen button)
+    if( ($extension == 'mp3' || $extension == 'avi') && 
+    	( ($file != null) && (function_exists('listen_button')) )) {
+		$output .= "<tr".((($num % 2) > 0) ? '' : "class='alt'").">";
+		$output .= "<td colspan='2'>";
+		$output .= '<td class="product_file_actions" >';
+		$output .= listen_button($file['idhash'], $file['file_id']);
+		$output .= '</td>';
+		$output .= '<td></td><td></td><td></td>';
+		$output .= "</tr>";
+	}
+
   }
-  $output .= "</div>";
-  $output .= "<div class='".((is_numeric($product_id)) ? "edit_" : "")."select_product_handle'><div></div></div>";
-  $output .= "<script type='text/javascript'>\n\r";
-  $output .= "var select_min_height = ".(25*3).";\n\r";
-  $output .= "var select_max_height = ".(25*($num+1)).";\n\r";  
-  $output .= "</script>";  
+// End of Table
+  $output .= '<tr id="product-uploader-last"><td></td></tr>';
+  $output .= "</table></div>";
+
   return $output;
 }
   

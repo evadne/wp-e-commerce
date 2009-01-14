@@ -169,7 +169,7 @@ function wpsc_the_product_image($width = null, $height = null) {
       return WPSC_IMAGE_URL.$image_file_name;
     }
   } else {
-    return WPSC_URL."/no-image-uploaded.gif";
+    return WPSC_URL."/images/no-image-uploaded.gif";
   }
 }
 
@@ -187,7 +187,7 @@ function wpsc_the_product_thumbnail() {
   if($image_file_name !== null) {
     return wpsc_product_image_html($image_file_name, $wpsc_query->product['id']);
   } else {
-    return WPSC_URL."/no-image-uploaded.gif";
+    return WPSC_URL."/images/no-image-uploaded.gif";
   }
 }
 

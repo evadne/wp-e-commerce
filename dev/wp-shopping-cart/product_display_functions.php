@@ -97,9 +97,9 @@ function wpsc_also_bought($product_id) {
           $output .= "</a>";
 				} else {
           if(get_option('product_image_width') != '') {
-            $output .= "<img src='".WPSC_URL."/no-image-uploaded.gif' title='".$also_bought_data['name']."' alt='".$also_bought_data['name']."' width='$image_display_height' height='$image_display_height' id='product_image_".$also_bought_data['id']."' class='product_image' />";
+            $output .= "<img src='".WPSC_URL."/images/no-image-uploaded.gif' title='".$also_bought_data['name']."' alt='".$also_bought_data['name']."' width='$image_display_height' height='$image_display_height' id='product_image_".$also_bought_data['id']."' class='product_image' />";
 					} else {
-            $output .= "<img src='".WPSC_URL."/no-image-uploaded.gif' title='".$also_bought_data['name']."' alt='".$product['name']."' id='product_image_".$also_bought_data['id']."' class='product_image' />";
+            $output .= "<img src='".WPSC_URL."/images/no-image-uploaded.gif' title='".$also_bought_data['name']."' alt='".$product['name']."' id='product_image_".$also_bought_data['id']."' class='product_image' />";
 					}
 				}
 			}

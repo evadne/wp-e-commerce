@@ -154,7 +154,7 @@ if($product['image'] !=null)
       }
       else
         {
-        echo "<img src='../wp-content/plugins/wp-shopping-cart/no-image-uploaded.gif' title='".$product['name']."' alt='".$product['name']."' width='50' height='50'  />";
+        echo "<img src='../wp-content/plugins/wp-shopping-cart/images/no-image-uploaded.gif' title='".$product['name']."' alt='".$product['name']."' width='50' height='50'  />";
         }
 echo "            </td>\n\r";
 */

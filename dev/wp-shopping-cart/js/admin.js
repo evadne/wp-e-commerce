@@ -11,6 +11,11 @@ if(typeof(select_min_height) == undefined) {
 	var select_max_height = 200;
 }
 
+function areYouSure (msg) {
+	var bool = window.confirm(msg);
+	return bool; 
+}
+
 jQuery(document).ready(
   function() {  
 //   jQuery('div.select_product_file').Resizable({
@@ -23,17 +28,17 @@ jQuery(document).ready(
 //       }
 //     });
 			
-		jQuery("div.admin_product_name a.shorttag_toggle").toggle(
-			function () {
-				jQuery("div.admin_product_shorttags", jQuery(this).parent("div.admin_product_name")).css('display', 'block');
-			},
-			function () {
-				//jQuery("div#admin_product_name a.shorttag_toggle").toggleClass('toggled');
-				jQuery("div.admin_product_shorttags", jQuery(this).parent("div.admin_product_name")).css('display', 'none');
-			}
-		);
-	  enablebuttons();
-	  
+	jQuery("div.admin_product_name a.shorttag_toggle").toggle(
+		function () {
+			jQuery("div.admin_product_shorttags", jQuery(this).parent("div.admin_product_name")).css('display', 'block');
+		},
+		function () {
+			//jQuery("div#admin_product_name a.shorttag_toggle").toggleClass('toggled');
+			jQuery("div.admin_product_shorttags", jQuery(this).parent("div.admin_product_name")).css('display', 'none');
+		}
+	);
+  enablebuttons();
+  
   }
 );
 
@@ -115,220 +120,185 @@ function submit_change_country() {
   document.cart_options.submit();
   //document.cart_options.submit();
 }
-  
+
+var swfu; var swfu_settings;
 var getresults=function(results) {
   document.getElementById('formcontent').innerHTML = results;
-  jQuery('form.edititem').css('display', 'block');
-  jQuery('form.edititem').css('display', 'block');
-  jQuery('#additem').css('display', 'none');
-  jQuery('#productform').css('display', 'block');
-	jQuery("#loadingindicator_span").css('visibility','hidden');
+// 	jQuery('form.edititem').css('display', 'block');
+// 	jQuery('form.edititem').css('display', 'block');
+// 	jQuery('#additem').css('display', 'none');
+// 	jQuery('#productform').css('display', 'block');
+// 	jQuery("#loadingindicator_span").css('visibility','hidden');
 	enablebuttons();
 	
-jQuery('#formcontent .postbox h3').click( function() {
-	jQuery(jQuery(this).parent('div.postbox')).toggleClass('closed');
-		if(jQuery(jQuery(this).parent('div.postbox')).hasClass('closed')) {
-			jQuery('a.togbox',this).html('+');
-		} else {
-			jQuery('a.togbox',this).html('&ndash;');
-		}
-	  wpsc_save_postboxes_state('editproduct', '#formcontent');
-});
-
-jQuery('.meta-box-sortables').sortable( {
-    placeholder: 'sortable-placeholder',
-    connectWith: [ '.meta-box-sortables' ],
-    items: '> .postbox',
-    handle: '.hndle',
-    distance: 2,
-    tolerance: 'pointer',
-    sort: function(e,ui) {
-    	if ( jQuery(document).width() - e.clientX < 300 ) {
-    		if ( ! jQuery('#post-body').hasClass('has-sidebar') ) {
-    			var pos = jQuery('#side-sortables').offset();
-
-    			jQuery('#side-sortables').append(ui.item)
-    			jQuery(ui.placeholder).css({'top':pos.top,'left':pos.left}).width(jQuery(ui.item).width())
-    			postboxes.expandSidebar(1);
-    		}
-    	}
-    },
-    stop: function() {
-    	var postVars = {
-    		action: 'product-page-order',
-    		ajax: 'true'
-    	}
-    	
-    	jQuery('.meta-box-sortables').each( function() {
-    		postVars["order[" + this.id.split('-')[0] + "]"] = jQuery(this).sortable( 'toArray' ).join(',');
-    	} );
-    	jQuery.post( 'index.php?admin=true&ajax=true', postVars, function() {
-    		postboxes.expandSidebar();
-    	} );
-    }
-} );
-
-tinyMCE.init({
-	theme : "advanced",
-	mode : "specific_textareas",
-	width : '100%',
-	height : '194px',
-	skin : 'wp_theme',
-	editor_selector : "mceEditor",
-	plugins : "spellchecker,pagebreak",
-	theme_advanced_buttons1 : "bold,italic,strikethrough,|,bullist,numlist,blockquote,|,justifyleft,justifycenter,justifyright,|,link,unlink,|,pagebreak",
-	theme_advanced_buttons2 : "",
-	theme_advanced_buttons3 : "",
-	theme_advanced_toolbar_location : "top",
-	theme_advanced_toolbar_align : "left",
-	theme_advanced_statusbar_location : "bottom",
-	theme_advanced_resizing : true,
-	content_css : WPSC_URL+"/js/tinymce3/mce.css",
-	theme_advanced_resize_horizontal : false
-});
-
-jQuery("#gallery_list").sortable({
-	revert: false,
-	placeholder: "ui-selected",
-	start: function(e,ui) {
-		jQuery('#image_settings_box').hide();
-		jQuery('a.editButton').hide();
-		jQuery('img.deleteButton').hide();
-		jQuery('ul#gallery_list').children('li').removeClass('first');
-	},
-	stop:function (e,ui) {
-		jQuery('ul#gallery_list').children('li:first').addClass('first');
-	},
-	update: function (e,ui){
-				set = jQuery("#gallery_list").sortable('toArray');
-				img_id = jQuery('#gallery_image_'+set[0]).parent('li').attr('id');
-				
-				jQuery('#gallery_image_'+set[0]).children('img.deleteButton').remove();
-				jQuery('#gallery_image_'+set[0]).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
-				jQuery('#gallery_image_'+set[0]).parent('li').attr('id', 0);
-				//for(i=1;i<set.length;i++) {
-				//	jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
-				//	jQuery('#gallery_image_'+set[i]).append("<img alt='-' class='deleteButton' src='"+WPSC_URL+"/images/cross.png'/>");
-				//}
-				
-				for(i=1;i<set.length;i++) {
-					jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
-					jQuery('#gallery_image_'+set[i]).append("<img alt='-' class='deleteButton' src='"+WPSC_URL+"/images/cross.png'/>");
-					
-          			element_id = jQuery('#gallery_image_'+set[i]).parent('li').attr('id');
-					if(element_id == 0) {
-            			jQuery('#gallery_image_'+set[i]).parent('li').attr('id', img_id);
-					}
-				}
-				
-				order = set.join(',');
-				prodid = jQuery('#prodid').val();
-				ajax.post("index.php",imageorderresults,"admin=true&ajax=true&prodid="+prodid+"&imageorder=true&order="+order);
-			},
-	'opacity':0.5
-});
-
-function imageorderresults(results) {
-  eval(results);
-  
-	jQuery('#gallery_image_'+ser).append(output);
-
-	enablebuttons();
-}
-
-jQuery("div.previewimage").hover(
-	function () {
-		jQuery(this).children('img.deleteButton').show();
-		if(jQuery('#image_settings_box').css('display')!='block')
-			jQuery(this).children('a.editButton').show();
-	},
-	function () {
-		jQuery(this).children('img.deleteButton').hide();
-		jQuery(this).children('a.editButton').hide();
-	}
-);
-
-jQuery("a.closeimagesettings").click(
-	function (e) {
-		jQuery("div#image_settings_box").hide();
-	}
-);
-
-jQuery("#table_rate_price").click(
-	function() {
-		if (this.checked) {
-			jQuery("#table_rate").slideDown("fast");
-		} else {
-			jQuery("#table_rate").slideUp("fast");
-		}
-	}
-);
-
-jQuery(".add_level").click(
-	function() {
-		jQuery(this).parent().children('table').append('<tr><td><input type="text" size="10" value="" name="productmeta_values[table_rate_price][quantity][]"/> and above</td><td><input type="text" size="10" value="" name="productmeta_values[table_rate_price][table_price][]"/></td><td><img src="'+WPSC_URL+'/images/cross.png" class="remove_line"></td></tr>');
-	}
-);
-
-jQuery(".remove_label").click(
-	function(){
-		jQuery(this).parent().parent().parent().remove();
-	}
-);
-
-jQuery("#add_label").click(
-	function(){
-		jQuery("#labels").append("<br><table><tr><td>"+TXT_WPSC_LABEL+" :</td><td><input type='text' name='productmeta_values[labels][]'></td></tr><tr><td>"+TXT_WPSC_LIFE_NUMBER+" :</td><td><input type='text' name='productmeta_values[life_number][]'></td></tr><tr><td>"+TXT_WPSC_ITEM_NUMBER+" :</td><td><input type='text' name='productmeta_values[item_number][]'></td></tr><tr><td>"+TXT_WPSC_PRODUCT_CODE+" :</td><td><input type='text' name='productmeta_values[product_code][]'></td></tr><tr><td>"+TXT_WPSC_PDF+" :</td><td><input type='file' name='productmeta_values[product_pdf][]'></td></tr></table>");
-	}
-);
-
-jQuery(".remove_line").click(
-	function() {
-		jQuery(this).parent().parent('tr').remove();
-	}
-);
-
-
-//SWFUpload
-	filesizeLimit = 5120000;
-	
-	if (typeof SWFUpload != "undefined") {
-    var swfu = new SWFUpload({
-      flash_url : WPSC_URL+'/js/swfupload.swf',
-      upload_url: base_url+'/?action=wpsc_add_image',
-      button_placeholder_id : "spanButtonPlaceholder",
-      button_width: 103,
-      button_height: 24,
-      button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
-      button_cursor: SWFUpload.CURSOR.HAND,
-      post_params: {"prodid" : jQuery('#prodid').val()},
-      file_queue_limit : 1,
-      file_size_limit : filesizeLimit+'b',
-      file_types : "*.jpg;*.jpeg;*.png;*.gif",
-      file_types_description : "Web-compatible Image Files",
-      file_upload_limit : filesizeLimit,
-        custom_settings : {
-        targetHolder : false,
-        progressBar : false,
-        sorting : false
-      },
-      debug: false,
-      
-      file_queued_handler : imageFileQueued,
-      file_queue_error_handler : imageFileQueueError,
-      file_dialog_complete_handler : imageFileDialogComplete,
-      upload_start_handler : startImageUpload,
-      upload_progress_handler : imageUploadProgress,
-      upload_error_handler : imageUploadError,
-      upload_success_handler : imageUploadSuccess,
-      upload_complete_handler : imageUploadComplete,
-      queue_complete_handler : imageQueueComplete
-    });
- 	}
-
-	jQuery("#add-product-image").click(function(){
-    swfu.selectFiles();
+	jQuery('#formcontent .postbox h3').click( function() {
+		jQuery(jQuery(this).parent('div.postbox')).toggleClass('closed');
+			if(jQuery(jQuery(this).parent('div.postbox')).hasClass('closed')) {
+				jQuery('a.togbox',this).html('+');
+			} else {
+				jQuery('a.togbox',this).html('&ndash;');
+			}
+		  wpsc_save_postboxes_state('editproduct', '#formcontent');
 	});
+	
+	jQuery('.meta-box-sortables').sortable( {
+		placeholder: 'sortable-placeholder',
+		connectWith: [ '.meta-box-sortables' ],
+		items: '> .postbox',
+		handle: '.hndle',
+		distance: 2,
+		tolerance: 'pointer',
+		sort: function(e,ui) {
+			if ( jQuery(document).width() - e.clientX < 300 ) {
+				if ( ! jQuery('#post-body').hasClass('has-sidebar') ) {
+					var pos = jQuery('#side-sortables').offset();
+	
+					jQuery('#side-sortables').append(ui.item)
+					jQuery(ui.placeholder).css({'top':pos.top,'left':pos.left}).width(jQuery(ui.item).width())
+					postboxes.expandSidebar(1);
+				}
+			}
+		},
+		stop: function() {
+			var postVars = {
+				action: 'product-page-order',
+				ajax: 'true'
+			}
+			
+			jQuery('.meta-box-sortables').each( function() {
+				postVars["order[" + this.id.split('-')[0] + "]"] = jQuery(this).sortable( 'toArray' ).join(',');
+			} );
+			jQuery.post( 'index.php?admin=true&ajax=true', postVars, function() {
+				postboxes.expandSidebar();
+			} );
+		}
+	});
+	
+	tinyMCE.init({
+		theme : "advanced",
+		mode : "specific_textareas",
+		width : '100%',
+		height : '194px',
+		skin : 'wp_theme',
+		editor_selector : "mceEditor",
+		plugins : "spellchecker,pagebreak",
+		theme_advanced_buttons1 : "bold,italic,strikethrough,|,bullist,numlist,blockquote,|,justifyleft,justifycenter,justifyright,|,link,unlink,|,pagebreak",
+		theme_advanced_buttons2 : "",
+		theme_advanced_buttons3 : "",
+		theme_advanced_toolbar_location : "top",
+		theme_advanced_toolbar_align : "left",
+		theme_advanced_statusbar_location : "bottom",
+		theme_advanced_resizing : true,
+		content_css : WPSC_URL+"/js/tinymce3/mce.css",
+		theme_advanced_resize_horizontal : false
+	});
+	
+	jQuery("#gallery_list").sortable({
+		revert: false,
+		placeholder: "ui-selected",
+		start: function(e,ui) {
+			jQuery('#image_settings_box').hide();
+			jQuery('a.editButton').hide();
+			jQuery('img.deleteButton').hide();
+			jQuery('ul#gallery_list').children('li').removeClass('first');
+		},
+		stop:function (e,ui) {
+			jQuery('ul#gallery_list').children('li:first').addClass('first');
+		},
+		update: function (e,ui){
+					set = jQuery("#gallery_list").sortable('toArray');
+					img_id = jQuery('#gallery_image_'+set[0]).parent('li').attr('id');
+					
+					jQuery('#gallery_image_'+set[0]).children('img.deleteButton').remove();
+					jQuery('#gallery_image_'+set[0]).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
+					jQuery('#gallery_image_'+set[0]).parent('li').attr('id', 0);
+					//for(i=1;i<set.length;i++) {
+					//	jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
+					//	jQuery('#gallery_image_'+set[i]).append("<img alt='-' class='deleteButton' src='"+WPSC_URL+"/images/cross.png'/>");
+					//}
+					
+					for(i=1;i<set.length;i++) {
+						jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
+						jQuery('#gallery_image_'+set[i]).append("<img alt='-' class='deleteButton' src='"+WPSC_URL+"/images/cross.png'/>");
+						
+						element_id = jQuery('#gallery_image_'+set[i]).parent('li').attr('id');
+						if(element_id == 0) {
+							jQuery('#gallery_image_'+set[i]).parent('li').attr('id', img_id);
+						}
+					}
+					
+					order = set.join(',');
+					prodid = jQuery('#prodid').val();
+					ajax.post(ajax_url,
+					imageorderresults,
+					"auth_cookie="+auth_cookie+"&action=wpsc_imageorder&prodid="+prodid+"&order="+order);
+				},
+		'opacity':0.5
+	});
+	
+	function imageorderresults(results) {
+	  eval(results);
+	  
+		jQuery('#gallery_image_'+ser).append(output);
+	
+		enablebuttons();
+	}
+	
+	jQuery("div.previewimage").hover(
+		function () {
+			jQuery(this).children('img.deleteButton').show();
+			if(jQuery('#image_settings_box').css('display')!='block')
+				jQuery(this).children('a.editButton').show();
+		},
+		function () {
+			jQuery(this).children('img.deleteButton').hide();
+			jQuery(this).children('a.editButton').hide();
+		}
+	);
+	
+	jQuery("a.closeimagesettings").click(
+		function (e) {
+			jQuery("div#image_settings_box").hide();
+		}
+	);
+	
+	jQuery("#table_rate_price").click(
+		function() {
+			if (this.checked) {
+				jQuery("#table_rate").slideDown("fast");
+			} else {
+				jQuery("#table_rate").slideUp("fast");
+			}
+		}
+	);
+	
+	jQuery(".add_level").click(
+		function() {
+			jQuery(this).parent().children('table').append('<tr><td><input type="text" size="10" value="" name="productmeta_values[table_rate_price][quantity][]"/> and above</td><td><input type="text" size="10" value="" name="productmeta_values[table_rate_price][table_price][]"/></td><td><img src="'+WPSC_URL+'/images/cross.png" class="remove_line"></td></tr>');
+		}
+	);
+	
+	jQuery(".remove_label").click(
+		function(){
+			jQuery(this).parent().parent().parent().remove();
+		}
+	);
+	
+	jQuery("#add_label").click(
+		function(){
+			jQuery("#labels").append("<br><table><tr><td>"+TXT_WPSC_LABEL+" :</td><td><input type='text' name='productmeta_values[labels][]'></td></tr><tr><td>"+TXT_WPSC_LIFE_NUMBER+" :</td><td><input type='text' name='productmeta_values[life_number][]'></td></tr><tr><td>"+TXT_WPSC_ITEM_NUMBER+" :</td><td><input type='text' name='productmeta_values[item_number][]'></td></tr><tr><td>"+TXT_WPSC_PRODUCT_CODE+" :</td><td><input type='text' name='productmeta_values[product_code][]'></td></tr><tr><td>"+TXT_WPSC_PDF+" :</td><td><input type='file' name='productmeta_values[product_pdf][]'></td></tr></table>");
+		}
+	);
+	
+	jQuery(".remove_line").click(
+		function() {
+			jQuery(this).parent().parent('tr').remove();
+		}
+	);
+	
+//swfu
+//	var swfu = swf_images();
+
 	activate_resizable();
 	tb_init("a.thickbox");
 
@@ -358,12 +328,18 @@ jQuery(".remove_line").click(
 	}
 }
 
+
 function filleditform(prodid)	{
-	jQuery(document).ready(function(){
-		ajax.post("index.php",getresults,"ajax=true&admin=true&prodid="+prodid);
-		jQuery('#loadingimage').attr('src', jQuery("#loadingimage").attr('src'));
-		jQuery('#loadingindicator_span').css('visibility','visible');
+	ajax.post("index.php",getresults,"ajax=true&admin=true&prodid="+prodid);
+	jQuery('#loadingimage').attr('src', jQuery("#loadingimage").attr('src'));
+	jQuery('#loadingindicator_span').css('visibility','visible');
+	jQuery("#add-product-image").click(function(){
+		swfu_edit = new SWFUpload(swfu_edit_settings);
+		prodid = jQuery('#prodid').val().toString();
+		swfu_edit.addPostParam('prodid', prodid );
+  	 	swfu_edit.selectFile();
 	});
+	wpsc_upload_flip(upload_flash);  // Restore Upload box to current value
 }
    
 function fillvariationform(variation_id) {
@@ -989,46 +965,46 @@ jQuery(document).ready(function(){
 		}
 	);
 	jQuery('.pickdate').datepicker({ dateFormat: 'yy-mm-dd' });
-	filesizeLimit = 5120000;
-	
-// 	alert('test 1');
-	if (typeof SWFUpload != "undefined") {
-//     alert('test 2');
-	  var swfu = new SWFUpload({
-      flash_url : WPSC_URL+'/js/swfupload.swf',
-      upload_url: base_url+'/?action=wpsc_add_image',
-      button_placeholder_id : "spanButtonPlaceholder",
-      button_width: 103,
-      button_height: 24,
-      button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
-      button_cursor: SWFUpload.CURSOR.HAND,
-      post_params: {"prodid" : 0},
-      file_queue_limit : 1,
-      file_size_limit : filesizeLimit+'b',
-      file_types : "*.jpg;*.jpeg;*.png;*.gif",
-      file_types_description : "Web-compatible Image Files",
-      file_upload_limit : filesizeLimit,
-      custom_settings : {
-      targetHolder : false,
-      progressBar : false,
-      sorting : false
-      },
-      debug: false,
-        
-      file_queued_handler : imageFileQueued,
-      file_queue_error_handler : imageFileQueueError,
-      file_dialog_complete_handler : imageFileDialogComplete,
-      upload_start_handler : startImageUpload,
-      upload_progress_handler : imageUploadProgress,
-      upload_error_handler : imageUploadError,
-      upload_success_handler : imageUploadSuccess,
-      upload_complete_handler : imageUploadComplete,
-      queue_complete_handler : imageQueueComplete
-    });
-	}
-  	jQuery("#add-product-image").click(function(){
-      swfu.selectFiles();
-  	});
+// 	filesizeLimit = 5120000;
+// 	
+// // 	alert('test 1');
+// 	if (typeof SWFUpload != "undefined") {
+// //     alert('test 2');
+// 	  var swfu = new SWFUpload({
+//       flash_url : WPSC_URL+'/js/swfupload.swf',
+//       upload_url: ajax_url+'?action=wpsc_add_image',
+//       button_placeholder_id : "spanButtonPlaceholder",
+//       button_width: 103,
+//       button_height: 24,
+//       button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
+//       button_cursor: SWFUpload.CURSOR.HAND,
+//       post_params: {"prodid" : 0},
+//       file_queue_limit : 1,
+//       file_size_limit : filesizeLimit+'b',
+//       file_types : "*.jpg;*.jpeg;*.png;*.gif",
+//       file_types_description : "Web-compatible Image Files",
+//       file_upload_limit : filesizeLimit,
+//       custom_settings : {
+//       targetHolder : false,
+//       progressBar : false,
+//       sorting : false
+//       },
+//       debug: false,
+//         
+//       file_queued_handler : imageFileQueued,
+//       file_queue_error_handler : imageFileQueueError,
+//       file_dialog_complete_handler : imageFileDialogComplete,
+//       upload_start_handler : startImageUpload,
+//       upload_progress_handler : imageUploadProgress,
+//       upload_error_handler : imageUploadError,
+//       upload_success_handler : imageUploadSuccess,
+//       upload_complete_handler : imageUploadComplete,
+//       queue_complete_handler : imageQueueComplete
+//     });
+// 	}
+//   	jQuery("#add-product-image").click(function(){
+//       swfu.selectFiles();
+//   	});
 });
 
 function addlayer(){
@@ -1095,12 +1071,13 @@ function imageUploadSuccess (file, results) {
   	var pid = null;
   	
     jQuery("span.swfupload_loadingindicator").css('visibility', 'hidden');
-		eval(results);
+
+	eval(results);
 // 		jQuery(this).css('border', '1px solid red');
 	  if(pid >= 1) {
-	    context = jQuery("div#productform");
+	  	context = jQuery("div#productform");
 	  } else {
-			context = jQuery("div#additem");
+		context = jQuery("div#additem");
 	  }
 	
 	if (id == null ) {
@@ -1108,18 +1085,18 @@ function imageUploadSuccess (file, results) {
 	  	  	jQuery("li.first div.previewimage a.thickbox", context).attr('href', replacement_src);
 	  	  	jQuery("li.first div.previewimage a.thickbox img.previewimage", context).attr('src', replacement_src);
 	  	} else {
-        if (jQuery('#gold_present', context).val() != '1') {
-          jQuery('#add-product-image', context).remove();
-        }
-        jQuery(this.sorting).attr({'value':src});
-        var img = jQuery('<div class="previewimage" id="'+id+'"><a href="'+WPSC_IMAGE_URL+src+'" rel="product_extra_image_'+id+'" class="thickbox"><img src="'+WPSC_IMAGE_URL+src+'" width="60" height="60" class="previewimage" /></a></div>').appendTo(this.targetHolder).hide();
-        set = jQuery("#gallery_list", context).sortable('toArray');
-
-        jQuery('#gallery_image_0', context).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
-        jQuery('#gallery_image_0', context).parent('li').addClass('first');
-        jQuery('#gallery_image_0', context).parent('li').attr('id', 0);
-        jQuery('#gallery_image_0 img.deleteButton', context).remove();
-        enablebuttons();
+			if (jQuery('#gold_present', context).val() != '1') {
+			  jQuery('#add-product-image', context).remove();
+			}
+			jQuery(this.sorting).attr({'value':src});
+			var img = jQuery('<div class="previewimage" id="'+id+'"><a href="'+WPSC_IMAGE_URL+src+'" rel="product_extra_image_'+id+'" class="thickbox"><img src="'+WPSC_IMAGE_URL+src+'" width="60" height="60" class="previewimage" /></a></div>').appendTo(this.targetHolder).hide();
+			set = jQuery("#gallery_list", context).sortable('toArray');
+	
+			jQuery('#gallery_image_0', context).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
+			jQuery('#gallery_image_0', context).parent('li').addClass('first');
+			jQuery('#gallery_image_0', context).parent('li').attr('id', 0);
+			jQuery('#gallery_image_0 img.deleteButton', context).remove();
+			enablebuttons();
 		}
 	} else {
 		//jQuery(this.targetHolder).attr({'id':'image-'+src});
@@ -1128,36 +1105,39 @@ function imageUploadSuccess (file, results) {
 		jQuery(this.targetHolder).html('');
 		var img = jQuery('<div class="previewimage" id="'+div_id+'"><input type="hidden" name="images[]" value="'+src+'"><a href="'+WPSC_IMAGE_URL+src+'" rel="product_extra_image_'+id+'" class="thickbox"><img src="'+WPSC_IMAGE_URL+src+'" width="60" height="60" class="previewimage" /></a></div>').appendTo(this.targetHolder).hide();
 		
-    jQuery('#gallery_image_0', context).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
-    jQuery('#gallery_image_0', context).parent('li').addClass('first');
-    jQuery('#gallery_image_0', context).parent('li').attr('id', 0);
-    jQuery('#gallery_image_0 img.deleteButton', context).remove();
-    
-    
-    if (jQuery('#gallery_list li', context).size() > 1) {
-      jQuery('#gallery_list', context).sortable('refresh');
-    } else {
-      jQuery('#gallery_list', context).sortable();
+		jQuery('#gallery_image_0', context).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
+		jQuery('#gallery_image_0', context).parent('li').addClass('first');
+		jQuery('#gallery_image_0', context).parent('li').attr('id', 0);
+		jQuery('#gallery_image_0 img.deleteButton', context).remove();
+		
+		
+		if (jQuery('#gallery_list li', context).size() > 1) {
+		  jQuery('#gallery_list', context).sortable('refresh');
+		} else {
+		  jQuery('#gallery_list', context).sortable();
 		}
-    set = jQuery("#gallery_list", context).sortable('toArray');
-    order = set.join(',');
-    prodid = jQuery('#prodid', context).val();
-    if(prodid == null) {
-      prodid = 0;
-    }
-    
-      function imageorderresults(results) {
-        eval(results);
-        jQuery('#gallery_image_'+ser).append(output);
-        enablebuttons();
-      }
-    
-    ajax.post("index.php",imageorderresults,"admin=true&ajax=true&prodid="+prodid+"&imageorder=true&order="+order+"");
-    
-    
-    enablebuttons();
+		set = jQuery("#gallery_list", context).sortable('toArray');
+		order = set.join(',');
 
+		prodid = jQuery('#prodid', context).val();
+		if(prodid == null) {
+			prodid = 0;
+		}
+		
+		function imageorderresults(results) {
+			eval(results);
+			jQuery('#gallery_image_'+ser).append(output);
+			enablebuttons();
+		}
+		
+		ajax.post(ajax_url,
+			imageorderresults,
+			"auth_cookie="+auth_cookie+"&action=wpsc_imageorder&prodid="+prodid+"&order="+order+"");
+		
+		enablebuttons();
+	
 	}
+
 	jQuery(this.progressBar).animate({'width':'76px'},250,function () {
 		jQuery(this).parent().fadeOut(500,function() {
 			jQuery(this).remove();
@@ -1179,6 +1159,51 @@ function imageUploadComplete (file) {
 function imageQueueComplete (uploads) {
 
 }
+
+function productFileQueued (file) {
+
+}
+
+function productFileQueueError (file, error, message) {
+	if (error == SWFUpload.QUEUE_ERROR.QUEUE_LIMIT_EXCEEDED) {
+		alert("You selected too many files to upload at one time. " + (message === 0 ? "You have reached the upload limit." : "You may upload " + (message > 1 ? "up to " + message + " files." : "only one file.")));
+		return;
+	}
+}
+
+function productFileDialogComplete (selected, queued) {
+	try {
+		this.startUpload();
+	} catch (ex) {
+		this.debug(ex);
+	}
+}
+
+function startProductUpload (file) {
+	return true;
+}
+
+function productUploadProgress (file, loaded, total) {
+	var progress = Math.ceil((loaded/total)*76);
+	jQuery(this.progressBar).animate({'width':progress+'px'},100);
+}
+
+function productUploadError (file, error, message) {
+	console.log(error+": "+message);
+}
+
+function productUploadSuccess (file, results) {
+	jQuery('#flash-product-uploader-status').html('Product Added').addClass('updated');
+	jQuery('#wpsc_dl_product_list').html(results);
+	attach_actions();
+}
+
+function productUploadComplete (file) {
+}
+
+function productQueueComplete (uploads) {
+}
+
 
 function enablebuttons(){
 	jQuery("img.deleteButton").click(
@@ -1219,7 +1244,9 @@ function enablebuttons(){
 				}
 				order = set.join(',');
 				prodid = jQuery('#prodid').val();
-				ajax.post("index.php",imageorderresults,"admin=true&ajax=true&prodid="+prodid+"&imageorder=true&order="+order+"&delete_primary=true");
+				ajax.post(ajax_url,
+				imageorderresults,
+				"auth_cookie="+auth_cookie+"&action=wpsc_imageorder&prodid="+prodid+"&order="+order+"&delete_primary=true");
 				
 				jQuery(this).parents('li.first').attr('id', '0');
 			}
@@ -1304,20 +1331,14 @@ jQuery(document).ready(function(){
 	
   	jQuery("table#itemlist .pricedisplay").each(
 		function () {
-			jQuery(this).attr("id",jQuery(this).parents('tr:first').attr('id'));
+			jQuery(this).attr("id",jQuery(this).parent().attr('id'));
 		}
 	);
-	
-	// http://www.appelsiini.net/projects/jeditable
- 	jQuery("table#itemlist .pricedisplay").editable( base_url+'/wp-admin/admin-ajax.php', {
-			indicator : "Saving...",
-			tooltip   : 'Click to edit...',
-			submitdata : {
-			   action: "wpsc_save_inline_price"
-			, 'cookie': encodeURIComponent(document.cookie)
-			}
-	});
-	
+ 	jQuery("table#itemlist .pricedisplay").editable(base_url+"/?inline_price=true", {
+         indicator : "Saving...",
+         tooltip   : 'Click to edit...'
+    });
+
     jQuery('.meta-box-sortables').sortable( {
 	    placeholder: 'sortable-placeholder',
 	    connectWith: [ '.meta-box-sortables' ],
@@ -1373,26 +1394,6 @@ jQuery(document).ready(function(){
 	);
 });
 
-
-
-
-function wpsc_upload_switcher(target_state) {
-  switch(target_state) {
-    case 'flash':
-    jQuery("table.browser-image-uploader").css("display","none");
-    jQuery("table.flash-image-uploader").css("display","block");
-    ajax.post("index.php",noresults,"admin=true&ajax=true&save_image_upload_state=true&image_upload_state=1");
-    break;
-    
-    case 'browser':
-    jQuery("table.flash-image-uploader").css("display","none");
-    jQuery("table.browser-image-uploader").css("display","block");
-    ajax.post("index.php",noresults,"admin=true&ajax=true&save_image_upload_state=true&image_upload_state=0");
-    break;
-  }
-}
-
-
 function image_resize_extra_forms(option) {
   container = jQuery(option).parent();
   jQuery("div.image_resize_extra_forms").css('display', 'none');
@@ -1404,29 +1405,4 @@ function open_variation_settings(element_id) {
   jQuery("tr#"+element_id+" td div.variation_settings").toggle();
   return false;
 }
-
-jQuery(document).ready(function(){
-// Used on admin/display-items.php - toggles the publish status of a product (dims background for unpublished)
-// click logic from http://xplus3.net/2008/10/16/jquery-and-ajax-in-wordpress-plugins-administration-pages/
-	jQuery("span.publish_toggle a").click(function() {
-		var that = this;
-		var theRow = jQuery(this).parents('tr:first');
-		jQuery.post(jQuery(this).attr("href"), {
-			   action: "wpsc_toggle_publish"
-			, 'cookie': encodeURIComponent(document.cookie)
-			, 'productid': jQuery(theRow).attr('id')
-			}
-			, function(newstatus){
-				if (newstatus == 'true') {
-					jQuery(that).text('Unpublish');
-					jQuery(theRow).removeClass('wpsc_not_published').addClass('wpsc_published')
-				} else {
-					jQuery(that).text('Publish');
-					jQuery(theRow).removeClass('wpsc_published').addClass('wpsc_not_published');
-				}	
-			}
-		);
-		return false; // The click never happened - defeat the a tag
-	});
-});
 

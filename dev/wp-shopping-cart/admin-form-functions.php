@@ -1,6 +1,6 @@
 <?php
 ini_set('display_errors','1');
-function nzshpcrt_getproductform($prodid)
+function wpsc_getproductform($prodid)
   {
   global $wpdb,$nzshpcrt_imagesize_info;
   $variations_processor = new nzshpcrt_variations;
@@ -180,11 +180,13 @@ function nzshpcrt_getproductform($prodid)
 		$output .= "<table style='width:100%'>";
 		$output .= "<tr><td  colspan='2'>";
 	}
+
 	$order = get_option('wpsc_product_page_order');
 	if (($order == '') || (count($order < 7 ))){
 		$order=array("category_and_tag", "price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
 	}
 	update_option('wpsc_product_page_order', $order);
+
 	foreach((array)$order as $key => $box) {
 		$box_function_name = $box."_box";
 		$output .= call_user_func($box_function_name,$product);

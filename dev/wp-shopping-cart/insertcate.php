@@ -16,7 +16,7 @@ $pluginURL = get_settings('siteurl') . $plugindir;
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 	<title>{$lang_insert_ecom_title}</title>
-	<link type="text/css" rel="stylesheet" href="<?php echo get_option('siteurl'); ?>/wp-content/plugins/admin.css"></link>
+	<link type="text/css" rel="stylesheet" href="<?php echo WPSC_URL; ?>/css/admin.css"></link>
 	<script language="javascript" type="text/javascript" src="<?php echo $tinyURI; ?>/tiny_mce_popup.js"></script>
 	<script language="javascript" type="text/javascript" src="<?php echo $tinyURI; ?>/utils/mctabs.js"></script>
 	<script language="javascript" type="text/javascript" src="<?php echo $tinyURI; ?>/utils/form_utils.js"></script>

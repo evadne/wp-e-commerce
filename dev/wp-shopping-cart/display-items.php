@@ -54,6 +54,7 @@ function top_category_options($category_id = null, $iteration = 0, $selected_id 
  * Makes the order changes
  */
 
+
 if(is_numeric($_GET['catid']) && is_numeric($_GET['product_id']) && ($_GET['position_action'] != ''))
   {
   $position_cat_id = $_GET['catid'];
@@ -804,7 +805,7 @@ $num_products = $wpdb->get_var("SELECT COUNT(DISTINCT `id`) FROM `".$wpdb->prefi
   <?php
   
   
-	if(function_exists('add_object_page')) {
+	if(IS_WP27) {
 		echo "
 			<div id='dashboard-widgets' class='metabox-holder'>";
 	}
@@ -873,7 +874,7 @@ echo $display_added_product ;
 </script>
 
 <?php
-if (function_exists('add_object_page')) {
+if (IS_WP27) {
 	echo "<div class='wpsc_products_nav27'>";
 } else {
 	echo "<div class='tablenav wpsc_products_nav'>";
@@ -905,13 +906,13 @@ $num = 0;
 
 echo "    <table id='productpage'>\n\r";
 echo "      <tr><td style='padding-right: 15px;'>\n\r";
-if (function_exists('add_object_page')){
+if (IS_WP27){
 	echo "<div class='postbox'>";
 	echo "<h3 class='hndle'>".TXT_WPSC_SELECT_PRODUCT."</h3>";
 	echo "<div class='inside'>";
 }
 echo "        <table id='itemlist'>\n\r";
-if (!function_exists('add_object_page')) {
+if (!IS_WP27) {
 	echo "          <tr class='firstrowth'>\n\r";
 	echo "            <td colspan='4' style='text-align: left;'>\n\r";
 	echo "<span id='loadingindicator_span' class='product_loadingindicator'><img id='loadingimage' src='".WPSC_URL."/images/grey-loader.gif' alt='Loading' title='Loading' /></span>";
@@ -935,7 +936,7 @@ if(($num_products > 20) || ($search_string != '')) {
 	echo "          </tr>\n\r";
 }
 
-if (function_exists('add_object_page')){
+if (IS_WP27){
 	//echo topcategorylist();
 }else{
 echo "          <tr class='selectcategory'>\n\r";
@@ -1045,7 +1046,7 @@ if($product_list != null)
 	} else if(($product['image'] != null) && file_exists(WPSC_THUMBNAIL_DIR.$product['image'])) { // check for automatic thumbnail images
 		echo "<img title='Drag to a new position' src='".WPSC_THUMBNAIL_URL.$product['image']."' title='".$product['name']."' alt='".$product['name']."' width='35' height='35'  />";
 	} else { // no image, display this fact
-		echo "<img title='Drag to a new position' src='".WPSC_URL."/no-image-uploaded.gif' title='".$product['name']."' alt='".$product['name']."' width='35' height='35' />";
+		echo "<img title='Drag to a new position' src='".WPSC_URL."/images/no-image-uploaded.gif' title='".$product['name']."' alt='".$product['name']."' width='35' height='35' />";
 	}
 
 	echo "</a>";
@@ -1059,7 +1060,8 @@ if($product_list != null)
     echo "            <div class='pli_name'>\n\r";
    }
    
-	echo "<a href='#' onclick='filleditform(".$product['id'].");return false;'>";
+//	echo "<a href='#' onclick='filleditform(".$product['id'].");return false;'>";
+	echo "<a href='?page=wp-shopping-cart/display-items.php&changethis=1&prodid=".$product['id']."'>";
 	if ($product['name']=='') {
 		echo "(".TXT_WPSC_NONAME.")";
 	} else {
@@ -1072,7 +1074,8 @@ if($product_list != null)
 	if(is_numeric($_GET['catid'])){
 		echo "            </div>\n\r";    
 	} else {
-		echo '<div class="wpsc-row-actions"><span class="edit"><a title="Edit this product" style="cursor:pointer;" onclick="filleditform('.$product['id'].');return false;">Edit</a></span> ';
+//		echo '<div class="wpsc-row-actions"><span class="edit"><a title="Edit this product" style="cursor:pointer;" onclick="filleditform('.$product['id'].');return false;">Edit</a></span> ';
+		echo '<div class="wpsc-row-actions"><span class="edit">'."<a href='?page=wp-shopping-cart/display-items.php&changethis=1&prodid=".$product['id']."'".' title="Edit this product" style="cursor:pointer;">Edit</a></span> ';
 		echo '| <span class="delete"><a onclick="if ( confirm(\'Are you sure to delete this product?\') ) { return true;}return false;" href="?page=wp-shopping-cart/display-items.php&deleteid='.$product['id'].'" title="Delete this product">Delete</a></span> ';
 		echo '| <span class="view"><a target="_blank" rel="permalink" title=\'View "'.$product['name'].'"\' href="'.wpsc_product_url($product['id']).'">View</a></span>';
 		echo ' | <span class="view"><a rel="permalink" title=\'Duplicate "'.$product['name'].'"\' href="?page=wp-shopping-cart/display-items.php&duplicate='.$product['id'].'">Duplicate</a></span> ';
@@ -1122,7 +1125,7 @@ if($product_list != null)
 			$_GET['pnum']=0;
 		}
 		
-		if (function_exists('add_object_page')){
+		if (IS_WP27){
 			echo "</table>";
 			echo "<div id='major-publishing-actions' class='wpsc_delete_product'>";
 		} else {
@@ -1136,7 +1139,7 @@ if($product_list != null)
 			'end_size' => 2, // How many numbers on either end including the end
 			'mid_size' => 2, // How many numbers to either side of current not including current
 		));
-		if(function_exists('add_object_page')){
+		if(IS_WP27){
 			echo "<div class='deleteproducts' style='float:left;'><button class='button-primary'>Delete</button></div>";
 		} else {
 			echo "<div class='deleteproducts' style='float:left;'><button class='button'>Delete</button></div>";
@@ -1166,7 +1169,7 @@ if($product_list != null)
 			echo "</div>";
 		}
 		echo "</td>";
-		if (!function_exists('add_object_page')){
+		if (!IS_WP27){
 			echo "</tr>";
 		}
 	}
@@ -1178,7 +1181,7 @@ if (isset($_GET['catid'])) {
 	if (($product_data_count >= 1) && (IS_WP27))
  		echo "</table>";
 }
-if (function_exists('add_object_page')){
+if (IS_WP27){
 	echo "</div>"; //id major-publishing-actions ends
 	echo "</div>"; //class inside ends
 	echo "</div>"; //class postbox ends
@@ -1193,15 +1196,17 @@ if (($product_data_count < 1)&& (IS_WP27)){
 
 //First column ends here
 echo "      </td><td class='secondcol'>\n\r";
-echo "<form method='POST' enctype='multipart/form-data' class='edititem' name='editproduct$num'>";
-echo "<div id='formcontent' style='width:100%;'>";
-echo "</div>";
-echo "</form>";
-echo "</div>";
+if( isset($_REQUEST['changethis']) ) {
+	echo "<form method='POST' enctype='multipart/form-data' class='edititem' name='editproduct$num'>";
+	echo "<div id='formcontent' style='width:100%;'>";
+	echo wpsc_getproductform($_REQUEST['prodid']);
+	echo "</div>";
+	echo "</form>";
+} else {
 ?>
 <form method='POST' enctype='multipart/form-data' class='additem'>
 <?php
-if (function_exists('add_object_page')){
+if (IS_WP27){
 	echo "<div id='additem'>";
 	echo "        <div id='additem27' class='postbox'>";
 	echo "<h3 class='hndle'>". TXT_WPSC_PRODUCTDETAILS." ".TXT_WPSC_ENTERPRODUCTDETAILSHERE."</h3>";
@@ -1213,7 +1218,7 @@ if (function_exists('add_object_page')){
 ?>
   <?php wp_nonce_field( 'closedpostboxes', 'closedpostboxesnonce', false ); ?>
 <?php
-	if(function_exists('add_object_page')) {
+	if(IS_WP27) {
 		echo "<div class='inside'>";
 	}
 ?><table class='additem' style='width:100%;'>
@@ -1257,7 +1262,7 @@ if (function_exists('add_object_page')){
    
 <?php
 
-	if(function_exists('add_object_page')){
+	if(IS_WP27){
 		echo "</table>
    </div></div>
 <table class='additem' style='margin-top:0px;'>";
@@ -1266,23 +1271,26 @@ if (function_exists('add_object_page')){
     
 <tr><td  colspan='2'>
 <?php
-	if (function_exists('add_object_page')){
+	if (IS_WP27){
 		echo "<div id='normal-sortables' class='meta-box-sortables'>";
 	}
+
 	$order = get_option('wpsc_product_page_order');
 	if (($order == '') || ($order[0]=='') || (count($order) < 7)){
 		$order=array("category_and_tag", "price_and_stock", "shipping", "variation", "advanced", "product_image", "product_download");
 	}
+	update_option('wpsc_product_page_order', $order);
+
 	foreach((array)$order as $key => $box) {
 		$box_function_name = $box."_box";
 		$output = call_user_func($box_function_name);
 		echo $output;
-		if(!function_exists('add_object_page') && ($key!=count($order)-1)) {
+		if(!IS_WP27 && ($key!=count($order)-1)) {
 			echo "</td></tr>";
   			echo "<tr><td colspan='2'>";
   		}
 	}
-	if (function_exists('add_object_page')){
+	if (IS_WP27){
 		echo "</div>";
 	}
 ?>
@@ -1296,7 +1304,7 @@ if (function_exists('add_object_page')){
       <td>
       
       <?php
-      	if (!function_exists('add_object_page')){
+      	if (!IS_WP27){
       		echo "<br>";
       	}
       ?>
@@ -1306,10 +1314,11 @@ if (function_exists('add_object_page')){
     </tr>
   </table>
   </form>
-  </div>
 <?php
+}   // <--- End of Add Product form
+
 echo "      </td></tr>\n\r";
 echo "     </table>\n\r"
 
-  ?>
+?>
 </div>

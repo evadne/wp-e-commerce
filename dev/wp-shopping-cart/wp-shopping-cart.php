@@ -434,16 +434,17 @@ function nzshpcrt_javascript()
 	}
   ?>
 <?php if (get_option('product_ratings') == 1){ ?>
-<link href='<?php echo WPSC_URL; ?>/product_rater.css' rel="stylesheet" type="text/css" />
+<link href='<?php echo WPSC_URL; ?>/css/product_rater.css' rel="stylesheet" type="text/css" />
 <?php } ?>
-<link href='<?php echo WPSC_URL; ?>/thickbox.css' rel="stylesheet" type="text/css" />
+<link href='<?php echo WPSC_URL; ?>/js/thickbox.css' rel="stylesheet" type="text/css" />
 <?php if (get_option('catsprods_display_type') == 1){ ?>
   <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/slideMenu.js"></script>
 <?php } ?>
 <script language='JavaScript' type='text/javascript'>
 jQuery.noConflict();
 /* base url */
-var base_url = "<?php echo $siteurl; ?>";
+var ajax_url = "<?php bloginfo('wpurl'); ?>/wp-admin/admin-ajax.php";
+var base_url = "<?php bloginfo('wpurl'); ?>";
 var WPSC_URL = "<?php echo WPSC_URL; ?>";
 var WPSC_IMAGE_URL = "<?php echo WPSC_IMAGE_URL; ?>";
 /* LightBox Configuration start*/
@@ -481,10 +482,10 @@ jQuery(document).ready( function() {
 });
 </script>
 
-<script src="<?php echo WPSC_URL; ?>/ajax.js" language='JavaScript' type="text/javascript"></script>
+<script src="<?php echo WPSC_URL; ?>/js/ajax.js" language='JavaScript' type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/ui.datepicker.js"></script>
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/jquery.jeditable.pack.js"></script>
-<script src="<?php echo WPSC_URL; ?>/user.js" language='JavaScript' type="text/javascript">
+<script src="<?php echo WPSC_URL; ?>/js/user.js" language='JavaScript' type="text/javascript">
 </script>
 
 
@@ -509,9 +510,9 @@ function wpsc_admin_css() {
   $siteurl = get_option('siteurl'); 
   if((strpos($_SERVER['REQUEST_URI'], WPSC_DIR_NAME.'') !== false) || ($_GET['mass_upload'] == 'true')) {
   	if(function_exists('add_object_page')) {
-  		echo "<link href='".WPSC_URL."/admin_2.7.css' rel='stylesheet' type='text/css' />";
+  		echo "<link href='".WPSC_URL."/css/admin_2.7.css' rel='stylesheet' type='text/css' />";
   	} else {
-  		echo "<link href='".WPSC_URL."/admin.css' rel='stylesheet' type='text/css' />";
+  		echo "<link href='".WPSC_URL."/css/admin.css' rel='stylesheet' type='text/css' />";
   	}
 ?>
 
@@ -524,8 +525,8 @@ if (($_GET['page'] == 'wp-shopping-cart/display-log.php') || ($_GET['page'] == '
 	<?php
 }
 ?>
-<!-- <link href='<?php echo WPSC_URL; ?>/thickbox.css' rel="stylesheet" type="text/css" /> -->
-<script src="<?php echo WPSC_URL; ?>/ajax.js" language='JavaScript' type="text/javascript"></script>
+<!-- <link href='<?php echo WPSC_URL; ?>/js/thickbox.css' rel="stylesheet" type="text/css" /> -->
+<script src="<?php echo WPSC_URL; ?>/js/ajax.js" language='JavaScript' type="text/javascript"></script>
 
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/jquery.tooltip.js"></script>
 <!--		<script src="http://dev.jquery.com/view/tags/ui/latest/ui/ui.core.js"></script>
@@ -533,7 +534,8 @@ if (($_GET['page'] == 'wp-shopping-cart/display-log.php') || ($_GET['page'] == '
 <script language='JavaScript' type='text/javascript'>
 
 /* base url */
-var base_url = "<?php echo $siteurl; ?>";
+var base_url = "<?php echo bloginfo('siteurl'); ?>";
+var ajax_url = "<?php bloginfo('wpurl'); ?>/wp-admin/admin-ajax.php";
 var WPSC_URL = "<?php echo WPSC_URL; ?>";
 var WPSC_IMAGE_URL = "<?php echo WPSC_IMAGE_URL; ?>";
 /* LightBox Configuration start*/
@@ -582,7 +584,7 @@ var borderSize = 10;
 <!--<script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/thickbox.js"></script>-->
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/jquery.tooltip.js"></script>
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/dimensions.js"></script>
-<script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/admin.js"></script>
+<script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/admin.js"></script>
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/ui.datepicker.js"></script>
   <style type="text/css" media="screen">
   <?php
@@ -593,21 +595,21 @@ var borderSize = 10;
     
     if(get_option('wpsc_use_flash_uploader') == 1) {
       ?>
-      table.flash-image-uploader {
+      table.use-flash-uploader {
         display: block;
       }
       
-      table.browser-image-uploader {
+      table.use-browser-uploader {
         display: none;
       }
       <?php
     } else {
       ?>
-      table.flash-image-uploader {
+      table.use-flash-uploader {
         display: none;
       }
       
-      table.browser-image-uploader {
+      table.use-browser-uploader {
         display: block;
       }
       <?php
@@ -1521,16 +1523,13 @@ foreach($nzshpcrt_shipping_list as $nzshpcrt_shipping) {
 			}
 		}
 
-function nzshpcrt_download_file() {
-  global $wpdb,$user_level,$wp_rewrite; 
-  get_currentuserinfo();  
-  function readfile_chunked($filename, $retbytes = true) {
-    $chunksize = 1 * (1024 * 1024); // how many bytes per chunk
-    $buffer = '';
-    $cnt = 0;
-    $handle = fopen($filename, 'rb');
-    if($handle === false) {
-      return false;
+function readfile_chunked($filename, $retbytes = true) {
+	$chunksize = 1 * (1024 * 1024); // how many bytes per chunk
+	$buffer = '';
+	$cnt = 0;
+	$handle = fopen($filename, 'rb');
+	if($handle === false) {
+	  return false;
 		}
 		while (!feof($handle)) {
 			$buffer = fread($handle, $chunksize);
@@ -1541,13 +1540,17 @@ function nzshpcrt_download_file() {
 				$cnt += strlen($buffer);
 			}
 		}
-    $status = fclose($handle);
-    if($retbytes && $status) {
-      return $cnt; // return num. bytes delivered like readfile() does.
+	$status = fclose($handle);
+	if($retbytes && $status) {
+	  return $cnt; // return num. bytes delivered like readfile() does.
 		}
-    return $status;
-	}  
-  
+	return $status;
+}  
+
+function nzshpcrt_download_file() {
+  global $wpdb,$user_level,$wp_rewrite; 
+  get_currentuserinfo();  
+
   if(isset($_GET['downloadid'])) {
     // strip out anything that isnt 'a' to 'z' or '0' to '9'
     $downloadid = preg_replace("/[^a-z0-9]+/i",'',strtolower($_GET['downloadid']));
@@ -1610,37 +1613,7 @@ function nzshpcrt_download_file() {
         exit();
 			}
 		}
-	} else {
-		if(($_GET['admin_preview'] == "true") && is_numeric($_GET['product_id']) && current_user_can('edit_plugins')) {
-			$product_id = $_GET['product_id'];
-			$product_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."product_list` WHERE `id` = '$product_id' LIMIT 1",ARRAY_A);
-			if(is_numeric($product_data[0]['file']) && ($product_data[0]['file'] > 0)) {
-				$file_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."product_files` WHERE `id`='".$product_data[0]['file']."' LIMIT 1",ARRAY_A) ;
-				$file_data = $file_data[0];
-				if(is_file(WPSC_FILE_DIR.$file_data['idhash'])) {
-					header('Content-Type: '.$file_data['mimetype']);
-					header('Content-Length: '.filesize(WPSC_FILE_DIR.$file_data['idhash']));
-					header('Content-Transfer-Encoding: binary');
-					if($_GET['preview_track'] != 'true') {
-						header('Content-Disposition: attachment; filename="'.$file_data['filename'].'"');
-					} else {
-						header('Content-Disposition: inline; filename="'.$file_data['filename'].'"');
-					}
-					if(isset($_SERVER["HTTPS"]) && ($_SERVER["HTTPS"] != '')) {
-						header("Pragma: public");
-						header("Expires: 0");      
-						header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-						header("Cache-Control: public"); 
-					} else {
-						header('Cache-Control: must-revalidate, post-check=0, pre-check=0');       
-					}             
-					$filename = WPSC_FILE_DIR.$file_data['idhash'];  
-					readfile_chunked($filename);   
-					exit();
-				}            
-			}
-    }
-  }
+	} 
 }
 
 function nzshpcrt_display_preview_image() {
@@ -2470,10 +2443,8 @@ function wpsc_start_the_query() {
 add_action('init', 'wpsc_start_the_query', 0);
 
 
-
-
 if(strpos($_SERVER['SCRIPT_NAME'], "wp-admin") === false) {
-  wp_enqueue_script( 'jQuery', WPSC_URL.'/js/jquery.js', false, '1.2.3');
+	wp_enqueue_script( 'jQuery', WPSC_URL.'/js/jquery.js', false, '1.2.3');
 // 	wp_enqueue_script('instinct_thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
 	wp_enqueue_script('ngg-thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
 } else {
@@ -2484,21 +2455,38 @@ if(strpos($_SERVER['SCRIPT_NAME'], "wp-admin") === false) {
 	wp_enqueue_script('jQuery-ui',WPSC_URL.'/js/jquery-ui.js?ver=1.6', array('jquery'), '1.6');
 	wp_enqueue_script('jEditable',WPSC_URL.'/js/jquery.jeditable.pack.js', array('jquery'), '2.7.4');
 }
-if(strpos($_SERVER['REQUEST_URI'], WPSC_DIR_NAME.'') !== false) {
-// 	wp_enqueue_script('interface',WPSC_URL.'/js/interface.js', 'Interface');
-	
-		if($_GET['page'] == 'wp-shopping-cart/display-items.php') {
-			wp_enqueue_script( 'postbox', '/wp-admin/js/postbox.js', array('jquery'));
-      wp_enqueue_script('new_swfupload', WPSC_URL.'/js/swfupload.js');
-      wp_enqueue_script('new_swfupload.swfobject', WPSC_URL.'/js/swfupload/swfupload.swfobject.js');
-      //wp_enqueue_script('swfupload-degrade');
-      //wp_enqueue_script('swfupload-queue');
-      //wp_enqueue_script('swfupload-handlers');
-		}
+
+function wpsc_admin_scripts_items() {
+
+		wp_enqueue_script( 'wpsc-admin-items', WPSC_URL.'/js/admin_product.js', array('jquery'));
+		wp_enqueue_script( 'postbox', '/wp-admin/js/postbox.js', array('jquery'));
+		wp_enqueue_script('new_swfupload', WPSC_URL.'/js/swfupload.js');
+		wp_enqueue_script('new_swfupload.swfobject', WPSC_URL.'/js/swfupload/swfupload.swfobject.js');
+		//wp_enqueue_script('swfupload-degrade');
+		//wp_enqueue_script('swfupload-queue');
+		//wp_enqueue_script('swfupload-handlers');
 }
+add_action('admin_print_scripts-'.WPSC_DIR_NAME.'/display-items.php','wpsc_admin_scripts_items');
 
-
-
+function wpsc_insert_footer_js() {
+	// link for the flash file
+	$swf_upload_link = WPSC_URL.'/wpsc_upload_files.php?action=wpsc_add_product';
+	$swf_upload_link = wp_nonce_url($swf_upload_link, 'wp-shopping-cart');
+	//flash doesn't seem to like encoded ampersands, so convert them back here
+	$swf_upload_link = str_replace('&#038;', '&', $swf_upload_link);
+?>
+<script language="JavaScript">
+var base_url = "<?php bloginfo('siteurl'); ?>";
+var ajax_url = "<?php bloginfo('wpurl'); ?>/wp-admin/admin-ajax.php";
+var upload_url = "<?php echo $swf_upload_link; ?>";
+var auth_cookie = "<?php if ( is_ssl() ) echo $_COOKIE[SECURE_AUTH_COOKIE]; else echo $_COOKIE[AUTH_COOKIE]; ?>";
+var wpnonce = "<?php echo wp_create_nonce('wp-shopping-cart'); ?>";
+<?php include('js/swfupload_setup.php'); ?>
+</script>
+<?php
+	return;
+}
+add_action('admin_footer','wpsc_insert_footer_js');
 
 switch(get_option('cart_location')) {
   case 1:
@@ -2553,18 +2541,19 @@ function thickbox_variation() {
 	echo "<head>";
 	echo "<link rel='stylesheet' href='{$siteurl}/wp-admin/wp-admin.css?ver=2.6.3' type='text/css' media='all' />
 	<link rel='stylesheet' href='{$siteurl}/wp-admin/css/colors-fresh.css?ver=2.6.3' type='text/css' media='all' />
-	<link href='{$siteurl}/wp-content/plugins/wp-shopping-cart/admin.css' rel='stylesheet' type='text/css'/>
+	<link href='{WPSC_URL}/css/admin.css' rel='stylesheet' type='text/css'/>
 	<link rel='stylesheet' href='{$siteurl}/wp-admin/css/global.css?ver=2.6.3' type='text/css' media='all' />";
 	echo "<script type='text/javascript' src='{$siteurl}/wp-includes/js/jquery/jquery.js?ver=1.2.6'></script>";
 	echo "<script type='text/javascript' src='{$siteurl}/wp-includes/js/thickbox/thickbox.js?ver=3.1-20080430'></script>
-	<script language='JavaScript' type='text/javascript' src='{$siteurl}/wp-content/plugins/wp-shopping-cart/js/jquery.tooltip.js'></script>
-<script type='text/javascript' src='{$siteurl}/wp-content/plugins/wp-shopping-cart/js/jquery-ui.js?ver=1.6'></script>
-<script type='text/javascript' src='{$siteurl}/wp-content/plugins/wp-shopping-cart/js/jquery.jeditable.pack.js?ver=2.7.4'></script>
-<script language='JavaScript' type='text/javascript' src='{$siteurl}/wp-content/plugins/wp-shopping-cart/js/ui.datepicker.js'></script>
+	<script language='JavaScript' type='text/javascript' src='{WPSC_URL}/js/jquery.tooltip.js'></script>
+<script type='text/javascript' src='{WPSC_URL}/js/jquery-ui.js?ver=1.6'></script>
+<script type='text/javascript' src='{WPSC_URL}/js/jquery.jeditable.pack.js?ver=2.7.4'></script>
+<script language='JavaScript' type='text/javascript' src='{WPSC_URL}/js/ui.datepicker.js'></script>
 <script type='text/javascript' src='{$siteurl}/wp-includes/js/swfupload/swfupload.js?ver=2.0.2-20080430'></script>
 ";
 	echo "<script language='JavaScript' type='text/javascript'>
 			var base_url = '".$siteurl."';
+			var ajax_url = '".get_bloginfo('wpurl')."/wp-admin/admin-ajax.php';
 			var WPSC_URL = '".WPSC_URL."';
 			var WPSC_IMAGE_URL = '".WPSC_IMAGE_URL."';";
 		echo "var TXT_WPSC_DELETE = '".TXT_WPSC_DELETE."';\n\r";
@@ -2588,7 +2577,7 @@ function thickbox_variation() {
 		
 	echo	"</script>";
 		
-	echo "<script language='JavaScript' type='text/javascript' src='".WPSC_URL."/admin.js'></script></head>";
+	echo "<script language='JavaScript' type='text/javascript' src='".WPSC_URL."/js/admin.js'></script></head>";
 	if($_POST){
 				if($_POST['submit_action'] == "add") {
     //exit("<pre>".print_r($_POST,true)."</pre>");
@@ -2616,7 +2605,7 @@ function thickbox_variation() {
       $wpdb->query($variation_value_sql);
       echo "<head>";
 		echo "
-		<script language='JavaScript' type='text/javascript' src='".WPSC_URL."/admin.js'></script>
+		<script language='JavaScript' type='text/javascript' src='".WPSC_URL."/js/admin.js'></script>
 		<script language='JavaScript' type='text/javascript'>
 				parent.jQuery('#add_product_variations').html(\"".nl2br($variations_processor->list_variations())."\");
 				parent.tb_remove();

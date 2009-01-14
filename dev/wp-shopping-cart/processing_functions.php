@@ -661,6 +661,7 @@ function wpsc_item_process_file($mode = 'add') {
 			copy(WPSC_FILE_DIR.$old_idhash, WPSC_FILE_DIR.$new_name);
 			unlink(WPSC_FILE_DIR.$old_idhash);
 		}
+		
 		if(move_uploaded_file($_FILES['file']['tmp_name'],(WPSC_FILE_DIR.$idhash)))	{
 			$stat = stat( dirname( (WPSC_FILE_DIR.$idhash) ));
 			$perms = $stat['mode'] & 0000666;

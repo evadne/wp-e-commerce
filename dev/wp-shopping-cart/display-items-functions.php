@@ -465,21 +465,21 @@ function product_image_box($product_data='') {
 		$output .=	  "<div class='inside'>";
     	
     	
-  		$output .= "  <table width='100%' class='flash-image-uploader'>";
+  		$output .= "  <table width='100%' class='use-flash-uploader'>";
   		$output .= "    <tr>";
   		$output .= "      <td>";
   		
   		$output .= '      <span id=\'spanButtonPlaceholder\'></span>';
   		$output .= '      <button id="add-product-image" name="add-image" class="button-secondary" type="button"><small>Add New Image</small></button>';
 			
-  		$output .= "      <p>".TXT_WPSC_FLASH_UPLOADER."</p>";
+  		$output .= "      <p>".preg_replace('/\[link\]/',"<a class='wpsc_upload_switcher' >",TXT_WPSC_FLASH_UPLOADER)."</p>";
   		$output .= "      </td>";
   		$output .= "    </tr>";
   		$output .= "  </table>";
 		
 		
 		
-		$output .= "<table width='100%' class='browser-image-uploader'>";
+		$output .= "<table width='100%' class='use-browser-uploader'>";
 		if(function_exists("getimagesize")){
 			if($product['image'] != '') {
 			$imagedir = WPSC_THUMBNAIL_DIR;
@@ -649,7 +649,7 @@ function product_image_box($product_data='') {
   		}
   		$output .= "          <tr>\n\r";
   		$output .= "            <td colspan='2' >\n\r";
-  		$output .= "              <p>".TXT_WPSC_BROWSER_UPLOADER."</p>\n\r";
+  		$output .= "              <p>".preg_replace('/\[link\]/',"<a class='wpsc_upload_switcher' >",TXT_WPSC_BROWSER_UPLOADER)."</p>\n\r";
   		$output .= "            </td>\n\r";
   		$output .= "          </tr>\n\r";
     	
@@ -678,13 +678,13 @@ function product_image_box($product_data='') {
 	</h3>
 	<div class='inside'>
     
-    <table width='100%' class='flash-image-uploader'>
+    <table width='100%' class='use-flash-uploader'>
       <tr>
         <td>
           <span id='spanButtonPlaceholder'></span>
             <button id='add-product-image' name='add-image' class='button-secondary' type='button'><small>Add New Image</small></button>
             
-            <p>".TXT_WPSC_FLASH_UPLOADER."</p>
+            <p>".preg_replace('/\[link\]/',"<a class='wpsc_upload_switcher' >",TXT_WPSC_FLASH_UPLOADER)."</p>
         </td>
       </tr>
     </table>
@@ -692,7 +692,7 @@ function product_image_box($product_data='') {
     
     
     
-    <table width='100%' class='browser-image-uploader'>
+    <table width='100%' class='use-browser-uploader'>
       <tr>
         <td>
         ".TXT_WPSC_PRODUCTIMAGE.":
@@ -747,7 +747,7 @@ function product_image_box($product_data='') {
         $output .= "
         <tr>
           <td colspan='2' >
-            <p>".TXT_WPSC_BROWSER_UPLOADER."</p>
+            <p>".preg_replace('/\[link\]/',"<a class='wpsc_upload_switcher' >",TXT_WPSC_BROWSER_UPLOADER)."</p>
           </td>
         </tr>";
       }
@@ -787,48 +787,38 @@ function product_download_box($product_data='') {
     }
     $output .= TXT_WPSC_PRODUCTDOWNLOAD;
 	$output .= "</h3>
-	<div class='inside'>
-	<table>
+	<div class='inside'>";
+	$output .= '<span id="flash-product-uploader-status" ></span>';
+	/*
+	/	Kick out the flash action
+	*/
+	$output .= "  <table width='100%' class='use-flash-uploader'>";
+	$output .= "    <tr>";
+	$output .= '      <td><span id="spanButtonPlaceholderProduct"></span>';
+	$output .= '      <button id="add-product-files" name="add-product" class="button-secondary" type="button"><small>Add New File</small></button>';
+		
+	$output .= "      <p>".preg_replace('/\[link\]/',"<a class='wpsc_upload_switcher' >",TXT_WPSC_FLASH_UPLOADER)."</p>";
+	$output .= "      </td>";
+	$output .= "    </tr>";
+	$output .= "  </table>";
+	/*
+	/	Kick out the standard upload field
+	*/
+	$output .= "<table class='use-browser-uploader'>
     <tr>
       <td>
         ".TXT_WPSC_DOWNLOADABLEPRODUCT.":
       </td>
       <td>
-        <input type='file' name='file' value='' /><br />
-        ".wpsc_select_product_file($product_data['id'])."
-        <br />
+        <input type='file' name='file' value='' />
       </td>
-    </tr>";
-	if($product_data['file'] > 0) {
-    	$output .= "          <tr>\n\r";
-    	$output .= "            <td>\n\r";
-    	$output .= TXT_WPSC_PREVIEW_FILE.": ";
-    	$output .= "            </td>\n\r";
-    	$output .= "            <td>\n\r";    
-    	
-    	$output .= "<a class='admin_download' href='index.php?admin_preview=true&product_id=".$product_data['id']."' style='float: left;' ><img align='absmiddle' src='".WPSC_URL."/images/download.gif' alt='' title='' /><span>".TXT_WPSC_CLICKTODOWNLOAD."</span></a>";
-		
-    	$file_data = $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."product_files` WHERE `id`='".$product_data['file']."' LIMIT 1",ARRAY_A);
-    	if(($file_data != null) && (function_exists('listen_button'))) {
-    	  $output .= "".listen_button($file_data['idhash'], $file_data['id']);
-    	}
-    	  
-    	$output .= "            </td>\n\r";
-    	$output .= "          </tr>\n\r";
-    }
-	if(function_exists("make_mp3_preview") || function_exists("wpsc_media_player")) {    
-		$output .= "    <tr>\n\r";
-		$output .= "      <td>\n\r";
-		$output .= TXT_WPSC_PREVIEW_FILE.": ";
-		$output .= "      </td>\n\r";
-		$output .= "      <td>\n\r";
-		$output .= "<input type='file' name='preview_file' value='' /><br />";
-		$output .= "<br />";
-		$output .= "<br />";
-		$output .= "      </td>\n\r";
-		$output .= "    </tr>\n\r";
-	}
-	$output .="</table></div></div>";
+    </tr><tr><td></td><td><p>".preg_replace('/\[link\]/',"<a class='wpsc_upload_switcher' >",TXT_WPSC_BROWSER_UPLOADER)."</p></td></tr></table>";
+    /*
+    /	The list of product file already uploaded (including the one selected for this product)
+    */
+    $output .= '<span id="wpsc_dl_product_list">'.wpsc_select_product_file($product_data['id']).'</span>';
+
+	$output .="</div></div>";
 	return $output;
 }
 
@@ -889,7 +879,50 @@ global $closed_postboxes;
 	</table></div></div>
 <?php
 }
+/*
+ * Request to download Product File
+ */
+function wpsc_admin_dl() {
+	global $wpdb;
 
+	if( !isset($_REQUEST['action']) && $_REQUEST['action'] != 'admin_preview') return;
+	
+	$wpnonce = $_REQUEST['_wpnonce'];
+	if( !wp_verify_nonce($wpnonce,'wp-shopping-cart') ) wp_die('security check');
+	
+	if( current_user_can('edit_plugins') ) {
+		$file_id = $_REQUEST['file_id'];
+
+		$file_data = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."product_files` WHERE `id`='".$file_id."' LIMIT 1",ARRAY_A) ;
+		$file_data = $file_data[0];
+
+		if(is_file(WPSC_FILE_DIR.$file_data['idhash'])) {
+			header('Content-Type: '.$file_data['mimetype']);
+			header('Content-Length: '.filesize(WPSC_FILE_DIR.$file_data['idhash']));
+			header('Content-Transfer-Encoding: binary');
+
+			if($_GET['preview_track'] != 'true') {
+				header('Content-Disposition: attachment; filename="'.$file_data['filename'].'"');
+			} else {
+				header('Content-Disposition: inline; filename="'.$file_data['filename'].'"');
+			}
+
+			if(isset($_SERVER["HTTPS"]) && ($_SERVER["HTTPS"] != '')) {
+				header("Pragma: public");
+				header("Expires: 0");      
+				header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+				header("Cache-Control: public"); 
+			} else {
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');       
+			}             
+			$filename = WPSC_FILE_DIR.$file_data['idhash'];  
+			readfile_chunked($filename);            
+		}
+    }
+	exit();
+}
+add_action('admin_init','wpsc_admin_dl');
+ 
 /*
 /* Code to support Publish/No Publish (TRansom)
 */

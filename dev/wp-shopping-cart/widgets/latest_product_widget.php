@@ -32,7 +32,7 @@ function nzshpcrt_latest_product($input = null) {
 					$output .= "<img src='".WPSC_THUMBNAIL_URL.$special['image']."' title='".$special['name']."' alt='".$special['name']."' /><br />";
 				}
 			} else {
-				//$output .= "<img src='$siteurl/wp-content/plugins/wp-shopping-cart/no-image-uploaded.gif' title='".$special['name']."' alt='".$special['name']."' /><br />";
+				//$output .= "<img src='".WPSC_URL."/images/no-image-uploaded.gif' title='".$special['name']."' alt='".$special['name']."' /><br />";
 			}
 			$output .= "</div>";
 			$output .= "<strong>".stripslashes($special['name'])."</strong></a><br><br /> ";
