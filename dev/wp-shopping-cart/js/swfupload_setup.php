@@ -1,5 +1,5 @@
 <?php
-
+if( $_REQUEST['page'] == WPSC_DIR_NAME.'/display-items.php' ) {   // Only load on the Display-Items page
 ?>
 window.onload = function() {
 // Create swf object
@@ -31,7 +31,7 @@ window.onload = function() {
 			progressBar : false,
 			sorting : false
 	  },
-	  debug: true,
+	  debug: false,
 	  
 	  file_queued_handler : imageFileQueued,
 	  file_queue_error_handler : imageFileQueueError,
@@ -70,7 +70,7 @@ window.onload = function() {
 			progressBar : false,
 			sorting : false
 	  },
-	  debug: true,
+	  debug: false,
 	  
 	  file_queued_handler : productFileQueued,
 	  file_queue_error_handler : productFileQueueError,
@@ -95,3 +95,5 @@ window.onload = function() {
 	swfu = new SWFUpload(swfu_settings);
 	swfdl = new SWFUpload(swfdl_settings);
 };
+?>
+}

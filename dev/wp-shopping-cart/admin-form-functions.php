@@ -132,13 +132,34 @@ function wpsc_getproductform($prodid)
   
   $output .= "          <tr>\n\r";
   $output .= "            <td class='itemfirstcol' colspan='2'>\n\r";
+
+//TRansom - Addl Desc Option
+		$the_desc = $product['additional_description'];
+		if( is_serialized($the_desc) ) {
+			$addl_descriptions = @unserialize($the_desc);
+		} else {
+			$addl_descriptions = array('addl_desc' => $the_desc);
+		}
+	
+		if( isset($addl_descriptions['addl_desc']) ) {
+			$value = $addl_descriptions['addl_desc'];
+		} else {
+			$value = '';
+		}
+	
+	if( function_exists('wpsc_addl_desc_product_edit') ) {		
+		$output .= wpsc_addl_desc_product_edit($empty=false,$addl_descriptions);
+	} else {
   $output .= "<strong >".TXT_WPSC_ADDITIONALDESCRIPTION." :</strong><br />";
 /*
   $output .= "            </td>\n\r";
   $output .= "            <td class='itemformcol'>\n\r";
 */
 
- $output .= "<textarea name='additional_description' cols='40' rows='8' >".stripslashes($product['additional_description'])."</textarea>";
+	 $output .= "<textarea name='additional_description' cols='40' rows='8' >".htmlentities(stripslashes($value))."</textarea>";
+	}
+// END <-- Add'l Desc Option
+
   $output .= "            </td>\n\r";
   $output .= "          </tr>\n\r";
  /*    

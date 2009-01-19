@@ -174,14 +174,30 @@ function nszhpcrt_category_tag($content = '') {
 						if($product['description'] != '') {
 							$output .= "<p class='wpsc_description'>".nl2br(stripslashes($product['description'])) . "</p>";
 						}
-				
-						if($product['additional_description'] != '') {
+						
+						$value = '';
+						$the_addl_desc = $product['additional_description'];
+						if( is_serialized($the_addl_desc) ) {
+							$addl_descriptions = @unserialize($the_addl_desc);
+						} else {
+							$addl_descriptions = array('addl_desc', $the_addl_desc);
+						}
+						
+						if( isset($addl_descriptions['addl_desc']) ) {
+							$value = $addl_descriptions['addl_desc'];
+						}
+						
+						if($value != '') {
 							$output .= "<a href='#' class='additional_description_link' onclick='return show_additional_description(\"additionaldescription".$product['id']."\",\"link_icon".$product['id']."\");'>";
 							$output .= "<img id='link_icon".$product['id']."' class='additional_description_button'  src='".WPSC_URL."/images/icon_window_expand.gif' title='".$product['name']."' alt='".$product['name']."' />";
 							$output .= TXT_WPSC_MOREDETAILS."</a>";
 						
 							$output .= "<span class='additional_description' id='additionaldescription".$product['id']."'><br />";
-							$output .= nl2br(stripslashes($product['additional_description'])) . "";
+							if( function_exists('wpsc_addl_desc_show') ) {
+								$output .= wpsc_addl_desc_show($addl_descriptions);
+							} else {
+								$output .= nl2br(stripslashes($value)) . "";
+							}
 							$output .= "</span><br />";
 						}
 					}

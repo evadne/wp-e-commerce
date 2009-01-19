@@ -145,7 +145,12 @@ if($_POST['submit_action'] == 'add') {
 		
 		$thumbnail_image = '';
 		
-			
+		if( function_exists('wpsc_addl_desc_product_form_submit') ) {	//TRansom - added for add'l desc option
+			$addl_description = wpsc_addl_desc_product_form_submit();
+		} else {
+			$addl_description = $wpdb->escape( maybe_serialize( array( 'addl_desc' => stripslashes($_POST['additional_description']) )));
+		}
+
 		$file = 0;  
 		/* handle adding file uploads here */
 		if(!empty($_FILES['file']['name'])) {
@@ -206,7 +211,7 @@ if($_POST['submit_action'] == 'add') {
 			$no_shipping = 0;
 		}
 
-		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` ( `name` , `description` , `additional_description` , `price`, `weight`, `weight_unit`, `pnp`, `international_pnp`, `file` , `image` , `brand`, `quantity_limited`, `quantity`, `special`, `special_price`, `display_frontpage`, `publish`, `notax`, `donation`, `no_shipping`, `thumbnail_image`, `thumbnail_state`) VALUES ('".$wpdb->escape($_POST['name'])."', '".$wpdb->escape($_POST['description'])."', '".$wpdb->escape($_POST['additional_description'])."','".(float)$wpdb->escape(str_replace(",","",$_POST['price']))."','".$wpdb->escape((float)$_POST['weight'])."','".$wpdb->escape($_POST['weight_unit'])."', '".$wpdb->escape((float)$_POST['pnp'])."', '".$wpdb->escape($_POST['international_pnp'])."', '".(int)$file."', '".$_POST['images'][0]."', '0', '$quantity_limited','$quantity','$special','$special_price', '$display_frontpage', '$publish', '$notax', '$is_donation', '$no_shipping', '".$wpdb->escape($thumbnail_image)."', '" . $wpdb->escape($_POST['image_resize']) . "');";
+		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` ( `name` , `description` , `additional_description` , `price`, `weight`, `weight_unit`, `pnp`, `international_pnp`, `file` , `image` , `brand`, `quantity_limited`, `quantity`, `special`, `special_price`, `display_frontpage`, `publish`, `notax`, `donation`, `no_shipping`, `thumbnail_image`, `thumbnail_state`) VALUES ('".$wpdb->escape($_POST['name'])."', '".$wpdb->escape($_POST['description'])."', '".$addl_description."','".(float)$wpdb->escape(str_replace(",","",$_POST['price']))."','".$wpdb->escape((float)$_POST['weight'])."','".$wpdb->escape($_POST['weight_unit'])."', '".$wpdb->escape((float)$_POST['pnp'])."', '".$wpdb->escape($_POST['international_pnp'])."', '".(int)$file."', '".$_POST['images'][0]."', '0', '$quantity_limited','$quantity','$special','$special_price', '$display_frontpage', '$publish', '$notax', '$is_donation', '$no_shipping', '".$wpdb->escape($thumbnail_image)."', '" . $wpdb->escape($_POST['image_resize']) . "');";
 		
 		if($wpdb->query($insertsql)) {
 			$product_id= $wpdb->get_var("SELECT LAST_INSERT_ID() AS `id` FROM `".$wpdb->prefix."product_list` LIMIT 1");
@@ -588,8 +593,17 @@ if($_POST['submit_action'] == "edit") {
 		} else {
 			$no_shipping = 0;
 		}
-		
-		$updatesql = "UPDATE `".$wpdb->prefix."product_list` SET `name` = '".$wpdb->escape($_POST['title'])."', `description` = '".$wpdb->escape($_POST['description'])."', `additional_description` = '".$wpdb->escape($_POST['additional_description'])."', `price` = '".$wpdb->escape(str_replace(",","",$_POST['price']))."', `pnp` = '".(float)$wpdb->escape($_POST['pnp'])."', `international_pnp` = '".(float)$wpdb->escape($_POST['international_pnp'])."', `brand` = '0', quantity_limited = '".$quantity_limited."', `quantity` = '".(int)$quantity."', `special`='$special', `special_price`='$special_price', `display_frontpage`='$display_frontpage', `publish`='$publish', `notax`='$notax', `donation`='$is_donation', `no_shipping` = '$no_shipping', `weight` = '".$wpdb->escape($_POST['weight'])."', `weight_unit` = '".$wpdb->escape($_POST['weight_unit'])."'  WHERE `id`='".$_POST['prodid']."' LIMIT 1";
+
+//TRansom - Addl Desc Option
+		if( function_exists('wpsc_addl_desc_product_form_submit') ) {	//TRansom - added for add'l desc option
+			$addl_description = wpsc_addl_desc_product_form_submit();
+		} else {
+			$addl_description = $wpdb->escape( maybe_serialize( array( 'addl_desc' => stripslashes($_POST['additional_description']) )));
+		}
+
+// END <-- Add'l Desc Option
+
+		$updatesql = "UPDATE `".$wpdb->prefix."product_list` SET `name` = '".$wpdb->escape($_POST['title'])."', `description` = '".$wpdb->escape($_POST['description'])."', `additional_description` = '".$addl_description."', `price` = '".$wpdb->escape(str_replace(",","",$_POST['price']))."', `pnp` = '".(float)$wpdb->escape($_POST['pnp'])."', `international_pnp` = '".(float)$wpdb->escape($_POST['international_pnp'])."', `brand` = '0', quantity_limited = '".$quantity_limited."', `quantity` = '".(int)$quantity."', `special`='$special', `special_price`='$special_price', `display_frontpage`='$display_frontpage', `publish`='$publish', `notax`='$notax', `donation`='$is_donation', `no_shipping` = '$no_shipping', `weight` = '".$wpdb->escape($_POST['weight'])."', `weight_unit` = '".$wpdb->escape($_POST['weight_unit'])."'  WHERE `id`='".$_POST['prodid']."' LIMIT 1";
 
 		$wpdb->query($updatesql);
 		if(($_FILES['image']['name'] != null) && ($image != null)) {
@@ -1254,8 +1268,12 @@ if (IS_WP27){
     </tr>
     <tr>
       <td colspan="2" class='itemfirstcol'>
+      <?php if( function_exists('wpsc_addl_desc_product_edit') ) { 
+      	echo wpsc_addl_desc_product_edit($empty=true);
+      	} else { ?>
       	<strong><?php echo TXT_WPSC_ADDITIONALDESCRIPTION;?>:</strong> <br />
         <textarea name='additional_description' cols='40' rows='8'></textarea>
+      <?php } ?>
       </td>
     </tr>
  

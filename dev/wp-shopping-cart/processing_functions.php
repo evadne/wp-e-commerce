@@ -1092,7 +1092,18 @@ function wpsc_add_product($product_values) {
 		$insertsql = "INSERT INTO `".$wpdb->prefix."product_list` SET";
 		$insertsql .= "`name` = '".$wpdb->escape($product_values['name'])."',";
 		$insertsql .= "`description`  = '".$wpdb->escape($product_values['description'])."',";
-		$insertsql .= "`additional_description`  = '".$wpdb->escape($product_values['additional_description'])."',";
+		
+		if( is_array($product_values['additional_description']) ) {
+			if( function_exists('wpsc_addl_desc_product_form_submit') ) {
+				$addl_description = wpsc_addl_desc_product_form_submit();
+			} else {
+				$addl_description = $wpdb->escape( maybe_serialize( array( 'addl_desc' => stripslashes($_POST['additional_description'][0])) ));
+			}
+		} else {
+			$addl_description = $wpdb->escape( maybe_serialize( array( 'addl_desc' => stripslashes($_POST['additional_description'])) ));
+		}
+
+		$insertsql .= "`additional_description`  = '".$addl_description."',";
 				
 		$insertsql .= "`price` = '".$wpdb->escape($product_values['price'])."',";
 		

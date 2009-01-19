@@ -11,8 +11,8 @@ function nzshpcrt_products_page($content = '') {
     } else {
 			$theme_dir = get_option('wpsc_selected_theme');
     }
-    
-		$wpsc_query->get_products();
+
+	$wpsc_query->get_products();
     $GLOBALS['nzshpcrt_activateshpcrt'] = true;
     ob_start();
     if(wpsc_is_single_product()) {

@@ -885,8 +885,8 @@ global $closed_postboxes;
 function wpsc_admin_dl() {
 	global $wpdb;
 
-	if( !isset($_REQUEST['action']) && $_REQUEST['action'] != 'admin_preview') return;
-	
+	if( !isset($_REQUEST['action']) || $_REQUEST['action'] != 'admin_preview') return;
+
 	$wpnonce = $_REQUEST['_wpnonce'];
 	if( !wp_verify_nonce($wpnonce,'wp-shopping-cart') ) wp_die('security check');
 	

@@ -491,11 +491,23 @@ jQuery(document).ready( function() {
 
 
 <?php
-  $theme_path = WPSC_FILE_PATH. '/themes/';
-  if((get_option('wpsc_selected_theme') != '') && (file_exists($theme_path.get_option('wpsc_selected_theme')."/".get_option('wpsc_selected_theme').".css") )) {    
+	$theme_path = WPSC_FILE_PATH. '/themes/';
+	if((get_option('wpsc_selected_theme') != '') && (file_exists($theme_path.get_option('wpsc_selected_theme')."/".get_option('wpsc_selected_theme').".css") )) {    
     ?>    
 <link href='<?php echo WPSC_URL; ?>/themes/<?php echo get_option('wpsc_selected_theme')."/".get_option('wpsc_selected_theme').".css"; ?>' rel="stylesheet" type="text/css" />
     <?php
+// TRansom - For Addl Desc Option
+		if( function_exists('wpsc_addl_desc_show') ) {
+			if( file_exists($theme_path.get_option('wpsc_selected_theme')."/css/ui.all.css") ) {		// Themed Tabs
+?>
+<link href='<?php echo WPSC_URL; ?>/themes/<?php echo get_option('wpsc_selected_theme')."/css/ui.all.css"; ?>' rel="stylesheet" type="text/css" />
+<?php
+			} else {																					// Default Tabs
+?>
+<link href='<?php echo WPSC_URL; ?>/js/jquery.ui.tabs.css' rel="stylesheet" type="text/css" />
+<?php
+			}
+		}
     } else {
     ?>    
 <link href='<?php echo WPSC_URL; ?>/themes/default/default.css' rel="stylesheet" type="text/css" />
@@ -504,26 +516,29 @@ jQuery(document).ready( function() {
     ?>    
 <link href='<?php echo WPSC_URL; ?>/themes/compatibility.css' rel="stylesheet" type="text/css" />
     <?php
-  }
+}
 
 function wpsc_admin_css() {
-  $siteurl = get_option('siteurl'); 
-  if((strpos($_SERVER['REQUEST_URI'], WPSC_DIR_NAME.'') !== false) || ($_GET['mass_upload'] == 'true')) {
+	$siteurl = get_option('siteurl'); 
+ 	if((strpos($_SERVER['REQUEST_URI'], WPSC_DIR_NAME.'') !== false) || ($_GET['mass_upload'] == 'true')) {
+
   	if(function_exists('add_object_page')) {
   		echo "<link href='".WPSC_URL."/css/admin_2.7.css' rel='stylesheet' type='text/css' />";
   	} else {
   		echo "<link href='".WPSC_URL."/css/admin.css' rel='stylesheet' type='text/css' />";
   	}
+
+	if ( (function_exists('wpsc_addl_desc_product_edit') ) && ( $_GET['page'] != WPSC_DIR_NAME.'/display-items.php' ) ) {   //TRansom - keep this from stepping on Add'l Desc tabs
 ?>
-
-<link href='<?php echo WPSC_URL; ?>/js/jquery.ui.tabs.css' rel="stylesheet" type="text/css" />
+		<link href='<?php echo WPSC_URL; ?>/js/jquery.ui.tabs.css' rel="stylesheet" type="text/css" />
 <?php
-
-if (($_GET['page'] == 'wp-shopping-cart/display-log.php') || ($_GET['page'] == 'wp-shopping-cart/gold_cart_files/affiliates.php')) {
-	?>
-		<link href='<?php echo $siteurl; ?>/wp-admin/css/dashboard.css?ver=2.6' rel="stylesheet" type="text/css" />
-	<?php
 }
+
+	if (($_GET['page'] == WPSC_DIR_NAME.'/display-log.php') || ($_GET['page'] == WPSC_DIR_NAME.'/gold_cart_files/affiliates.php')) {
+?>
+		<link href='<?php echo $siteurl; ?>/wp-admin/css/dashboard.css?ver=2.6' rel="stylesheet" type="text/css" />
+<?php
+	}
 ?>
 <!-- <link href='<?php echo WPSC_URL; ?>/js/thickbox.css' rel="stylesheet" type="text/css" /> -->
 <script src="<?php echo WPSC_URL; ?>/js/ajax.js" language='JavaScript' type="text/javascript"></script>
@@ -548,37 +563,40 @@ var resizeSpeed = 9;
 var borderSize = 10;
 /* LightBox Configuration end*/
 /* custom admin functions start*/
+
 <?php
 	$hidden_boxes = get_option('wpsc_hidden_box');
 	$hidden_boxes = implode(',', (array)$hidden_boxes);
-	echo "var hidden_boxes = '".$hidden_boxes."';";
-	echo "var IS_WP27 = '".IS_WP27."';";
-    echo "var TXT_WPSC_DELETE = '".TXT_WPSC_DELETE."';\n\r";
-    echo "var TXT_WPSC_TEXT = '".TXT_WPSC_TEXT."';\n\r";
-    echo "var TXT_WPSC_EMAIL = '".TXT_WPSC_EMAIL."';\n\r";
-    echo "var TXT_WPSC_COUNTRY = '".TXT_WPSC_COUNTRY."';\n\r";
-    echo "var TXT_WPSC_TEXTAREA = '".TXT_WPSC_TEXTAREA."';\n\r";
-    echo "var TXT_WPSC_HEADING = '".TXT_WPSC_HEADING."';\n\r";
-    echo "var TXT_WPSC_COUPON = '".TXT_WPSC_COUPON."';\n\r";
-    echo "var HTML_FORM_FIELD_TYPES =\"<option value='text' >".TXT_WPSC_TEXT."</option>";
-    echo "<option value='email' >".TXT_WPSC_EMAIL."</option>";
-    echo "<option value='address' >".TXT_WPSC_ADDRESS."</option>";
-    echo "<option value='city' >".TXT_WPSC_CITY."</option>";
-    echo "<option value='country'>".TXT_WPSC_COUNTRY."</option>";
-    echo "<option value='delivery_address' >".TXT_WPSC_DELIVERY_ADDRESS."</option>";
-    echo "<option value='delivery_city' >".TXT_WPSC_DELIVERY_CITY."</option>";
-    echo "<option value='delivery_country'>".TXT_WPSC_DELIVERY_COUNTRY."</option>";
-    echo "<option value='textarea' >".TXT_WPSC_TEXTAREA."</option>";    
-    echo "<option value='heading' >".TXT_WPSC_HEADING."</option>";
-    echo "<option value='coupon' >".TXT_WPSC_COUPON."</option>\";\n\r";
-    
-    echo "var TXT_WPSC_LABEL = '".TXT_WPSC_LABEL."';\n\r";
-    echo "var TXT_WPSC_LABEL_DESC = '".TXT_WPSC_LABEL_DESC."';\n\r";
-    echo "var TXT_WPSC_ITEM_NUMBER = '".TXT_WPSC_ITEM_NUMBER."';\n\r";
-    echo "var TXT_WPSC_LIFE_NUMBER = '".TXT_WPSC_LIFE_NUMBER."';\n\r";
-    echo "var TXT_WPSC_PRODUCT_CODE = '".TXT_WPSC_PRODUCT_CODE."';\n\r";
-    echo "var TXT_WPSC_PDF = '".TXT_WPSC_PDF."';\n\r";
 ?>
+var hidden_boxes = '<?php echo  $hidden_boxes; ?>';
+var IS_WP27 = '<?php echo  IS_WP27; ?>';
+var TXT_WPSC_DELETE = '<?php echo  TXT_WPSC_DELETE; ?>';
+var TXT_WPSC_TEXT = '<?php echo  TXT_WPSC_TEXT; ?>';
+var TXT_WPSC_EMAIL = '<?php echo  TXT_WPSC_EMAIL; ?>';
+var TXT_WPSC_COY = '<?php echo  TXT_WPSC_COY; ?>';
+var TXT_WPSC_TEXTAREA = '<?php echo  TXT_WPSC_TEXTAREA; ?>';
+var TXT_WPSC_HEADING = '<?php echo  TXT_WPSC_HEADING; ?>';
+var TXT_WPSC_COUPON = '<?php echo  TXT_WPSC_COUPON; ?>';
+
+var HTML_FORM_FIELD_TYPES = '<option value="text" ><?php echo TXT_WPSC_TEXT; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="email" ><?php echo TXT_WPSC_EMAIL; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="address" ><?php echo TXT_WPSC_ADDRESS; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="city" ><?php echo TXT_WPSC_CITY; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="coy"><?php echo TXT_WPSC_COY; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="delivery_address" ><?php echo TXT_WPSC_DELIVERY_ADDRESS; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="delivery_city" ><?php echo TXT_WPSC_DELIVERY_CITY; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="delivery_coy"><?php echo TXT_WPSC_DELIVERY_COY; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="textarea" ><?php echo TXT_WPSC_TEXTAREA; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="heading" ><?php echo TXT_WPSC_HEADING; ?></option>';
+var HTML_FORM_FIELD_TYPES = HTML_FORM_FIELD_TYPES + '<option value="coupon" ><?php echo TXT_WPSC_COUPON; ?></option>';
+    
+var TXT_WPSC_LABEL = '<?php echo  TXT_WPSC_LABEL; ?>';
+var TXT_WPSC_LABEL_DESC = '<?php echo  TXT_WPSC_LABEL_DESC; ?>';
+var TXT_WPSC_ITEM_NUMBER = '<?php echo  TXT_WPSC_ITEM_NUMBER; ?>';
+var TXT_WPSC_LIFE_NUMBER = '<?php echo  TXT_WPSC_LIFE_NUMBER; ?>';
+var TXT_WPSC_PRODUCT_CODE = '<?php echo  TXT_WPSC_PRODUCT_CODE; ?>';
+var TXT_WPSC_PDF = '<?php echo  TXT_WPSC_PDF; ?>';
+
 /* custom admin functions end*/
 </script>
 <!--<script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/thickbox.js"></script>-->
@@ -586,15 +604,14 @@ var borderSize = 10;
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/dimensions.js"></script>
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/admin.js"></script>
 <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/ui.datepicker.js"></script>
-  <style type="text/css" media="screen">
-  <?php
-  
+
+<?php    
     // $flash = true;
     // if ( false !== strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'mac') && apache_mod_loaded('mod_security') )
     // 	$flash = false;
-    
     if(get_option('wpsc_use_flash_uploader') == 1) {
-      ?>
+?>
+<style>
       table.use-flash-uploader {
         display: block;
       }
@@ -602,9 +619,11 @@ var borderSize = 10;
       table.use-browser-uploader {
         display: none;
       }
-      <?php
+</style>
+<?php
     } else {
-      ?>
+?>
+<style>
       table.use-flash-uploader {
         display: none;
       }
@@ -612,14 +631,14 @@ var borderSize = 10;
       table.use-browser-uploader {
         display: block;
       }
-      <?php
+</style>
+<?php
     
     }
-  ?>
-  </style>
-<?php
-	}
 }
+}
+add_action('admin_head', 'wpsc_admin_css');
+
 
 function nzshpcrt_displaypages()
   {
@@ -2235,6 +2254,9 @@ include_once(WPSC_FILE_PATH.'/widgets/admin_menu_widget.php');
 include_once(WPSC_FILE_PATH.'/image_processing.php');
 include_once(WPSC_FILE_PATH."/show_cats_brands.php");
 
+// Insert functions for Add'l Description Option
+include_once(WPSC_FILE_PATH.'/admin/options_addl_desc.php');	
+
 
 $theme_path = WPSC_FILE_PATH . '/themes/';
 if((get_option('wpsc_selected_theme') != '') && (file_exists($theme_path.get_option('wpsc_selected_theme')."/".get_option('wpsc_selected_theme').".php") )) {    
@@ -2306,9 +2328,6 @@ function wpsc_include_css_and_javascript() {
 add_action('init', 'wpsc_include_css_and_javascript');
 add_action('wp_head', 'nzshpcrt_product_list_rss_feed');
 
-
-
-add_action('admin_head', 'wpsc_admin_css');
 if($_GET['page'] == WPSC_DIR_NAME."/display-log.php") {
   add_action('admin_head', 'nzshpcrt_product_log_rss_feed');
 }
@@ -2447,6 +2466,10 @@ if(strpos($_SERVER['SCRIPT_NAME'], "wp-admin") === false) {
 	wp_enqueue_script( 'jQuery', WPSC_URL.'/js/jquery.js', false, '1.2.3');
 // 	wp_enqueue_script('instinct_thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
 	wp_enqueue_script('ngg-thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
+	if( function_exists('wpsc_addl_desc_show') ) {
+		wp_enqueue_script('jquery');
+		wp_enqueue_script('wpsc-ui-core_tabs',WPSC_URL.'/js/jquery-ui-personalized-1.5.3.packed.js','jQuery','Instinct_e-commerce');
+	}
 } else {
 	wp_enqueue_script('thickbox');
 	if(function_exists('wp_enqueue_style')) {  // DO NOT ALTER THIS!! This function is not present on older versions of wordpress

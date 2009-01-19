@@ -71,7 +71,25 @@ while ($wpsc_query->have_products()) {
             <img class='additional_description_button'  src='<?php echo WPSC_URL; ?>/images/icon_window_expand.gif' title='Additional Description' alt='Additional Description' /><?php echo TXT_WPSC_MOREDETAILS; ?>
           </a>
           <span class='additional_description'><br />
-            <?php echo wpsc_the_product_additional_description(); ?>
+            <?php
+				$value = '';
+				$the_addl_desc = wpsc_the_product_additional_description();
+				if( is_serialized($the_addl_desc) ) {
+					$addl_descriptions = @unserialize($the_addl_desc);
+				} else {
+					$addl_descriptions = array('addl_desc', $the_addl_desc);
+				}
+				
+				if( isset($addl_descriptions['addl_desc']) ) {
+					$value = $addl_descriptions['addl_desc'];
+				}
+
+            	if( function_exists('wpsc_addl_desc_show') ) {
+            		echo wpsc_addl_desc_show( $addl_descriptions );
+            	} else {
+            		echo $value;
+            	}
+            ?>
           </span>
           <br />
         </div>

@@ -76,7 +76,7 @@ function wpsc_the_product_description() {
 
 function wpsc_the_product_additional_description() {
 	global $wpsc_query;
-	return wpautop(stripslashes($wpsc_query->product['additional_description']));
+	return $wpsc_query->product['additional_description'];
 }
 
 function wpsc_the_product_permalink() {

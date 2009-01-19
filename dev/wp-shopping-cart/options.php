@@ -1,5 +1,14 @@
 <?php
+
+	$wpsc_site_options = get_option('wpsc_site_options');  //TRansom
+	// Over time - setting should be migrated to a single (or just a couple) options
+	// e.g. wpsc_site_options is an array
+	//		'presentation' => array(
+	//			Field => data
+	//			, field => data
+	//			, etc);
    //$_SESSION['debug']=0;
+
 if(preg_match("/[a-zA-Z]{2,4}/",$_GET['isocode'])) {
   include('tax_and_shipping.php');
 } else {
@@ -415,7 +424,7 @@ if($_POST['do_not_use_shipping'] == 1) {
 		update_option('shipwirepassword', $_POST['shipwirepassword']);
 	}
 
-	
+do_action('wpsc_options_update');
 	
 	echo "<div class='updated'><p align='center'>".TXT_WPSC_THANKSAPPLIED."</p></div>";
 }
@@ -952,6 +961,9 @@ if($_GET['clean_categories'] == 'true') {
 							<?php
 							// if(function_exists('product_display_list') || function_exists('product_display_grid')) {
 								?>    
+<tr>
+<?php do_action('wpsc_options_present_productpage_begin'); ?>		
+</td>					
 								<tr>
 									<th scope="row">
 									<?php echo TXT_WPSC_PRODUCT_DISPLAY;?>:
@@ -1372,9 +1384,9 @@ if($_GET['clean_categories'] == 'true') {
                 <input type='radio' value='0' name='wpsc_replace_page_title' id='wpsc_replace_page_title2' <?php echo $wpsc_replace_page_title2; ?> /> <label for='wpsc_replace_page_title2'><?php echo TXT_WPSC_NO;?></label>
                 </td>
               </tr>
-
-					
-					
+<tr>
+<?php do_action('wpsc_options_present_productpage_end'); ?>		
+</td>					
 							</table> 
 							
 							<h3 class="form_group"><?php echo TXT_WPSC_CARTSETTINGS;?></h3>
