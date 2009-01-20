@@ -5,6 +5,7 @@ class tablerate {
 		$this->internal_name = "tablerate";
 		$this->name="Table Rate";
 		$this->is_external=false;
+		$this->needs_zipcode=false;
 		return true;
 	}
 	
@@ -68,10 +69,11 @@ class tablerate {
 		
 		$layers = get_option('table_rate_layers');
 		
-		//echo "<pre>".print_r($layers,true)."</pre>";
+		
 		
 		if ($layers != '') {
-			$layers = array_reverse($layers,true);
+			krsort($layers);
+// 			echo "<pre>".print_r($layers,true)."</pre>";
 			foreach ($layers as $key => $shipping) {
 				if ($price >= (float)$key) {
 				  //echo "<pre>$price $key</pre>";

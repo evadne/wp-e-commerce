@@ -6,6 +6,7 @@ class usps {
 		$this->name="USPS";
 		$this->is_external=true;
 		$this->requires_curl=true;
+		$this->needs_zipcode=true;
 		return true;
 	}
 	

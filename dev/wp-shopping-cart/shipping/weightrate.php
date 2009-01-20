@@ -5,6 +5,7 @@ class weightrate {
 		$this->internal_name = "weightrate";
 		$this->name="Weight Rate";
 		$this->is_external=false;
+		$this->needs_zipcode=false;
 		return true;
 	}
 	
@@ -63,7 +64,7 @@ class weightrate {
 		$weight = shopping_cart_total_weight();
 		$layers = get_option('weight_rate_layers');
 		if ($layers != '') {
-			$layers = array_reverse($layers,true);
+			krsort($layers);
 			foreach ($layers as $key => $shipping) {
 				if ($weight >= (float)$key) {
 					return array(array("Weight Rate"=>$shipping));

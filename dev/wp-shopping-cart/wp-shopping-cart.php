@@ -888,8 +888,10 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 		//changes for usps ends
 
 	if(($_GET['user'] == "true") && is_numeric($_POST['prodid'])) {
-		$memberstatus = get_product_meta($_POST['prodid'],'is_membership',true);
-		if(($memberstatus[0]=='1') && ($_SESSION['nzshopcrt_cart']!=NULL)){
+		if(function_exists('wpsc_members_init')) {
+			$memberstatus = get_product_meta($_POST['prodid'],'is_membership',true);
+		}
+		if(($memberstatus[0]=='1') && ($_SESSION['nzshpcrt_cart']!=NULL)){
 		} else{
 			$sql = "SELECT * FROM `".$wpdb->prefix."product_list` WHERE `id`='".$_POST['prodid']."' LIMIT 1";
 			$item_data = $wpdb->get_results($sql,ARRAY_A);
@@ -985,8 +987,8 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 				}
 				if(!(($memberstatus[0]=='1')&&(count($_SESSION['nzshpcrt_cart'])>0))){
 					$status = get_product_meta($cartt1, 'is_membership', true);
-					if ($status[0]=='1'){
-					exit();
+					if (function_exists('wpsc_members_init') && ( $status[0]=='1')){
+						exit();
 					}	
 					if($updated_quantity === false) {
 						
@@ -1012,8 +1014,9 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 		
 			if (($memberstatus[0]=='1')&&(count($cart)>1)) {
 			} else {
+			  
 				$status = get_product_meta($cartt1, 'is_membership', true);
-				if ($status[0]=='1'){
+				if (function_exists('wpsc_members_init') && ( $status[0]=='1')){
 					exit('st');
 				}
 			  echo  "if(document.getElementById('shoppingcartcontents') != null)
@@ -1491,7 +1494,8 @@ foreach($nzshpcrt_shipping_list as $nzshpcrt_shipping) {
 		require(WPSC_FILE_PATH."/shipping/".$nzshpcrt_shipping);
 	}
 }
-    
+
+ 
     if(is_numeric($_GET['remove']) && ($_SESSION['nzshpcrt_cart'] != null)) {
       $key = $_GET['remove'];
       if(is_object($_SESSION['nzshpcrt_cart'][$key])){

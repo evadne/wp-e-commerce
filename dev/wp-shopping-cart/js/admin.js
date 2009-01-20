@@ -469,7 +469,7 @@ function remove_variation_value_field(id)
     }
   }
   
-function variation_value_list(id) {
+function variation_value_list(id, parent_element) {
   if(id == null) {
     id = '';
   }
@@ -482,15 +482,24 @@ function variation_value_list(id) {
     	  	jQuery("#add_product_variation_details").html(add_variation_combinations_html);
     	}
 	}
+		selected_value = jQuery("input.variation_checkbox",parent_element).attr('checked');
+ 	if(selected_value == true) {
+		active_checkboxes = jQuery.makeArray(jQuery("div.variation_values_box input[checked]",parent_element));
+		if(active_checkboxes.length < 1) {
+			jQuery("div.variation_values_box input[@type='checkbox']",parent_element).attr('checked', 'true');
+		}
+ 	} else {
+ 		//selected_value = jQuery("div.variation_values_box input[@type='checkbox']",parent_element).attr('checked', 'false');
+ 	}
+	
 	selected_price = jQuery("div#price_and_stock input[@name='price']").val();
 	
-	current_variations = jQuery("label.variation_checkbox"+id+" input[@type='checkbox']").serialize();
+	current_variations = jQuery("label.variation_checkbox"+id+" input[@type='hidden'], label.variation_checkbox"+id+" input[@type='checkbox']").serialize();
+	
+	//current_variations = jQuery("label.variation_checkbox"+id+" input[@type='checkbox']").serialize();
 	jQuery("label.variation_checkbox"+id+" input[@type='checkbox']").attr("disabled", "true");
 	ajax.post("index.php",display_list,"admin=true&ajax=true&list_variation_values=true&product_id="+id+"&selected_price="+selected_price+"&"+current_variations+"");
-}
-
- 
-  
+}  
   
   
 var display_list_ajaxx=function(results) {

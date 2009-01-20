@@ -1960,5 +1960,11 @@ td.select_gateway h3.hndle {
 }
 
 
+div.variation_box{
+}
+div.variation_values_box{
+  padding-left: 10px;
+}
+
 div#productform table tr td{ height: 11px !important; }
 div#productform table tr.settings_row td{ height: 0px !important; }

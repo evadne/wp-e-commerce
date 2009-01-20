@@ -17,8 +17,8 @@ var changetaxntotal=function(results) {
 	var tax = roundNumber(prices[0],2)
 	tax = tax.toFixed(2);
 	total = total.toFixed(2);
-	document.getElementById('checkout_tax').innerHTML="<span class='pricedisplay'>$"+tax+"</span>";
-	document.getElementById('checkout_total').innerHTML="<span class='pricedisplay'>$"+total+"</span>";
+	jQuery('#checkout_tax').html("<span class='pricedisplay'>$"+tax+"</span>");
+	jQuery('#checkout_total').html("<span class='pricedisplay'>$"+total+"</span>");
 	//alert(t);
 	return true;
 }
@@ -227,10 +227,9 @@ function update_vote_count(prodid)
   ajax.post("index.php",update_vote_count,"ajax=true&get_rating_count=true&product_id="+prodid);
   }
 
-function submit_change_country()
-  {
+function submit_change_country() {
   document.forms.change_country.submit();
-  }
+}
   
 function update_preview_url(prodid)
   {

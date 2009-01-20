@@ -289,7 +289,11 @@ function wpsc_admin_ajax() {
     	}
 
     	if(is_numeric($_POST['product_id'])) {
-      		$product_id = (int)$_POST['product_id'];
+      		$product_id = (int)$_POST['product_id'];      		
+      		
+      		// variation values housekeeping
+      		
+      		$variation_processor->edit_product_values($product_id,$_POST['edit_variation_values']);
       
       		// get all the currently associated variations from the database
       		$associated_variations = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}variation_associations` WHERE `type` IN ('product') AND `associated_id` IN ('{$product_id}')", ARRAY_A);
@@ -307,21 +311,21 @@ function wpsc_admin_ajax() {
       		}
        
 			foreach((array)$variations_selected as $variation_id) {
-			  	// add variations not already in the database that have been checked.
-        		$variation_values = $variation_processor->falsepost_variation_values($variation_id);
-        		if(array_search($variation_id, $variations_still_associated) === false) {
-      	  			$variation_processor->add_to_existing_product($product_id,$variation_values);
-        		}
-      		}
-      		//echo "/* ".print_r($associated_variations,true)." */\n\r";
-      		echo "edit_variation_combinations_html = \"".str_replace(array("\n","\r"), array('\n','\r'), addslashes($variation_processor->variations_grid_view($product_id)))."\";\n";
+				// add variations not already in the database that have been checked.
+					$variation_values = $variation_processor->falsepost_variation_values($variation_id);
+					if(array_search($variation_id, $variations_still_associated) === false) {
+							$variation_processor->add_to_existing_product($product_id,$variation_values);
+					}
+				}
+    		echo "edit_variation_combinations_html = \"".str_replace(array("\n","\r"), array('\n','\r'), addslashes($variation_processor->variations_grid_view($product_id,  (array)$_POST['edit_variation_values'])))."\";\n";
     	} else {
       		if(count($variations_selected) > 0) {
         		// takes an array of variations, returns a form for adding data to those variations.
         		if((float)$_POST['selected_price'] > 0) {
           			$selected_price = (float)$_POST['selected_price'];
         		}
-        		echo "add_variation_combinations_html = \"".TXT_WPSC_EDIT_VAR."<br />".str_replace(array("\n","\r"), array('\n','\r'), addslashes($variation_processor->variations_add_grid_view((array)$variations_selected, $selected_price)))."\";\n";
+        		echo "add_variation_combinations_html = \"".TXT_WPSC_EDIT_VAR."<br />".str_replace(array("\n","\r"), array('\n','\r'), addslashes($variation_processor->variations_add_grid_view((array)$variations_selected, (array)$_POST['edit_variation_values'], $selected_price)))."\";\n";
+
       		} else {
         		echo "add_variation_combinations_html = \"\";\n";
       		}

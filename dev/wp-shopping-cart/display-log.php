@@ -491,7 +491,7 @@ if($_GET['filter'] !== 'true') {
             echo TXT_WPSC_DATE;
             echo " </td>";
 
-            foreach($form_data as $form_field)
+            foreach((array)$form_data as $form_field)
               {
               echo " <td>";
               echo $form_field['name'];
@@ -576,7 +576,7 @@ if($_GET['filter'] !== 'true') {
               echo date("jS M Y",$purchase['date']);
               echo " </td>\n\r";
             
-              foreach($form_data as $form_field) {
+              foreach((array)$form_data as $form_field) {
                 $collected_data_sql = "SELECT * FROM `".$wpdb->prefix."submited_form_data` WHERE `log_id` = '".$purchase['id']."' AND `form_id` = '".$form_field['id']."' LIMIT 1";
                 $collected_data = $wpdb->get_results($collected_data_sql,ARRAY_A);
                 $collected_data = $collected_data[0];

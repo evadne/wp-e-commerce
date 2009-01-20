@@ -5,6 +5,11 @@ class flatrate {
 		$this->internal_name = "flatrate";
 		$this->name="Flat Rate";
 		$this->is_external=false;
+		$this->needs_zipcode=false;
+		$this->contiguous_48_states = array(
+		"AL", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", 
+		"MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", 
+		"OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "DC", "WV", "WI", "WY");
 		return true;
 	}
 	
@@ -28,15 +33,17 @@ class flatrate {
 	
 	function getForm() {
 		$shipping = get_option('flat_rates');
-		$output = "<tr><td colspan='1'><strong>Base Local</strong></td>";
+		$output = "<tr><td colspan='1'><strong>Local</strong></td>";
 		
 		switch(get_option('base_country')) {
 		  case 'NZ':
+		  $output .= "<td></td></tr>";		  
 			$output .= "<tr><td>South Island</td><td>$<input type='text' name='shipping[southisland]' value='{$shipping['southisland']}'></td></tr>";
 			$output .= "<tr><td>North Island</td><td>$<input type='text' name='shipping[northisland]'  value='{$shipping['northisland']}'></td></tr>";
 		  break;
 		  
 		  case 'US':
+		  $output .= "<td>$<input type='text' name='shipping[local]' value='{$shipping['local']}'></td></tr>";		  
 			$output .= "<tr><td>Continental 48 States</td><td>$<input type='text' name='shipping[continental]' value='{$shipping['continental']}'></td></tr>";
 			$output .= "<tr><td>All 50 States</td><td>$<input type='text' name='shipping[all]'  value='{$shipping['all']}'></td></tr>";
 		  break;
@@ -116,8 +123,35 @@ class flatrate {
 			  break;
 			  
 			  case 'US':
-				$shipping_quotes["Continental 48 States"] = (float)$flatrates['continental']+$per_item_shipping;
-				$shipping_quotes["All 50 States"] = (float)$flatrates['all']+$per_item_shipping;
+			  $region_id = (int)$_SESSION['delivery_region'];
+			  
+			  
+			  if($region_id == null) {
+			    // if there is no selected region, select the most expensive shipping to ensure that the full cost is paid.
+			    $possible_values = array($flatrates['local'], $flatrates['continental'], $flatrates['all']); 
+			  
+			  
+					$shipping_quotes["All 50 States"] = (float)max($possible_values)+$per_item_shipping;
+			  } else {
+			    if($region_id == get_option('base_region')) {
+						$shipping_quotes["Local Shipping"] = (float)$flatrates['local']+$per_item_shipping;
+			    } else {
+			      $selelcted_region = $wpdb->get_var("SELECT `code` FROM `{$wpdb->prefix}region_tax` WHERE `id` IN('{$region_id}')");
+			      if(array_search($selelcted_region, $this->contiguous_48_states) !== false) {
+							$shipping_quotes["Continental 48 States"] = (float)$flatrates['continental']+$per_item_shipping;
+			      } else {
+							$shipping_quotes["All 50 States"] = (float)$flatrates['all']+$per_item_shipping;
+			      }
+			    }
+			  }
+			  
+			  
+			  //get_option('base_region') 
+				//
+			  
+			  
+			  //if(== $region)
+			  
 			  break;
 			  
 			  default:

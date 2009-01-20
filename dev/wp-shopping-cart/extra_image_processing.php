@@ -1,7 +1,7 @@
 <?php
-$imagetype = getimagesize($new_image_path);
 if(is_numeric($height) && is_numeric($width) && function_exists('imagecreatefromjpeg'))
   {
+	$imagetype = getimagesize($new_image_path);
   $destdir = $imagedir.$name;
   //exit($destdir);
   switch($imagetype[2])

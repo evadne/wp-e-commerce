@@ -508,7 +508,7 @@ function wpsc_item_process_image($id, $input_file, $output_filename, $width = 0,
 			$new_image_path = WPSC_IMAGE_DIR.$image_name;
 			rename($input_file, $new_image_path);
 			$stat = stat( dirname( $new_image_path ));
-			$perms = $stat['mode'] & 0000770;
+			$perms = $stat['mode'] & 0000775;
 			@ chmod( $new_image_path, $perms );
 			
 			switch($resize_method) {
@@ -577,7 +577,7 @@ function wpsc_item_process_image($id, $input_file, $output_filename, $width = 0,
 			$new_image_path = WPSC_IMAGE_DIR.$image_name;
 			move_uploaded_file($input_file, $new_image_path);
 			$stat = stat( dirname( $new_image_path ));
-			$perms = $stat['mode'] & 0000770;
+			$perms = $stat['mode'] & 0000775;
 			@ chmod( $new_image_path, $perms );
 			$image = $wpdb->escape($image_name);
 		}
@@ -591,7 +591,7 @@ function wpsc_item_process_image($id, $input_file, $output_filename, $width = 0,
 			$thumbnail_image = $image;
 			$wpdb->query("UPDATE `".$wpdb->prefix."product_list` SET `thumbnail_image` = '".$thumbnail_image."' WHERE `id` = '".$image_data['id']."'");
 			$stat = stat( dirname( (WPSC_THUMBNAIL_DIR.$image_data['image']) ));
-			$perms = $stat['mode'] & 0000770;
+			$perms = $stat['mode'] & 0000775;
 			@ chmod( (WPSC_THUMBNAIL_DIR.$image_data['image']), $perms );	
 		}
 		$image = false;
@@ -768,14 +768,26 @@ function wpsc_get_mimetype($file, $check_reliability = false) {
 }
 
 
-function shopping_cart_total_weight(){
+function shopping_cart_total_weight() {
 	global $wpdb;
 	$cart = $_SESSION['nzshpcrt_cart'];
 	$total_weight=0;
 	foreach((array)$cart as $item) {
-		$sql="SELECT weight, weight_unit FROM ".$wpdb->prefix."product_list WHERE id='".$item->product_id."'";
-		$weight=$wpdb->get_results($sql, ARRAY_A);
-		$weight = $weight[0];
+	  $weight = array();
+		$variations = $item->product_variations;
+		if(count($variations) > 0) {
+			$variation_ids = $wpdb->get_col("SELECT `variation_id` FROM `{$wpdb->prefix}variation_values` WHERE `id` IN ('".implode("','",$variations)."')");
+			asort($variation_ids);
+			$all_variation_ids = implode(",", $variation_ids);
+			$priceandstock_id = $wpdb->get_var("SELECT `priceandstock_id` FROM `{$wpdb->prefix}wpsc_variation_combinations` WHERE `product_id` = '".(int)$item->product_id."' AND `value_id` IN ( '".implode("', '",$variations )."' ) AND `all_variation_ids` IN('{$all_variation_ids}') GROUP BY `priceandstock_id` HAVING COUNT( `priceandstock_id` ) = '".count($variations)."' LIMIT 1");
+			$weight = $wpdb->get_row("SELECT `weight`, `weight_unit` FROM `{$wpdb->prefix}variation_priceandstock` WHERE `id` = '{$priceandstock_id}' LIMIT 1", ARRAY_A);
+			
+		}
+		
+		if(($weight == null) || ($weight['weight'] == null) && ($weight['weight_unit'] == null)) {
+			$weight=$wpdb->get_row("SELECT `weight`, `weight_unit` FROM `{$wpdb->prefix}product_list` WHERE id='{$item->product_id}'", ARRAY_A);
+		}
+		
 		switch($weight['weight_unit']) {
 			case "kilogram":
 			$weight = $weight['weight'] / 0.45359237;
@@ -784,7 +796,7 @@ function shopping_cart_total_weight(){
 			case "gram":
 			$weight = $weight['weight'] / 453.59237;
 			break;
-			
+		
 			case "once":
 			case "ounces":
 			$weight = $weight['weight'] / 16;
@@ -799,7 +811,6 @@ function shopping_cart_total_weight(){
 	}
 	return $total_weight;
 }
-
 function usps_shipping_methods() {
   /// this section of code needs to be tidied up and all references to "ereg" changed to "preg_match" or similar.
   global $wpdb;

@@ -1955,3 +1955,9 @@ label.variation_checkbox {
   display: block;
 }
 
+
+div.variation_box{
+}
+div.variation_values_box{
+  padding-left: 10px;
+}
