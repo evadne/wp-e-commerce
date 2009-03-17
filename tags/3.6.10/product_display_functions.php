@@ -526,7 +526,7 @@ function product_display_default($product_list, $group_type, $group_sql = '', $s
 							$output .= google_buynow($product['id']);
 						} else if (in_array('paypal_multiple',(array)get_option('custom_gateway_options'))) {
 					
-							$product_sql = "SELECT * FROM ".$wpdb->prefix."product_list WHERE id = ".$product_id." LIMIT 1";
+							$product_sql = "SELECT * FROM ".$wpdb->prefix."product_list WHERE id = ".$product['id']." LIMIT 1";
 							$product = $wpdb->get_row($product_sql, ARRAY_A);
 							$tax_percentage = 0;
 							$country_data = $wpdb->get_row("SELECT * FROM `".$wpdb->prefix."currency_list` WHERE `isocode` IN('".get_option('base_country')."') LIMIT 1",ARRAY_A);
