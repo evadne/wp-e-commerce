@@ -24,8 +24,8 @@ function wpsc_get_product_listing($product_list, $group_type, $group_sql = '', $
 	}
 	if((get_option('use_pagination') == 1)) {
 		$products_per_page = get_option('wpsc_products_per_page');
-		if (isset($_REQUEST['items_per_page'])){
-			$products_per_page = $_REQUEST['items_per_page'];
+		if (is_numeric($_REQUEST['items_per_page'])){
+			$products_per_page = (int)$_REQUEST['items_per_page'];
 		}
 		if(($_GET['page_number'] > 0)) {
 			$startnum = ($_GET['page_number']-1)*$products_per_page;
