@@ -38,6 +38,8 @@ function nzshpcrt_donations($input = null) {
 			$currency_type = get_option('currency_type');
 			$currency_symbol = $wpdb->get_var("SELECT `symbol_html` FROM `".$wpdb->prefix."currency_list` WHERE `id`='".$currency_type."' LIMIT 1") ;
 			$output .= "<label for='donation_price_".$product['id']."'>".TXT_WPSC_DONATION.":</label> $currency_symbol<input type='text' id='donation_price_".$product['id']."' name='donation_price' value='".number_format($product['price'],2)."' size='6' /><br />"; 
+			$output .= "<input type='hidden' name='originating_page' value='".$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']."'  />";
+// 			$output .= "<pre>".print_r($_SERVER,true)."</pre>";
 			$output .= "<input type='submit' name='Buy' value='".TXT_WPSC_ADDTOCART."'  />";
 			$output .= "</form>";
 		}

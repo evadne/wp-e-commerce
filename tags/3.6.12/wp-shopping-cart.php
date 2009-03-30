@@ -1009,8 +1009,9 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 			} else {
 				$status = get_product_meta($cartt1, 'is_membership', true);
 				if (function_exists('wpsc_members_init') && ( $status[0]=='1')){
-					exit('st');
+					//exit('st');
 				}
+				
 
 			  echo  "if(document.getElementById('shoppingcartcontents') != null)
 					  {
@@ -1033,6 +1034,10 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 				} else {
 				echo  'jQuery("#sliding_cart").css({ display: "block"});'."\n\r";
 				}
+				if(isset($_POST['originating_page']) && (stristr(get_option('shopping_cart_url'), $_POST['originating_page']))) {
+				  echo "window.location = window.location;\n\r";
+				}
+				
 			}
 		}
       exit();
@@ -1094,7 +1099,6 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 			$id = $wpdb->escape((int)$_REQUEST['product_id']);
 			$price = $wpdb->escape((float)$_REQUEST['price']);
 			$downloads = get_option('max_downloads');
-			$product_sql = ;
 			$product_info = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."product_list WHERE id = ".$id." LIMIT 1", ARRAY_A);
 			if(count($product_info) > 0) {
 				$sessionid = (mt_rand(100,999).time());
@@ -1943,7 +1947,7 @@ function make_csv($array)
   }   
   
 function nzshpcrt_product_log_rss_feed() {
-  echo "<link type='application/rss+xml' href='".get_option('siteurl')."/index.php?rss=true&amp;rss_key=key&amp;action=purchase_log&amp;type=rss' title='WP E-Commerce Purchase Log RSS' rel='alternate'/>";
+  echo "<link type='application/rss+xml' href='".get_option('siteurl')."/wp-admin/?rss=true&amp;rss_key=key&amp;action=purchase_log&amp;type=rss' title='WP E-Commerce Purchase Log RSS' rel='alternate'/>";
 }
   
 function nzshpcrt_product_list_rss_feed() {

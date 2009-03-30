@@ -447,37 +447,37 @@ function wpsc_admin_ajax() {
 			update_option('language_setting', $_POST['language_setting']);
 		}
 	}
+}
 	
-    
-  if(($_GET['rss'] == "true") && ($_GET['rss_key'] == 'key') && ($_GET['action'] == "purchase_log")) {
-    $sql = "SELECT * FROM `".$wpdb->prefix."purchase_logs` WHERE `date`!='' ORDER BY `date` DESC";
-    $purchase_log = $wpdb->get_results($sql,ARRAY_A);
-    header("Content-Type: application/xml; charset=UTF-8"); 
-    header('Content-Disposition: inline; filename="WP_E-Commerce_Purchase_Log.rss"');
-    $output = '';
-    $output .= "<?xml version='1.0'?>\n\r";
-    $output .= "<rss version='2.0'>\n\r";
-    $output .= "  <channel>\n\r";
-    $output .= "    <title>WP E-Commerce Product Log</title>\n\r";
-    $output .= "    <link>".get_option('siteurl')."/wp-admin/admin.php?page=".WPSC_DIR_NAME."/display-log.php</link>\n\r";
-    $output .= "    <description>This is the WP E-Commerce Product Log RSS feed</description>\n\r";
-    $output .= "    <generator>WP E-Commerce Plugin</generator>\n\r";
-    
-    foreach((array)$purchase_log as $purchase) {
-      $purchase_link = get_option('siteurl')."/wp-admin/admin.php?page=".WPSC_DIR_NAME."/display-log.php&amp;purchaseid=".$purchase['id'];
-      $output .= "    <item>\n\r";
-      $output .= "      <title>Purchase No. ".$purchase['id']."</title>\n\r";
-      $output .= "      <link>$purchase_link</link>\n\r";
-      $output .= "      <description>This is an entry in the purchase log.</description>\n\r";
-      $output .= "      <pubDate>".date("r",$purchase['date'])."</pubDate>\n\r";
-      $output .= "      <guid>$purchase_link</guid>\n\r";
-      $output .= "    </item>\n\r";
-		}
-    $output .= "  </channel>\n\r";
-    $output .= "</rss>";
-    echo $output;
-    exit();
+function wpsc_purchase_log_rss() {
+  global $wpdb;
+	$sql = "SELECT * FROM `".$wpdb->prefix."purchase_logs` WHERE `date`!='' ORDER BY `date` DESC";
+	$purchase_log = $wpdb->get_results($sql,ARRAY_A);
+	header("Content-Type: application/xml; charset=UTF-8"); 
+	header('Content-Disposition: inline; filename="WP_E-Commerce_Purchase_Log.rss"');
+	$output = '';
+	$output .= "<?xml version='1.0'?>\n\r";
+	$output .= "<rss version='2.0'>\n\r";
+	$output .= "  <channel>\n\r";
+	$output .= "    <title>WP E-Commerce Product Log</title>\n\r";
+	$output .= "    <link>".get_option('siteurl')."/wp-admin/admin.php?page=".WPSC_DIR_NAME."/display-log.php</link>\n\r";
+	$output .= "    <description>This is the WP E-Commerce Product Log RSS feed</description>\n\r";
+	$output .= "    <generator>WP E-Commerce Plugin</generator>\n\r";
+	
+	foreach((array)$purchase_log as $purchase) {
+		$purchase_link = get_option('siteurl')."/wp-admin/admin.php?page=".WPSC_DIR_NAME."/display-log.php&amp;purchaseid=".$purchase['id'];
+		$output .= "    <item>\n\r";
+		$output .= "      <title>Purchase No. ".$purchase['id']."</title>\n\r";
+		$output .= "      <link>$purchase_link</link>\n\r";
+		$output .= "      <description>This is an entry in the purchase log.</description>\n\r";
+		$output .= "      <pubDate>".date("r",$purchase['date'])."</pubDate>\n\r";
+		$output .= "      <guid>$purchase_link</guid>\n\r";
+		$output .= "    </item>\n\r";
 	}
+	$output .= "  </channel>\n\r";
+	$output .= "</rss>";
+	echo $output;
+	exit();
 }
 
 
@@ -645,6 +645,10 @@ if($_GET['purchase_log_csv'] == "true") {
 
 if(($_REQUEST['ajax'] == "true") && ($_REQUEST['admin'] == "true")) {
 	add_action('admin_init', 'wpsc_admin_ajax');
+}
+
+if(($_GET['rss'] == "true") && ($_GET['rss_key'] == 'key') && ($_GET['action'] == "purchase_log")) {
+	add_action('admin_init', 'wpsc_purchase_log_rss');
 }
 
 ?>

@@ -3,6 +3,27 @@
 This is a language file for the WP Shopping Cart plugin version 3.6.10
 */
 
+/*
+ *New Constants by Jeffry
+ */
+define("TXT_WPSC_ADDITIONAL_INFO", "3. Additional Information"); 
+define('TXT_WPSC_ECOMMERCE', 'Products'); 
+define('TXT_WPSC_PRODUCTS', 'Manage Products'); 
+define('TXT_WPSC_FLOT_ANNUAL_SALES_GRAPH','ANNUAL SALES GRAPH');
+/*
+ *End of New Constants by Jeffry
+ */ 
+define("TXT_WPSC_USE_THEME_ENGINE", "Use the experimental Theme Engine");
+define("TXT_WPSC_TM", "Target Markets");
+define("TXT_WPSC_SHIPPING_DETAIL","Please choose a country bellow to calculate your shipping costs");
+define('TXT_WPSC_TOTAL_THIS_MONTH', 'Last 30 Days');
+define('TXT_WPSC_TOTAL_INCOME', 'Life Time');
+define('TXT_WPSC_SALES_TITLE', 'Sales');
+define('TXT_WPSC_ORDERS_TITLE', 'Orders');
+define('TXT_WPSC_AVGORDER_TITLE', 'Avg Orders');
+
+
+
 define('TXT_WPSC_GATEWAY_SETTINGS', 'Gateway Settings');
 define('TXT_WPSC_CHECKOUT_SETTINGS', 'Checkout Settings');
 define('TXT_WPSC_ADD_NEW_PRODUCT', 'Add New Product');

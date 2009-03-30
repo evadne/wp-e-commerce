@@ -2096,8 +2096,10 @@ padding:0;
 position:relative;
 width:250px;
 }
+
+
 #leftDashboard{
-width:49%; 
+width:49%;
 float:left;
 text-align:right;
 border-right:1px #999999 solid;
@@ -2112,7 +2114,7 @@ float:left;
 padding-left: 40px;
 }
 #rightDashboard{
-width:50%; 
+width:50%;
 float:right;
 text-align:right;
 
@@ -2124,7 +2126,7 @@ float:left;
 .dashboardWidgetSpecial{
 font-family:Georgia,"Times New Roman","Bitstream Charter",Times,serif;
 color:#21759B;
-font-size:18px!important;
+font-size:13px !important;
 margin: 5px 0 5px 0;
 }
 .dashboardWidget{
