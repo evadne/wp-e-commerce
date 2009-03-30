@@ -2547,7 +2547,11 @@ global $wpdb;
 		echo "<p class='dashboardWidgetSpecial'>";
 		//echo "<span class='pricedisplay'>";
 		//calculates average sales amount per order for the month
-		$monthsAverage = ((int)admin_display_total_price($start_timestamp, $end_timestamp)/(int)$currentMonthOrders);
+		if($currentMonthOrders > 0) {
+			$monthsAverage = ((int)admin_display_total_price($start_timestamp, $end_timestamp)/(int)$currentMonthOrders);
+		} else {
+			$monthsAverage = 0;
+		}
 		echo nzshpcrt_currency_display($monthsAverage,1);
 		//echo "</span>";
 		echo "<span class='dashboardWidget'>".TXT_WPSC_AVGORDER_TITLE."</span>";
@@ -2575,7 +2579,11 @@ global $wpdb;
 		echo "<p class='dashboardWidgetSpecial'>";
 		//echo "<span class='pricedisplay'>";
 		//calculates average sales amount per order for the month
-		$totalAverage = ((int)admin_display_total_price()/(int)$totalOrders);
+		if($totalOrders > 0) {
+			$totalAverage = ((int)admin_display_total_price()/(int)$totalOrders);
+		} else {
+		  $totalAverage = 0;
+		}
 		echo nzshpcrt_currency_display($totalAverage,1);
 		//echo "</span>";
 		echo "<span class='dashboardWidget'>".TXT_WPSC_AVGORDER_TITLE."</span>";

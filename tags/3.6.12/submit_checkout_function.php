@@ -295,7 +295,7 @@ function nzshpcrt_submit_checkout() {
 
    $log_id = $wpdb->get_var("SELECT `id` FROM `".$wpdb->prefix."purchase_logs` WHERE `sessionid` IN('".$sessionid."') LIMIT 1") ;
    foreach($_POST['collected_data'] as $value_id => $value) {
-     $wpdb->query("INSERT INTO `".$wpdb->prefix."submited_form_data` ( `log_id` , `form_id` , `value` ) VALUES ( '".$log_id."', '".$value_id."', '".$value."');") ;
+     $wpdb->query("INSERT INTO `".$wpdb->prefix."submited_form_data` ( `log_id` , `form_id` , `value` ) VALUES ( '".$log_id."', '".(int)$value_id."', '".$value."');") ;
      }
    
 		if(function_exists("nzshpcrt_user_log")) {
