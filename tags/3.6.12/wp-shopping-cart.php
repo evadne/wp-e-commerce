@@ -1664,6 +1664,7 @@ function nzshpcrt_download_file() {
 					header('Cache-Control: must-revalidate, post-check=0, pre-check=0');       
 				}        
         $filename = WPSC_FILE_DIR.$file_data['idhash'];
+	session_destroy(); 
         readfile_chunked($filename);   
         exit();
 			}
@@ -1693,6 +1694,7 @@ function nzshpcrt_download_file() {
 						header('Cache-Control: must-revalidate, post-check=0, pre-check=0');       
 					}             
 					$filename = WPSC_FILE_DIR.$file_data['idhash'];  
+					session_destroy(); 
 					readfile_chunked($filename);   
 					exit();
 				}            
