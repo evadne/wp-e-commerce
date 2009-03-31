@@ -1111,7 +1111,6 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 			}
 		}
 	exit();
-	
 	}
 	
     
