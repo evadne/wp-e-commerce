@@ -1353,7 +1353,7 @@ jQuery(document).ready(function(){
 	for (i=0;i<boxes.length;i++) {
 		if ( ! jQuery('#'+boxes[i]+'-hide').attr('checked')){
 			if (IS_WP27) {
-				jQuery('#'+boxes[i]).hide();
+				//jQuery('#'+boxes[i]).hide();
 			}
 		}
 	}

@@ -899,6 +899,6 @@ function wpsc_meta_boxes(){
 	add_meta_box('product_image', 'Product Images', 'product_image_box', WPSC_DIR_NAME.'/display-items', 'normal', 'high');
 }
 
-add_action('admin_menu', 'wpsc_meta_boxes');
+//add_action('admin_menu', 'wpsc_meta_boxes');
 
 ?>
