@@ -23,9 +23,12 @@ $saved_data_sql = "SELECT * FROM `".$wpdb->prefix."usermeta` WHERE `user_id` = '
 $saved_data = $wpdb->get_row($saved_data_sql,ARRAY_A);
 $meta_data = unserialize($saved_data['meta_value']);
 
+
+ $billing_form_check = $wpdb->get_var("SELECT `id` FROM `".$wpdb->prefix."collect_data_forms` WHERE `active` = '1' AND `type` IN('country') LIMIT 1");
+
 if($_POST['country'] != null) {
 	$_SESSION['delivery_country'] = $_POST['country'];
-	if($_SESSION['selected_country'] == null) {
+	if(($_SESSION['selected_country'] == null)  || ($billing_form_check < 1)) {
 		$_SESSION['selected_country'] = $_POST['country'];
 	}
 } else if($_SESSION['selected_country'] == '') {
@@ -39,7 +42,7 @@ if($_SESSION['delivery_country'] == '') {
 
 if($_POST['region'] != null) {
 	$_SESSION['delivery_region'] = $_POST['region'];
-	if($_SESSION['selected_region'] == null) {
+	if(($_SESSION['selected_region'] == null) || ($billing_form_check < 1)) {
 		$_SESSION['selected_region'] = $_POST['region'];
 	}
 } else if($_SESSION['selected_region'] == '') {
@@ -209,6 +212,19 @@ if(isset($_POST['zipcode'])) {
 	    $price = $quantity * $cart_item->donation_price;
     } else {
 	    $price = $quantity * calculate_product_price($product_id, $cart_item->product_variations,'stay',$extras);
+	    
+			$levels = get_product_meta($product_id, 'table_rate_price');
+			$levels = $levels[0];
+			if ($levels != '') {
+				foreach($levels['quantity'] as $key => $qty) {
+					if ($quantity >= $qty) {
+						$unit_price = $levels['table_price'][$key];
+						if ($unit_price != '')
+							$price = $quantity * $unit_price;
+					}
+				}
+			}
+	    
 	    if($product_list['notax'] != 1) {
 		    $tax += nzshpcrt_calculate_tax($price, $_SESSION['selected_country'], $_SESSION['selected_region']) - $price;
 	    }
