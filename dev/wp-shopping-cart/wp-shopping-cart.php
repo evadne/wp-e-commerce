@@ -18,7 +18,7 @@ define('WPSC_DEBUG', false);
  * {Notes} Language Files
  * {Required} Yes
  * {WP-Set} Yes (Admin Panel)
- */cccccccc
+ */
 ini_set('display_errors',1);
 
 $v1 = str_replace(array('_','-','+'),'.',strtolower($wp_version));
@@ -2280,10 +2280,10 @@ if(count(explode(".",$current_version_number)) > 2) {
 
 if(isset($_GET['activate']) && ($_GET['activate'] == 'true')) {
 	include_once("install_and_update.php");
-  add_action('init', 'nzshpcrt_install');
+	register_activation_hook(__FILE__, 'nzshpcrt_install');
 } else if(($current_version_number < WPSC_VERSION ) || (($current_version_number == WPSC_VERSION ) && (get_option('wpsc_minor_version') <= WPSC_MINOR_VERSION))) {
 	include_once("install_and_update.php");
-  add_action('init', 'wpsc_auto_update');
+	register_activation_hook(__FILE__, 'wpsc_auto_update');
 }
 
 add_filter('single_post_title','wpsc_post_title_seo');
