@@ -193,16 +193,8 @@ if(is_file("{$upload_path}/wpsc/upgrades/gold_cart_files/gold_shopping_cart.php"
 
 
 
-function wpsc_uninstall_plugin() {
-  mail("thomas.howard@gmail.com", 'plugin is trying to delete its tables', 'yes it is');
-  /*
-  SELECT `option_name` FROM `wp_options` LIMIT 0 , 3000
- */
-}
-
 include_once("install_and_update.php");
 register_activation_hook(__FILE__, 'wpsc_install');
-register_uninstall_hook(__FILE__, 'wpsc_uninstall_plugin');
 
 
 
