@@ -1,11 +1,27 @@
 <?php
 /*
-This is a language file for the WP Shopping Cart plugin version 3.6.10
+This is a language file for the WP Shopping Cart plugin version 3.7
 */
+
+define('TXT_WPSC_API_RESET_DESCRIPTION', 'Enter your API name and key to release it from an old site that you no longer use.');
+define('TXT_WPSC_API_HAS_BEEN_RESET', 'Your API key has been Reset');
+define('TXT_WPSC_API_RESET', 'API Key Reset');
+define('TXT_WPSC_UPGRADES_PAGE', 'Upgrades');
+define('TXT_WPSC_GOLD_OPTIONS', 'Upgrades (Old)');
+
+
+
+define('TXT_WPSC_CATEGORY_LIST', 'Show list of product groups');
+define('TXT_WPSC_ALL_PRODUCTS_AND_CATEGORY_LIST', 'Show all products + list');
+define('TXT_WPSC_INSUFFICIENT_REMAINING', 'Sorry, but there are only [number] of this item in stock.');
+define('TXT_WPSC_ZERO_QUANTITY_REQUESTED', 'Sorry, but you cannot add zero items to your cart');
+define('TXT_WPSC_PRODUCT_DISPLAY_SETTINGS', 'Product Settings');
+define('TXT_WPSC_BUTTON_SETTINGS', 'Button Settings');
+define('TXT_WPSC_UPDATING', 'Loading');
 define('TXT_WPSC_EDIT_GROUP', 'Edit Group');
 define('TXT_WPSC_ADD_GROUP', 'Add Group');
 define('TXT_SHOW_GRID_PER_ROW', 'Products Per Row');
-define('TXT_WPSC_PRODUCT_TAGS', 'Tags');
+define('TXT_WPSC_PRODUCT_TAGS', 'Product Tags');
 define('TXT_WPSC_CATEGORISATION', 'Categories');
 define('TXT_WPSC_COUPONSINVALID', 'Coupon is not valid.');
 define('TXT_WPSC_NOITEMSINTHISGROUP', 'There are no products in this group.');
@@ -16,6 +32,7 @@ define('TXT_WPSC_EMAIL_BUYER', 'Resend Receipt to Buyer');
 
 define('TXT_WPSC_DISPLAY_PRODUCT_TEMPLATE_TAG','Display Product Template Tag');
 define('TXT_WPSC_DISPLAY_PRODUCT_SHORTCODE','Display Product Shortcode');
+define('TXT_WPSC_PRODUCT_SKU','Display Product SKU');
 
 
 define('TXT_WPSC_CATEGORY_TARGETMARKET','Oops the product : %s cannot be shipped to %s. To continue with your transaction please remove this product from the list above.');
@@ -37,7 +54,7 @@ define('TXT_WPSC_ENABLE_COMMENTS', 'Use IntenseDebate Comments');
 define('TXT_WPSC_COMMENTS_WHICH_PRODUCTS', 'By Default Display Comments on');
 define('TXT_WPSC_INTENSE_DEBATE_ACCOUNT_ID', 'IntenseDebate Account ID');
 
-define('TXT_WPSC_PRODUCT_ENABLE_COMMENTS', 'Enable Comments');
+define('TXT_WPSC_PRODUCT_ENABLE_COMMENTS', 'Enable IntenseDebate Comments');
 define('TXT_WPSC_PRODUCT_ENABLE_COMMENTS_INFO', 'Allow users to comment on this product.');
 
 
@@ -164,7 +181,7 @@ define('TXT_WPSC_SHIPPING_BUT_NO_CURL', 'The following shipping modules all need
 define('TXT_WPSC_PLEASE_ENTER_ZIPCODE', 'Please enter a zipcode.');
 define('TXT_WPSC_PLEASE_SELECT_SHIPPING', 'Please select a shipping option.');
 define('TXT_WPSC_ADD_NEW_VARIATIONS', '+ Add New Variations');
-define('TXT_WPSC_ADMIN_ENGRAVE', 'Users can personalize this product by leaving a message during checkout');
+define('TXT_WPSC_ADMIN_ENGRAVE', 'Users can personalize this product by leaving a message on single product page');
 define('TXT_WPSC_PERSONALISATION_OPTIONS','Personalisation Options');
 
 define('TXT_WPSC_CHOOSE_SHIPPING', "To enable shipping in WP e-Commerce you must select  which shipping methods you want to enable on your site");
@@ -316,7 +333,7 @@ define('TXT_WPSC_PENDINGCOUNT_PLURAL','transactions');
 define('TXT_WPSC_VARIATION_SINGULAR','variation');
 define('TXT_WPSC_VARIATION_PLURAL','variations');
 
-define('TXT_WPSC_SALES_DASHBOARD', 'You have <a href=\'admin.php?page='.WPSC_DIR_NAME.'/display-items.php\'>:productcount:</a>, contained within <a href=\'admin.php?page='.WPSC_DIR_NAME.'/display-category.php\'>:groupcount:</a>. This month you made :salecount: and generated a total of :monthtotal: and your total sales ever is :overaltotal:. You have :pendingcount: awaiting approval.');
+define('TXT_WPSC_SALES_DASHBOARD', 'You have <a href=\'admin.php?page=wpsc-edit-products\'>:productcount:</a>, contained within <a href=\'admin.php?page=wpsc-edit-groups\'>:groupcount:</a>. This month you made :salecount: and generated a total of :monthtotal: and your total sales ever is :overaltotal:. You have :pendingcount: awaiting approval.');
 
 define('TXT_WPSC_YOUAREUSING', 'You are using the :theme: style. This is WP e-Commerce :versionnumber:.');
 define('TXT_WPSC_NO_SHORTCODE', 'This item product is still waiting to be added to your catalogue. There are no shortcodes or tags available at this point.');
@@ -326,10 +343,10 @@ define('TXT_WPSC_ABOUT_THIS_PAGE', 'About This Page');
 define('TXT_WPSC_ORDER_PENDING_PAYMENT_REQUIRED', 'Order Pending: Payment Required');
 define('TXT_WPSC_SELECTALLCATEGORIES', 'Show All Products');
 
-define('TXT_WPSC_CURRENT_GROUP', '[categorisation] group');
-define('TXT_WPSC_EDITING_GROUP', 'You are editing the [categorisation] group');
-define('TXT_WPSC_ADDING_TO_GROUP', 'You are adding a new item to the [categorisation] group');
-define('TXT_WPSC_EDITING_IN_GROUP', 'You are editing an item in the [categorisation] group');
+define('TXT_WPSC_CURRENT_GROUP', '&quot;[categorisation]&quot; Group');
+define('TXT_WPSC_EDITING_GROUP', 'You are editing the &quot;[categorisation]&quot; Group');
+define('TXT_WPSC_ADDING_TO_GROUP', 'You are adding a new item to the &quot;[categorisation]&quot; Group');
+define('TXT_WPSC_EDITING_IN_GROUP', 'You are editing an item in the &quot;[categorisation]&quot; Group');
 
 
 define('TXT_WPSC_PURCHASE_UNAVAILABLE', 'Purchase unavailable options');
@@ -360,7 +377,7 @@ define('TXT_WPSC_SHOW_BREADCRUMBS', 'Show Breadcrumbs');
 define('TXT_WPSC_PAYMENT_INSTRUCTIONS_DESCR', 'Enter the payment instructions that you wish to display to your customers when they make a purchase');
 define('TXT_WPSC_PAYMENT_INSTRUCTIONS_BELOW_DESCR', 'For example, this is where you the Shop Owner might enter your bank account details or address so that your customer can make their manual payment.');
 
-define('TXT_WPSC_ALLOW_UPLOADING_IMAGE', 'Users can upload images at checkout to purchase logs.');
+define('TXT_WPSC_ALLOW_UPLOADING_IMAGE', 'Users can upload images on single product page to purchase logs.');
 
 define('TXT_WPSC_OPTIONS_GENERAL_HEADER', 'General Settings');
 define('TXT_WPSC_OPTIONS_PRESENTATION_HEADER', 'Presentation Settings');
@@ -381,7 +398,7 @@ define('TXT_WPSC_VARIATION_LIST', 'Select a Variation');
 
 define('TXT_WPSC_CATEGORISATION_GROUPS_DESCR', 'Categorizing your products into groups help your customers find them. For instance if you sell hats and trousers you  might want to setup a Group called clothes and add hats and trousers to that group.');
 define('TXT_WPSC_CATEGORISATION_DESCR', 'Product Grouping Widget');
-define('WPSC_DOWNLOAD_INVALID', 'This download is no longer valid.');
+define('WPSC_DOWNLOAD_INVALID', 'This download is no longer valid, Please contact the site administrator for more information.');
 define('TXT_WPSC_LOCK_DOWNLOADS_TO_IP', 'Lock downloads to IP address');
 define('TXT_WPSC_CLEAR_IP_LOCKS', 'Unlock any downloads locked to an IP address for this order');
 define('TXT_WPSC_THANKS_UNLOCKED', 'Thanks, the downloads that were locked to this users IP number have been freed.');
@@ -404,7 +421,7 @@ define('TXT_WPSC_NO_DEFAULT_PRODUCTS', 'Your "products page" is not currently se
 define('TXT_WPSC_FIX_CATEGORY_PERMALINKS', 'Fix Product Group Permalinks');
 define('TXT_WPSC_ADVANCED_OPTIONS', 'Advanced Options');
 define('TXT_WPSC_INVALID_COUPON', 'Invalid Coupon');
-define('TXT_WPSC_RSSNOTE', '<strong>Note:</strong> Not only can people use this RSS to keep update with your product list but you can also use this link to promote your products in your facebook profile. <br>Just add the <a href="http://apps.facebook.com/getshopped">getshopped! facebook application</a> to your facebook profile and follow the instructions.');
+define('TXT_WPSC_RSSNOTE', '<strong>Note:</strong> Not only can people use this RSS to keep update with your product list but you can also use this link to promote your products in your facebook profile. <br />Just add the <a href="http://apps.facebook.com/getshopped">getshopped! facebook application</a> to your facebook profile and follow the instructions.');
 define('TXT_WPSC_GOOGLEFINANCESTATUS', 'Financial Status');
 define('TXT_WPSC_GOOGLEFULFILLMENTSTATUS', 'Fulfillment Status');
 define('TXT_WPSC_SURETODELETECATEGORISATION', 'Are you sure you want to delete this product group? All categories it contains will be deleted too.');
@@ -416,7 +433,9 @@ define('TXT_WPSC_ADD_CATEGORISATION', 'Add New Group');
 define('TXT_WPSC_EDIT_CATEGORISATION', 'Edit Group');
 define('TXT_WPSC_ADDDETAILS', 'Add Details');
 define('TXT_WPSC_EDITDETAILS', 'Edit Details');
-define('TXT_WPSC_ADDNEWCATEGORY', 'Add New [categorisation] &raquo;');
+define('TXT_WPSC_ADDING_A_NEW_CATEGORY', 'Adding a new category here will make it available when you add or edit a product.');
+define('TXT_WPSC_ADDNEWCATEGORY_TITLE', 'Add Category');
+define('TXT_WPSC_ADDNEWCATEGORY', '+ Add new category to the &quot;[categorisation]&quot; Group');
 define('TXT_WPSC_VALUE', 'Value');
 define('TXT_WPSC_CUSTOM_META', 'Custom Meta');
 define('TXT_WPSC_ADD_CUSTOM_FIELD', 'Add Custom Meta');
@@ -425,11 +444,11 @@ define('TXT_WPSC_SAVE', 'Save');
 
 
 
-define('TXT_WPSC_DISPLAY_PRODUCT_CATEGORIES', 'Display [categorisation]'); // The shortcode [categorisation] is replaced with the name of the currently select categorisation
+define('TXT_WPSC_DISPLAY_PRODUCT_CATEGORIES', 'Display &quot;[categorisation]&quot;'); // The shortcode [categorisation] is replaced with the name of the currently select categorisation
 
-define('TXT_WPSC_PRODUCT_CATEGORIES', 'Select [categorisation]'); // The shortcode [categorisation] is replaced with the name of the currently select categorisation
+define('TXT_WPSC_PRODUCT_CATEGORIES', 'Select &quot;[categorisation]&quot;'); // The shortcode [categorisation] is replaced with the name of the currently select categorisation
 
-define('TXT_WPSC_MANAGE_CATEGORISATION', 'Manage [categorisation]'); // The shortcode [categorisation] is replaced with the name of the currently select categorisation
+define('TXT_WPSC_MANAGE_CATEGORISATION', 'Manage &quot;[categorisation]&quot;'); // The shortcode [categorisation] is replaced with the name of the currently select categorisation
 
 
 
@@ -467,7 +486,7 @@ define('TXT_WPSC_ENGRAVE', 'Engrave text');
 define('TXT_WPSC_FREETRIAL', 'One Month Free Trial');
 define('TXT_WPSC_PROHIBITED', 'Prohibited');
 define('TXT_WPSC_ADMINNOTES', 'Merchant Notes');
-define('TXT_WPSC_HIDEADDNAMELINK', 'Hide Product Name Links');
+define('TXT_WPSC_HIDEADDNAMELINK', 'Disable link in Title');
 define('TXT_WPSC_ADMINMENU', 'Admin Menu');
 define('TXT_WPSC_USEONLYEXTERNALLINK', 'If this product is for sale on another website enter the link here. For instance if your product is an MP3 file for sale on itunes you could put the link here. This option over rides the buy now and add to cart links and takes you to the site linked here.');
 define('TXT_WPSC_EXTERNALLINK', 'External Link');
@@ -647,7 +666,7 @@ define('TXT_WPSC_PEOPLEGIVEN', 'people have given this image');
 define('TXT_WPSC_PEOPLEGIVEN2', 'stars.');
 define('TXT_WPSC_ITEMHASBEENADDED', 'The item has been added');
 define('TXT_WPSC_ITEMHASNOTBEENADDED', 'The item has not been added');
-define('TXT_WPSC_ADDNEWCATEGORY', 'Add New Product Group');
+//define('TXT_WPSC_ADDNEWCATEGORY', 'Add New Product Group');
 define('TXT_WPSC_SUBMIT', 'Submit');
 define('TXT_WPSC_SELECTAVALIDCATEGORY', 'Please select a valid Product Group');
 define('TXT_WPSC_PRODUCTNAME', 'Product Name');
@@ -774,7 +793,7 @@ define('TXT_WPSC_REPLYEMAIL', 'Reply Email');
 define('TXT_WPSC_BRANDNOCAP', 'brand');
 define('TXT_WPSC_CATEGORYNOCAP', 'category');
 define('TXT_WPSC_UDPATING', 'Updating');
-define('TXT_WPSC_UPDATING', 'Updating');
+define('TXT_WPSC_UDPATING_CART', 'Updating...');
 define('TXT_WPSC_MOREDETAILS', 'More Details');
 define('TXT_WPSC_ADDTOCART', 'Add To Cart');
 define('TXT_WPSC_AVGCUSTREVIEW', 'Avg. Customer Rating');
@@ -877,9 +896,8 @@ define('TXT_WPSC_PRODUCTDOWNLOAD', 'Product Download');
 define('TXT_WPSC_SHOWTHUMBNAILS', 'Show Thumbnails');
 define('TXT_WPSC_ADD_ADDITIONAL_IMAGE', 'Add Additional Image');
 define('TXT_WPSC_DELETE_IMAGE', 'Delete Image');
-define('TXT_WPSC_GOLD_OPTIONS', 'Upgrades');
-define('TXT_WPSC_ACTIVATE_SETTINGS', 'Activation Settings: Gold Cart');
-define('TXT_WPSC_ACTIVATION_KEY', 'Activation Key');
+define('TXT_WPSC_ACTIVATE_SETTINGS', 'Gold Cart Activation');
+define('TXT_WPSC_ACTIVATION_KEY', 'API Key');
 define('TXT_WPSC_THANKSACTIVATED', 'Thanks, the gold shopping cart has been activated.');
 define('TXT_WPSC_NOTACTIVATED', 'Sorry, the API key was incorrect.');
 
@@ -956,7 +974,7 @@ define('TXT_WPSC_PLEASEENTERAVALIDADDRESS', 'Please complete your address.');
 define('TXT_WPSC_PLEASEENTERAVALIDCITY', 'Please enter your town or city.');
 define('TXT_WPSC_PLEASEENTERAVALIDPHONENUMBER', 'Please enter a valid phone number.');
 define('TXT_WPSC_PLEASESELECTCOUNTRY', 'Please select your country from the list.');
-define('TXT_WPSC_PLEASEAGREETERMSANDCONDITIONS', 'Please select the terms and conditions option.  Unfortunately we cannot process your order otherwise.');
+define('TXT_WPSC_PLEASEAGREETERMSANDCONDITIONS', 'Please agree to the terms and conditions, otherwise we cannot process your order.');
 define('TXT_WPSC_POSITION', 'Position');
 
 define('TXT_WPSC_DELIVERY_REGION', 'Delivery Region');
@@ -1033,9 +1051,9 @@ define('TXT_WPSC_DONATION_LC', 'donation');
 define('TXT_WPSC_DONATION_SHIPPING', 'No shipping for donations');
 define('TXT_WPSC_DOWNLOADABLEPRODUCT_URL', 'Product Filename');
 define('TXT_WPSC_FILETOBEPRODUCTURL', 'Note: Upload your file to the e-commerce files directory and enter the filename here.');
-define('TXT_WPSC_DONATIONS', 'Donations');
+define('TXT_WPSC_DONATIONS', 'Product Donations');
 define('TXT_WPSC_WRONG_FILE_PERMS', 'The following directories are not writable: :directory: You won\'t be able to upload any images or files here. You will need to change the permissions on these directories to make them writable.');
-define('TXT_WPSC_RESET_API', 'Reset API key');
+define('TXT_WPSC_RESET_API', 'Reset API Key');
 define('TXT_WPSC_PRODUCTS_PER_PAGE', 'Products per Page');
 define('TXT_WPSC_OPTION_PRODUCTS_PER_PAGE', 'number of products to show per page');
 define('TXT_WPSC_PAGE_NUMBER_POSITION', 'Page Number position');
@@ -1082,7 +1100,7 @@ define('TXT_WPSC_DAYS', "Days");
 define('TXT_WPSC_MONTHS', "Months");
 define('TXT_WPSC_YEARS', "Years");
 define('TXT_WPSC_MEMBERS_SUBSCRIPTION_ENDED', "Your subscription has ended.");
-define('TXT_WPSC_ACTIVATE_SETTINGS_MEMBERS', 'Activation Settings: Members Module');
+define('TXT_WPSC_ACTIVATE_SETTINGS_MEMBERS', 'Members Only Module');
 define('TXT_WPSC_GOLD_CART', 'Gold Cart');
 define('TXT_WPSC_SHOW_CATEGORY_DESCRIPTION', 'Show Product Group Description');
 define('TXT_WPSC_ALSO_BOUGHT', 'People who bought this item also bought');

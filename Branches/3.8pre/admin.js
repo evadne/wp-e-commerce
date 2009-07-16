@@ -1,5 +1,3 @@
-
-
 var someresults=function()  {
 	document.getElementById('changenotice').innerHTML = "Thank you, your change has been saved";
 }
@@ -176,7 +174,6 @@ jQuery('.meta-box-sortables').sortable( {
 } );
 
 
-
 jQuery("#gallery_list").sortable({
 	revert: false,
 	placeholder: "ui-selected",
@@ -194,7 +191,7 @@ jQuery("#gallery_list").sortable({
 				img_id = jQuery('#gallery_image_'+set[0]).parent('li').attr('id');
 				
 				jQuery('#gallery_image_'+set[0]).children('img.deleteButton').remove();
-				jQuery('#gallery_image_'+set[0]).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
+				jQuery('#gallery_image_'+set[0]).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png' alt='' /></a>");
 				jQuery('#gallery_image_'+set[0]).parent('li').attr('id', 0);
 				//for(i=1;i<set.length;i++) {
 				//	jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
@@ -346,14 +343,14 @@ jQuery(".remove_line").click(
 function filleditform(prodid)	{
 	jQuery(document).ready(function(){
 		ajax.post("index.php",getresults,"ajax=true&admin=true&prodid="+prodid);
-		jQuery('#loadingimage').attr('src', jQuery("#loadingimage").attr('src'));
+		jQuery('.loadingimage').attr('src', jQuery(".loadingimage").attr('src'));
 		jQuery('#loadingindicator_span').css('visibility','visible');
 	});
 }
    
 function fillvariationform(variation_id) {
   ajax.post("index.php",getresults,"ajax=true&admin=true&variation_id="+variation_id);
-	jQuery('#loadingimage').attr('src', WPSC_URL+'/images/indicator.gif');
+	jQuery('.loadingimage').attr('src', WPSC_URL+'/images/indicator.gif');
 	jQuery('#loadingindicator_span').css('visibility','visible');
 }
    
@@ -602,6 +599,7 @@ jQuery(window).load( function () {
 	});
 	
 	jQuery('a.closeEl').bind('click', toggleContent);
+/*
  	jQuery('div.groupWrapper').sortable( {
 			accept: 'groupItem',
  			helperclass: 'sortHelper',
@@ -623,6 +621,7 @@ jQuery(window).load( function () {
  			}
  		}
  	);
+*/
 
 	jQuery('a#close_news_box').click( function () {
 		jQuery('div.wpsc_news').css( 'display', 'none' );
@@ -1018,8 +1017,6 @@ function enablebuttons(){
 					jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
 					jQuery('#gallery_image_'+set[i]).append("<img alt='-' class='deleteButton' src='"+WPSC_URL+"/images/cross.png'/>");
 					
-          //alert(jQuery('#gallery_image_'+set[i]).parent('li').attr('id'));
-					  //alert(element_id);
 					if(element_id == 0) {
             jQuery('#gallery_image_'+set[i]).parent('li').attr('id', img_id);
 					}
@@ -1142,10 +1139,11 @@ jQuery(document).ready(function(){
 	);
 	
 	
- 	jQuery("table#itemlist .pricedisplay").editable(base_url+"/wp-admin/admin.php?inline_price=true", {
-         indicator : "Saving...",
-         tooltip   : 'Click to edit...'
-    });
+//  	jQuery("table#itemlist .pricedisplay").editable(base_url+"/wp-admin/admin.php?inline_price=true", {
+//          indicator : "Saving...",
+//          tooltip   : 'Click to edit...'
+//     });
+/*
     jQuery('.meta-box-sortables').sortable( {
 	    placeholder: 'sortable-placeholder',
 	    connectWith: [ '.meta-box-sortables' ],
@@ -1193,6 +1191,7 @@ jQuery(document).ready(function(){
 			}
 		}
 	}
+*/
 	jQuery("#submit_category_select").click(
 		function() {
 			new_url = jQuery("#category_select").children("option:selected").val();

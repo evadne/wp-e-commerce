@@ -2,25 +2,20 @@
 
 // this function is for binding actions to events and rebinding them after they are replaced by AJAX
 // these functions are bound to events on elements when the page is fully loaded.
-function wpsc_bind_to_events() {
-	// empty the cart using ajax when the form is submitted,  
-	jQuery("form.wpsc_empty_the_cart").submit(function() {
-		form_values = "ajax=true&";
-		form_values += jQuery(this).serialize( );
-		jQuery.post( 'index.php', form_values, function(returned_data) {
-			eval(returned_data);
-			wpsc_bind_to_events();
-		});
-		return false;
-	});
-}    
-    
-
-	
+// empty the cart using ajax when the form is submitted,  
+function check_make_purchase_button(){
+	toggle = jQuery('#noca_gateway').attr('checked');
+	if(toggle == true){
+		//jQuery('.make_purchase').hide();
+		jQuery('#OCPsubmit').show();
+	}else{
+		jQuery('.make_purchase').show();	
+		jQuery('#OCPsubmit').hide();		
+	}
+}	
 
 jQuery(document).ready(function () {
-  wpsc_bind_to_events();
-	
+  
 	// Submit the product form using AJAX
   jQuery("form.product_form").submit(function() {
     // we cannot submit a file through AJAX, so this needs to return true to submit the form normally if a file formfield is present
@@ -29,9 +24,14 @@ jQuery(document).ready(function () {
 			return true;
 		} else {
 			form_values = jQuery(this).serialize();
+			// Sometimes jQuery returns an object instead of null, using length tells us how many elements are in the object, which is more reliable than comparing the object to null
+			if(jQuery('#fancy_notification').length == 0) {
+				jQuery('div.wpsc_loading_animation',this).css('visibility', 'visible');
+			}
 			jQuery.post( 'index.php?ajax=true', form_values, function(returned_data) {
 				eval(returned_data);
-				wpsc_bind_to_events();
+				jQuery('div.wpsc_loading_animation').css('visibility', 'hidden');
+				
 				if(jQuery('#fancy_notification') != null) {
 					jQuery('#loading_animation').css("display", 'none');
 					//jQuery('#fancy_notificationimage').css("display", 'none');
@@ -39,24 +39,20 @@ jQuery(document).ready(function () {
 				
 			});
 			wpsc_fancy_notification(this);
-			
 			return false;
 		}
 	});
   
   
   //  this is for storing data with the product image, like the product ID, for things like dropshop and the the ike.
-  jQuery("form.product_form").load( function() {
-    product_id = jQuery('input[name=product_id]',this).val();
-    image_element_id = 'product_image_'+product_id;
-    jQuery("#"+image_element_id).data("product_id", product_id);
-    
-    
-    parent_container = jQuery(this).parents('div.product_view_'+product_id);
-    
-    jQuery("div.item_no_image", parent_container).data("product_id", product_id);
-  });
-  jQuery("form.product_form").trigger('load');
+	jQuery("form.product_form").livequery(function(){
+			product_id = jQuery('input[name=product_id]',this).val();
+			image_element_id = 'product_image_'+product_id;
+			jQuery("#"+image_element_id).data("product_id", product_id);			
+			parent_container = jQuery(this).parents('div.product_view_'+product_id);
+			jQuery("div.item_no_image", parent_container).data("product_id", product_id);
+	});
+  //jQuery("form.product_form").trigger('load');
   
   // Toggle the additional description content  
   jQuery("a.additional_description_link").click(function() {
@@ -85,7 +81,32 @@ jQuery(document).ready(function () {
 		});
 		return false;
 	});
-	
+
+
+
+
+	jQuery("form.wpsc_empty_the_cart").livequery(function(){
+		jQuery(this).submit(function() {
+			form_values = "ajax=true&";
+			form_values += jQuery(this).serialize();
+			jQuery.post( 'index.php', form_values, function(returned_data) {
+				eval(returned_data);
+			});
+			return false;
+		});
+	});
+
+	jQuery("form.wpsc_empty_the_cart span.emptycart a").livequery(function(){
+		jQuery(this).click(function() {
+			parent_form = jQuery(this).parents("form.wpsc_empty_the_cart");
+			form_values = "ajax=true&";
+			form_values += jQuery(parent_form).serialize();
+			jQuery.post( 'index.php', form_values, function(returned_data) {
+				eval(returned_data);
+			});
+			return false;
+		});
+	}); 
 });
 
 
@@ -117,7 +138,7 @@ function wpsc_fancy_notification(parent_form){
       border: 1 ,
       padding: 1 ,
       scroll: 1 
-      };
+		};
 
     form_button_id = jQuery(parent_form).attr('id') + "_submit_button";
     //console.log(form_button_id);
@@ -169,8 +190,8 @@ function shopping_cart_collapser() {
   
 function set_billing_country(html_form_id, form_id){
   var billing_region = '';
-  country = jQuery(("div#"+html_form_id+" select[@class=current_country]")).val();
-  region = jQuery(("div#"+html_form_id+" select[@class=current_region]")).val();
+  country = jQuery(("div#"+html_form_id+" select[class=current_country]")).val();
+  region = jQuery(("div#"+html_form_id+" select[class=current_region]")).val();
   if(/[\d]{1,}/.test(region)) {
     billing_region = "&billing_region="+region;
 	}

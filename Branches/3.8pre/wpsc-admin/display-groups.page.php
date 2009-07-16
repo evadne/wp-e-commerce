@@ -1,21 +1,23 @@
 <?php
-
  function wpsc_category_tm(){
  global $wpdb;
  /* START OF TARGET MARKET SELECTION */					
 	$countrylist = $wpdb->get_results("SELECT id,country,visible FROM `".WPSC_TABLE_CURRENCY_LIST."` ORDER BY country ASC ",ARRAY_A);
 	?>
 		<tr>
-			<td colspan="2"><h4>Target Market Restrictions</h4></td></tr><tr>
+			<td colspan="2"><h4>Target Market Restrictions</h4></td>
+		</tr>
+		<tr>
 			<td>
 				<?php echo TXT_WPSC_TM; ?>:
+				<br />
 			</td>
 			<td>
 				<div id='resizeable' class='ui-widget-content multiple-select'>
 					<input type='checkbox' name='countrylist2[]' value='all' />Select All<br />
 					<input type='checkbox' name='countrylist2[]' value='none' />Uncheck All<br />
 					<?php
-					foreach($countrylist as $country){
+					foreach((array)$countrylist as $country){
 						if($country['visible'] == 1){
 							echo "					<input type='checkbox' name='countrylist2[]' value='".$country['id']."'  checked='".$country['visible']."' />".$country['country']."<br />\n\r";
 						}else{
@@ -24,8 +26,8 @@
 					}
 					?>
 				</div>
-				<br />
-				Select the markets you are selling this category to.
+				<br />				<br />
+				<span class='small description'><?php _e('Select the markets you are selling this category to.'); ?></span>
 			</td>
 		</tr>
 	<?php
@@ -68,54 +70,31 @@ function display_category_row($category,$subcategory_level = 0) {
   echo "     <tr>\n\r";
   echo "       <td colspan='4' class='colspan'>\n\r";
   if($subcategory_level > 0) {
-    echo "<div class='subcategory' style='padding-left: ".(1*$subcategory_level)."em;'>";
-    echo "<img class='category_indenter' src='".WPSC_URL."/images/indenter.gif' alt='' title='' />";
+    echo "        <div class='subcategory' style='padding-left: ".(1*$subcategory_level)."em;'>\n\r";
+    echo "		        <img class='category_indenter' src='".WPSC_URL."/images/indenter.gif' alt='' title='' />\n\r";
 	}
-  echo "        <table class='itemlist'>\n\r";
-  echo "          <tr>\n\r";
-  echo "            <td>\n\r";
+  echo "		        <table class='itemlist'>\n\r";
+  echo "		          <tr>\n\r";
+  echo "		            <td>\n\r";
   if($category['image'] !=null) {
-		echo "<img src='".WPSC_CATEGORY_URL.$category['image']."' title='".$category['name']."' alt='".$category['name']."' width='30' height='30' />";
+		echo "		            <img src='".WPSC_CATEGORY_URL.$category['image']."' title='".$category['name']."' alt='".$category['name']."' width='30' height='30' />\n\r";
 	} else {
-		echo "<img style='border-style:solid; border-color: red' src='".WPSC_URL."/images/no-image-uploaded.gif' title='".$category['name']."' alt='".$category['name']."' width='30' height='30'  />";
+		echo "		            <img style='border-style:solid; border-color: red' src='".WPSC_URL."/images/no-image-uploaded.gif' title='".$category['name']."' alt='".$category['name']."' width='30' height='30'  />\n\r";
 	}
-  echo "            </td>\n\r";
+  echo "		            </td>\n\r";
   
-  echo "            <td>\n\r";
+  echo "		            <td>\n\r";
   echo "".htmlentities(stripslashes($category['name']), ENT_QUOTES, 'UTF-8')."";
-  echo "            </td>\n\r";
-  /*
-  $displaydescription = substr(stripslashes($category['description']),0,44);
-  if($displaydescription != $category['description']) {
-    $displaydescription_arr = explode(" ",$displaydescription);
-    $lastword = count($displaydescription_arr);
-    if($lastword > 1) {
-      unset($displaydescription_arr[$lastword-1]);
-      $displaydescription = '';
-      $j = 0;
-      foreach($displaydescription_arr as $displaydescription_row) {
-        $j++;
-        $displaydescription .= $displaydescription_row;
-        if($j < $lastword -1) {
-          $displaydescription .= " ";
-				}
-			}
-		}
-    $displaydescription .= "...";
-	}
-  
-  echo "            <td>\n\r";
-  echo "".stripslashes($displaydescription)."";
-  echo "            </td>\n\r";
-  */
-  echo "            <td>\n\r";
-  echo "<a href='#' onclick='fillcategoryform(".$category['id'].");return false;'>".TXT_WPSC_EDIT."</a>";
-  echo "            </td>\n\r";
-  echo "          </tr>\n\r";
-  echo "        </table>";
+  echo "		            </td>\n\r";
+
+  echo "		            <td>\n\r";
+  echo "		            		<a href='#' onclick='fillcategoryform(".$category['id'].");return false;'>".TXT_WPSC_EDIT."</a>\n\r";
+  echo "		            </td>\n\r";
+  echo "		          </tr>\n\r";
+  echo "		        </table>\n\r";
   
   if($subcategory_level > 0) {
-    echo "</div>";
+    echo "		        </div>\n\r";
 	}
   echo "       </td>\n\r";
   echo "      </tr>\n\r";
@@ -162,7 +141,9 @@ function wpsc_display_groups_page() {
 		}
       
    
-    $url_name = sanitize_title($_POST['name']);
+    $tidied_name = sanitize_title($_POST['name']);
+		$tidied_name = strtolower($tidied_name);
+		$url_name = preg_replace(array("/(\s-\s)+/","/(\s)+/"), array("-","-"), $tidied_name);
     $similar_names = $wpdb->get_row("SELECT COUNT(*) AS `count`, MAX(REPLACE(`nice-name`, '$url_name', '')) AS `max_number` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `nice-name` REGEXP '^($url_name){1}(\d)*$' ",ARRAY_A);
     $extension_number = '';
     if($similar_names['count'] > 0) {
@@ -206,8 +187,10 @@ function wpsc_display_groups_page() {
     
     if(trim($_POST['name']) != null) {
       $insertsql = "INSERT INTO `".WPSC_TABLE_PRODUCT_CATEGORIES."` (`group_id`, `name` , `nice-name` , `description`, `image`, `fee` , `active`, `category_parent`, `order` ) VALUES ( '".(int)$_POST['categorisation_group']."', '".$wpdb->escape(stripslashes($_POST['name']))."', '".$url_name."', '".$wpdb->escape(stripslashes($_POST['description']))."', '$image', '0', '1' ,'$parent_category', '0')";
+      
       $wp_rewrite->flush_rules(); 
       if($wpdb->query($insertsql)) {
+				$category_id = $wpdb->get_var("SELECT LAST_INSERT_ID() AS `id` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` LIMIT 1");
         echo "<div class='updated'><p align='center'>".TXT_WPSC_ITEMHASBEENADDED."</p></div>";
       } else {
         echo "<div class='updated'><p align='center'>".TXT_WPSC_ITEMHASNOTBEENADDED."</p></div>";
@@ -220,78 +203,49 @@ function wpsc_display_groups_page() {
    // Jeff 15-04-09 Used for category target market options
 	   
     if($_POST['countrylist2'] != null){
-  		$catid = $wpdb->get_var("SELECT id FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `nice-name`='".$url_name."'");
     	$AllSelected = false;
     	
-    	if(in_array('all',$_POST['countrylist2'])){
-    		//get category id, counrtylist, 
+			$countryList = $wpdb->get_col("SELECT `id` FROM  `".WPSC_TABLE_CURRENCY_LIST."`");
     	
-    		//exit($catid);
-    		$sql = "SELECT `id` FROM  `".WPSC_TABLE_CURRENCY_LIST."`";
-    		//echo $sql;
-    		$countryList = $wpdb->get_col($sql);
-    		//exit('<pre>'.print_r($countryList,true).'</pre>');
+    	if(in_array('all',$_POST['countrylist2'])) {
     		foreach($countryList as $country){
- 				//exit(print_r($country));   	
-    			$wpdb->query("INSERT INTO `".WPSC_TABLE_CATEGORY_TM."` SET visible = 1 AND categoryid=".$catid." AND countryid=".$country);
+					$wpdb->query("INSERT INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('1','{$country}', '{$category_id}' )");
+					//echo "REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('1','{$country}', '{$category_id}' )<br />";
     		}
-			$AllSelected = true;
+				$AllSelected = true;
     	}
+    	
     	if(in_array('none', $_POST['countrylist2'])){
-    	  	$sql = "SELECT `id` FROM  `".WPSC_TABLE_CURRENCY_LIST."`";
-	    	$countryList = $wpdb->get_col($sql);
     		foreach($countryList as $country){
-    			$wpdb->query("INSERT INTO `".WPSC_TABLE_CATEGORY_TM."` SET visible = 0 AND categoryid=".$catid." AND countryid=".$country);
+					$wpdb->query("REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('0','{$country}', '{$category_id}' )");
     		}
-			$AllSelected = true;
+				$AllSelected = true;
     	}
-      	if($AllSelected != true){
-			$countrylist = $wpdb->get_col("SELECT id FROM `".WPSC_TABLE_CURRENCY_LIST."` ORDER BY country ASC ");
-			//find the countries not selected 
-			$unselectedCountries = array_diff($countrylist, $_POST['countrylist2']);
-			$catid = $wpdb->get_var("SELECT id FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `nice-name`='".$url_name."'");
-			foreach($unselectedCountries as $unselected){
-				$sqlunselect = "INSERT INTO `".WPSC_TABLE_CATEGORY_TM."` SET visible = 0 AND countryid = '".$unselected."' AND categoryid=".$catid;
-				$wpdb->query($sqlunselect);
-			} 
-	
-			//find the countries that are selected
-			$selectedCountries = array_intersect($countrylist, $_POST['countrylist2']);
-			foreach($selectedCountries as $selected){
-				$sqlselect = "INSERT INTO `".WPSC_TABLE_CATEGORY_TM."` SET visible = 1 AND countryid = '".$selected."' AND categoryid=".$catid;
-
-				$wpdb->query($sqlselect);
-			}
- 		}
-    	/*
-if($AllSelected != true){
-    	//exit('Work in Progress.<br /><pre>'.print_r($_POST, true).'</pre>');
-			//find the countries not selected 
-		  	$sql = "SELECT `id` FROM  `".WPSC_TABLE_CURRENCY_LIST."`";
-	    	$countryList = $wpdb->get_col($sql);
-			$unselectedCountries = array_diff($countryList,$_POST['countrylist2']);
-			exit('<pre>'.print_r($unselectedCountries, true).'</pre>');
-			foreach($unselectedCountries as $unselected){
+    			
+    			
+			if($AllSelected != true){
+				$unselectedCountries = array_diff($countryList, $_POST['countrylist2']);
+				foreach($unselectedCountries as $unselected){
+					$wpdb->query("REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('0','{$unselected}', '{$category_id}' )");
+					//echo "REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('0','{$unselected}', '{$category_id}' )<br />";
+				} 
 		
-	//			
-			} 
-	
-			//find the countries that are selected
-			$selectedCountries = array_intersect($countrylist, $_POST['countrylist2']);
-			foreach($selectedCountries as $selected){
-			//	$wpdb->query("UPDATE `".WPSC_TABLE_CATEGORY_TM."` SET visible = 1	WHERE id = '".$selected."' LIMIT 1");
+				//find the countries that are selected
+				$selectedCountries = array_intersect($countryList, $_POST['countrylist2']);
+				foreach($selectedCountries as $selected){
+					$wpdb->query("REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('1','{$selected}', '{$category_id}' )");
+					//echo "REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('1','{$unselected}', '{$category_id}' )<br />";
+				}
 			}
-
- 		}*/
-	} 
-    
+		}
 	}
 
   if(($_POST['submit_action'] == "edit") && is_numeric($_POST['prodid'])) {
+    $category_id = absint($_POST['prodid']);
     if(($_FILES['image'] != null) && preg_match("/\.(gif|jp(e)*g|png){1}$/i",$_FILES['image']['name'])) {
       if(function_exists("getimagesize")) {
       		if(((int)$_POST['width'] >= 10 && (int)$_POST['width'] <= 512) && ((int)$_POST['height'] >= 10 && (int)$_POST['height'] <= 512) ) {
-      		  $height = (int)$_POST['width'];
+      		  $width = (int)$_POST['width'];
       		  $height = (int)$_POST['height'];
 						image_processing($_FILES['image']['tmp_name'], (WPSC_CATEGORY_DIR.$_FILES['image']['name']), $width, $height);
     		  } else {
@@ -302,18 +256,18 @@ if($AllSelected != true){
 					move_uploaded_file($_FILES['image']['tmp_name'], (WPSC_CATEGORY_DIR.$_FILES['image']['name']));
 					$image = $wpdb->escape($_FILES['image']['name']);
         }
+      
       } else {
 				$image = '';
       }
     
     if(is_numeric($_POST['height']) && is_numeric($_POST['width']) && ($image == null)) {
-      $imagesql = "SELECT `image` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `id`=".(int)$_POST['prodid']." LIMIT 1";
-      $imagedata = $wpdb->get_results($imagesql,ARRAY_A);
-      if($imagedata[0]['image'] != null) {
+      $imagedata = $wpdb->get_var("SELECT `image` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `id`=".(int)$_POST['prodid']." LIMIT 1");
+      if($imagedata != null) {
         $height = $_POST['height'];
         $width = $_POST['width'];
-        $imagepath = WPSC_CATEGORY_DIR . $imagedata[0]['image'];
-        $image_output = WPSC_CATEGORY_DIR . $imagedata[0]['image'];
+        $imagepath = WPSC_CATEGORY_DIR . $imagedata;
+        $image_output = WPSC_CATEGORY_DIR . $imagedata;
         image_processing($imagepath, $image_output, $width, $height);
 			}
 		}
@@ -346,61 +300,31 @@ if($AllSelected != true){
 	   // Jeff 15-04-09 Used for category target market options
 	   
     if($_POST['countrylist2'] != null){
-  		
+			$countryList = $wpdb->get_col("SELECT `id` FROM `".WPSC_TABLE_CURRENCY_LIST."`");
     	$AllSelected = false;
-    	$catid = $wpdb->escape($_POST['prodid']);
     	if(in_array('all',$_POST['countrylist2'])){
-    		//get category id, counrtylist, 
-    		$sql = "SELECT `id` FROM  `".WPSC_TABLE_CURRENCY_LIST."`";
-    		$countryList = $wpdb->get_col($sql);
     		foreach($countryList as $country){
- 				$sql ="UPDATE `".WPSC_TABLE_CATEGORY_TM."` SET visible = 1 WHERE categoryid=".$catid." AND countryid=".$country;
-    		//	exit($sql);
-    			$wpdb->query($sql);
+					$wpdb->query("REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('1','{$country}', '{$category_id}' )");
     		}
-			$AllSelected = true;
+				$AllSelected = true;
     	}
     	if(in_array('none', $_POST['countrylist2'])){
-    	  	$sql = "SELECT `id` FROM  `".WPSC_TABLE_CURRENCY_LIST."`";
-	    	$countryList = $wpdb->get_col($sql);
-    		foreach($countryList as $country){
-    			$sql ="UPDATE `".WPSC_TABLE_CATEGORY_TM."` SET visible = 0 WHERE categoryid=".$catid." AND countryid=".$country;
-    		//exit($sql);
-    		$wpdb->query($sql);
-    		
-    		}
+				$wpdb->query("UPDATE `".WPSC_TABLE_CATEGORY_TM."` SET `visible` = '0' WHERE `categoryid`='{$category_id}'");
 			$AllSelected = true;
     	}
-      	if($AllSelected != true){
-			$countrylist = $wpdb->get_col("SELECT id FROM `".WPSC_TABLE_CURRENCY_LIST."` ORDER BY country ASC ");
-			//find the countries not selected 
+			if($AllSelected != true){
+				$unselectedCountries = array_diff($countryList, $_POST['countrylist2']);
+				foreach($unselectedCountries as $unselected){
+    				$wpdb->query("REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."` (`visible`, `countryid`, `categoryid`) VALUES (0,'{$unselected}', '{$category_id}' )");
+				} 
 		
-			$unselectedCountries = array_diff($countrylist, $_POST['countrylist2']);
-				//exit(count($_POST['countrylist2']).' + '.count($unselectedCountries).' = '.count($countrylist));
-			foreach($unselectedCountries as $unselected){
-				$sqlunselect = "UPDATE `".WPSC_TABLE_CATEGORY_TM."` SET visible = 0 WHERE countryid = '".$unselected."' AND categoryid=".$catid;
-				
-				$success = $wpdb->query($sqlunselect);
-				if(!$success){
-    				$sqlunselect = "INSERT INTO `".WPSC_TABLE_CATEGORY_TM."` (visible, countryid, categoryid) VALUES (0,'".$unselected."', '".$catid."' )";
-    				//exit($sqlunselect);
-    				$wpdb->query($sqlunselect);
-    			}
-			} 
-	
-			//find the countries that are selected
-			$selectedCountries = array_intersect($countrylist, $_POST['countrylist2']);
-			foreach($selectedCountries as $selected){
-				$sqlselect = "UPDATE `".WPSC_TABLE_CATEGORY_TM."` SET visible = 1 WHERE countryid = '".$selected."' AND categoryid=".$catid;
-
-				$success = $wpdb->query($sqlselect);
-				if(!$success){
-    				$sqlselect = "INSERT INTO `".WPSC_TABLE_CATEGORY_TM."`(visible, countryid, categoryid) VALUES (0,'".$selected."', '".$catid.".' )";
-    				$wpdb->query($sqlselect);
+				//find the countries that are selected
+				$selectedCountries = array_intersect($countryList, $_POST['countrylist2']);
+				foreach($selectedCountries as $selected){
+					$wpdb->query("REPLACE INTO `".WPSC_TABLE_CATEGORY_TM."`(`visible`, `countryid`, `categoryid`) VALUES ('1','{$selected}', '{$category_id}' )");
 				}
 			}
 		}
-	}
     
     if($_POST['description'] != $category_data['description']) {
       $description = $_POST['description'];
@@ -670,7 +594,7 @@ if(is_numeric($_GET['deleteid'])) {
 	$num = 0;
 	
 	echo "  <table id='productpage' style='margin-top: 1ex;'>\n\r";
-	echo "    <tr><td class='firstcol'>\n\r";
+	echo "    <tr><td class='firstcol' style='width: 297px;'>\n\r";
 	if (function_exists('add_object_page')){
 		echo "<div class='postbox' style='margin-right: 15px; min-width:255px;'>";
 		echo "<h3 class='hndle'>".str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_CURRENT_GROUP)."</h3>";
@@ -711,7 +635,6 @@ if(is_numeric($_GET['deleteid'])) {
 	echo "  <a href='#' onclick='return showedit_categorisation_form()'>".TXT_WPSC_EDIT."</a>";
 	
 	echo "</p></div>";
-	echo "<a href='' onclick='return showaddform()' class='add_category_link'><span>".str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDNEWCATEGORY)." </span></a>";
 	echo "       </td>\n\r";
 	echo "     <tr>\n\r";
 	
@@ -723,7 +646,7 @@ if(is_numeric($_GET['deleteid'])) {
 	} else {
 		echo "</table>\n\r";
 	}
-	echo "      </td><td class='secondcol product_groups_page'>\n\r";
+	echo "      </td><td id='poststuff' class='secondcol product_groups_page'>\n\r";
 	echo "        <div id='productform' class='postbox'>";
 	echo "<form method='POST'  enctype='multipart/form-data' name='editproduct$num'>\n\r";
 	
@@ -744,144 +667,140 @@ if(is_numeric($_GET['deleteid'])) {
 	echo "</form>\n\r";
 	echo "        </div>\n\r";
 	?>
+
 	
-	<?php
-	if (function_exists('add_object_page')) {
-		echo "<div id='additem' class='postbox'>";
-		echo "<h3 class='hndle'>".str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDING_TO_GROUP)."</h3>";
-		echo "<div class='inside'>";
-	} else {
-		echo "<div id='additem'>";
-		echo "<div class='categorisation_title'><strong class='form_group'>".TXT_WPSC_ADDDETAILS."</strong></div>";
-	}
-	?>
-		<form method='POST' enctype='multipart/form-data' class='additem'>
-		<div class='editing_this_group'><p> <?php echo "".str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDING_TO_GROUP) .""; ?></p></div>
-		<table class='category_forms'>
-			<tr>
-				<td>
-					<?php echo TXT_WPSC_NAME;?>:
-				</td>
-				<td>
-					<input type='text' class="text" name='name' value=''  />
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<?php echo TXT_WPSC_DESCRIPTION;?>:
-				</td>
-				<td>
-					<textarea name='description' rows='8'></textarea>
-				</td>
-			</tr>   
-			
-				<tr>
-				<td>
-					<?php echo TXT_WPSC_CATEGORY_PARENT;?>:
-				</td>
-				<td>
-					<?php echo wpsc_parent_category_list($current_categorisation['id'], 0,0); ?>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<?php echo TXT_WPSC_GROUP_IMAGE;?>:
-				</td>
-				<td>
-					<input type='file' name='image' value='' />
-				</td>
-			</tr>
-	<?php
-	if(function_exists("getimagesize")) {
-			?>
-			<tr>
-				<td>
-				</td>
-				<td>
-					<?php echo TXT_WPSC_HEIGHT;?>:<input type='text' size='6' name='height' value='<?php echo get_option('category_image_height'); ?>' /> <?php echo TXT_WPSC_WIDTH;?>:<input type='text' size='6' name='width' value='<?php echo get_option('category_image_width'); ?>' /> <br />
-					<span class='small'><?php echo TXT_WPSC_GROUP_IMAGE_TEXT; ?></span>
-				</td>
-			</tr>
+<div id="blank_item">
+	<h3 class="form_heading"><?php echo str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDNEWCATEGORY_TITLE); ?></h3>
+	<div class="inside">
+	  <a href='' onclick='return showaddform()' class='add_category_link'><span><?php echo str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDNEWCATEGORY); ?> </span></a>
+	  <span class="setting-description"><?php echo TXT_WPSC_ADDING_A_NEW_CATEGORY;?></span>
+	</div>
+</div>
+
+	
+	<div id='additem' class='postbox'>
+		<h3 class='hndle'><?php echo str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDING_TO_GROUP); ?></h3>
+		<div class='inside'>
+			<form method='POST' enctype='multipart/form-data' class='additem'>
+				<div class='editing_this_group'><p> <?php echo "".str_replace("[categorisation]", $current_categorisation['name'], TXT_WPSC_ADDING_TO_GROUP) .""; ?></p></div>
+				<table class='category_forms'>
+					<tr>
+						<td>
+							<?php echo TXT_WPSC_NAME;?>:
+						</td>
+						<td>
+							<input type='text' class="text" name='name' value=''  />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<?php echo TXT_WPSC_DESCRIPTION;?>:
+						</td>
+						<td>
+							<textarea name='description' rows='8'></textarea>
+						</td>
+					</tr>
+
+						<tr>
+						<td>
+							<?php echo TXT_WPSC_CATEGORY_PARENT;?>:
+						</td>
+						<td>
+							<?php echo wpsc_parent_category_list($current_categorisation['id'], 0,0); ?>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<?php echo TXT_WPSC_GROUP_IMAGE;?>:
+						</td>
+						<td>
+							<input type='file' name='image' value='' />
+						</td>
+					</tr>
 			<?php
-	}
-	?>
-		<?php  wpsc_category_tm(); //category target market checkbox ?> 
-			<tr>
-				<td colspan='2' class='category_presentation_settings'>
-					<h4><?php echo TXT_WPSC_PRESENTATIONSETTINGS;?></h4>
-					<span class='small'><?php echo TXT_WPSC_GROUP_PRESENTATION_TEXT; ?></span>
-				</td>
-			</tr>
-			
-			
-			
-			<tr>
-				<td>
-					<?php echo TXT_WPSC_CATALOG_VIEW;?>:
-				</td>
-				<td>
-						<select name='product_view'>
-							<option value='default' <?php echo $product_view1; ?>><?php echo TXT_WPSC_DEFAULT;?></option>
-							<?php
-							if(function_exists('product_display_list')) {
-								?>
-								<option value='list' <?php echo $product_view2; ?>><?php echo TXT_WPSC_LIST;?></option>
-								<?php      
-							}  else {
-								?>
-								<option value='list' disabled='disabled' <?php echo $product_view2; ?>><?php echo TXT_WPSC_LIST;?></option>
-								<?php
-							}
-							
-							if(function_exists('product_display_grid')) {
-								?>
-							<option value='grid' <?php echo $product_view3; ?>><?php echo TXT_WPSC_GRID;?></option>
-								<?php   
-							} else {
-								?>
-							<option value='grid' disabled='disabled' <?php echo $product_view3; ?>><?php echo TXT_WPSC_GRID;?></option>
-								<?php 
-							}
-							?>
-						</select>
-				</td>
-			</tr>
-			
-			<tr>
-				<td>
-				<?php echo TXT_WPSC_THUMBNAIL_SIZE; ?>:
-				</td>
-				<td>
-					<?php echo TXT_WPSC_HEIGHT; ?>: <input type='text' value='' name='product_height' size='6'/>
-					<?php echo TXT_WPSC_WIDTH; ?>: <input type='text' value='' name='product_width' size='6'/> <br/>
-				</td>
-			</tr>
-			
-			<tr>
-				<td>
-				</td>
-				<td class='last_row'>
-				   
-					<input type='hidden' name='categorisation_group' value='<?php echo $current_categorisation['id']; ?>' />
-					<input type='hidden' name='submit_action' value='add' />
-					<input class='button-primary' type='submit' name='submit' value='<?php echo TXT_WPSC_ADD_GROUP;?>' />
-				</td>
-			</tr>
-			
-	
-	
-			
-		</table>
-		</form>
+			if(function_exists("getimagesize")) {
+					?>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<?php echo TXT_WPSC_HEIGHT;?>:<input type='text' size='6' name='height' value='<?php echo get_option('category_image_height'); ?>' /> <?php echo TXT_WPSC_WIDTH;?>:<input type='text' size='6' name='width' value='<?php echo get_option('category_image_width'); ?>' /> <br />
+							<span class='small description'><?php echo TXT_WPSC_GROUP_IMAGE_TEXT; ?></span>
+						</td>
+					</tr>
+					<?php
+			}
+			?>
+				<?php  wpsc_category_tm(); //category target market checkbox ?>
+					<tr>
+						<td colspan='2' class='category_presentation_settings'>
+							<h4><?php echo TXT_WPSC_PRESENTATIONSETTINGS;?></h4>
+							<span class='small'><?php echo TXT_WPSC_GROUP_PRESENTATION_TEXT; ?></span>
+						</td>
+					</tr>
+
+
+
+					<tr>
+						<td>
+							<?php echo TXT_WPSC_CATALOG_VIEW;?>:
+						</td>
+						<td>
+								<select name='product_view'>
+									<option value='default' <?php echo $product_view1; ?>><?php echo TXT_WPSC_DEFAULT;?></option>
+									<?php
+									if(function_exists('product_display_list')) {
+										?>
+										<option value='list' <?php echo $product_view2; ?>><?php echo TXT_WPSC_LIST;?></option>
+										<?php
+									}  else {
+										?>
+										<option value='list' disabled='disabled' <?php echo $product_view2; ?>><?php echo TXT_WPSC_LIST;?></option>
+										<?php
+									}
+
+									if(function_exists('product_display_grid')) {
+										?>
+									<option value='grid' <?php echo $product_view3; ?>><?php echo TXT_WPSC_GRID;?></option>
+										<?php
+									} else {
+										?>
+									<option value='grid' disabled='disabled' <?php echo $product_view3; ?>><?php echo TXT_WPSC_GRID;?></option>
+										<?php
+									}
+									?>
+								</select>
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+						<?php echo TXT_WPSC_THUMBNAIL_SIZE; ?>:
+						</td>
+						<td>
+							<?php echo TXT_WPSC_HEIGHT; ?>: <input type='text' value='' name='product_height' size='6'/>
+							<?php echo TXT_WPSC_WIDTH; ?>: <input type='text' value='' name='product_width' size='6'/> <br/>
+						</td>
+					</tr>
+
+					<tr>
+						<td>
+						</td>
+						<td class='last_row'>
+
+							<input type='hidden' name='categorisation_group' value='<?php echo $current_categorisation['id']; ?>' />
+							<input type='hidden' name='submit_action' value='add' />
+							<input class='button-primary' type='submit' name='submit' value='<?php echo TXT_WPSC_ADD_GROUP;?>' />
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
 	</div>
-	<?php
-	echo "      </td></tr>\n\r";
-	echo "     </table>\n\r";
-	if (function_exists('add_object_page')) {
-		echo "</div>";
-	}
-		?>
-	</div>
+
+	
+	</td></tr>
+	</table>
 	</div>
 	<?php
   }

@@ -239,9 +239,9 @@ function nzshpcrt_javascript()
 	}
   ?>
 <?php if (get_option('product_ratings') == 1){ ?>
-<link href='<?php echo WPSC_URL; ?>/product_rater.css' rel="stylesheet" type="text/css" />
+<link href='<?php echo WPSC_URL; ?>/js/product_rater.css' rel="stylesheet" type="text/css" />
 <?php } ?>
-<link href='<?php echo WPSC_URL; ?>/thickbox.css' rel="stylesheet" type="text/css" />
+<link href='<?php echo WPSC_URL; ?>/js/thickbox.css' rel="stylesheet" type="text/css" />
 <?php if (get_option('catsprods_display_type') == 1){ ?>
   <script language="JavaScript" type="text/javascript" src="<?php echo WPSC_URL; ?>/js/slideMenu.js"></script>
 <?php } ?>
@@ -306,23 +306,6 @@ jQuery(document).ready( function() {
 <link href='<?php echo WPSC_URL; ?>/themes/compatibility.css' rel="stylesheet" type="text/css" />
     <?php
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -719,7 +702,8 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 					  }
 					";
 		
-			  if(($_POST['prodid'] != null) &&(get_option('fancy_notifications') == 1)) {
+	/*
+		  if(($_POST['prodid'] != null) &&(get_option('fancy_notifications') == 1)) {
 				echo "if(document.getElementById('fancy_notification_content') != null)
 					  {
 					  document.getElementById('fancy_notification_content').innerHTML = \"".str_replace(Array("\n","\r") , "",addslashes(fancy_notification_content($_POST['prodid'], $quantity_limit))). "\";
@@ -728,6 +712,7 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
 					  }
 					";
 				}
+*/
 			  
 			  if($_SESSION['slider_state'] == 0) {
 				//echo  'jQuery("#sliding_cart").css({ display: "none"});'."\n\r";
@@ -1128,7 +1113,6 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
     }
     
 //     include_once(WPSC_FILE_PATH."/product_display_functions.php");
-    include_once(WPSC_FILE_PATH."/show_cats_brands.php");
     
     
 		if(isset($_GET['category_id']) and is_numeric($_GET['category_id'])){
@@ -1182,7 +1166,7 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
     exit();
     }
     
-    require_once(WPSC_FILE_PATH . '/processing_functions.php');
+    
 
 
 /* 
@@ -1279,8 +1263,12 @@ function nzshpcrt_download_file() {
     //exit("<pre>".print_r($download_data,true)."</pre>");
    
     if($download_data != null) {
-      $file_data = $wpdb->get_results("SELECT * FROM `".WPSC_TABLE_PRODUCT_FILES."` WHERE `id`='".$download_data['fileid']."' LIMIT 1",ARRAY_A) ;
-      $file_data = $file_data[0];      
+      if($download_data['product_id'] > 0) {
+				$product_file_id = $wpdb->get_var("SELECT `file` FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id`='".$download_data['product_id']."' LIMIT 1");
+				$file_data = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_FILES."` WHERE `id`='".$product_file_id."' LIMIT 1", ARRAY_A);
+      } else {
+				$file_data = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_FILES."` WHERE `id`='".$download_data['fileid']."' LIMIT 1", ARRAY_A);
+			}
       
       if((int)$download_data['downloads'] >= 1) {
         $download_count = (int)$download_data['downloads'] - 1;
@@ -1312,10 +1300,13 @@ function nzshpcrt_download_file() {
 					header('Cache-Control: must-revalidate, post-check=0, pre-check=0');       
 				}        
         $filename = WPSC_FILE_DIR.$file_data['idhash'];
+        // destroy the session to allow the file to be downloaded on some buggy browsers and webservers
         session_destroy();
         readfile_chunked($filename);   
         exit();
 			}
+		} else {
+			exit(WPSC_DOWNLOAD_INVALID);
 		}
 	} else {
 		if(($_GET['admin_preview'] == "true") && is_numeric($_GET['product_id']) && current_user_can('edit_plugins')) {
@@ -1342,8 +1333,8 @@ function nzshpcrt_download_file() {
 						header('Cache-Control: must-revalidate, post-check=0, pre-check=0');       
 					}             
 					$filename = WPSC_FILE_DIR.$file_data['idhash'];  
-					readfile_chunked($filename);   
 					session_destroy();
+					readfile_chunked($filename);   
 					exit();
 				}            
 			}
@@ -1353,7 +1344,7 @@ function nzshpcrt_download_file() {
 
 function nzshpcrt_display_preview_image() {
 	  global $wpdb;
-	  if(is_numeric($_GET['productid']) || is_numeric($_GET['image_id'])) {
+	  if(is_numeric($_GET['productid']) || is_numeric($_GET['image_id'])|| isset($_GET['image_name'])) {
 		if(function_exists("getimagesize")) {
 			if(is_numeric($_GET['productid'])) {
 				$product_id = (int)$_GET['productid'];
@@ -1369,6 +1360,9 @@ function nzshpcrt_display_preview_image() {
 				$image_id = (int)$_GET['image_id'];
 				$image = $wpdb->get_var("SELECT `image` FROM `".WPSC_TABLE_PRODUCT_IMAGES."` WHERE `id` = '{$image_id}' LIMIT 1");
 				$imagepath = WPSC_IMAGE_DIR . $image;
+			}elseif($_GET['image_name']){
+				$image = $_GET['image_name'];
+				$imagepath = WPSC_USER_UPLOADS_DIR . $image;
 			}
 			
 			if(!is_file($imagepath)) {
@@ -1610,26 +1604,6 @@ function nzshpcrt_product_list_rss_feed() {
 
 
 
-// This function displays the category groups, it is used by the above function
-function nzshpcrt_display_categories_groups() {
-    global $wpdb;
-
-    if(get_option('permalink_structure') != '') {
-      $seperator ="?";
-    } else {
-      $seperator ="&amp;";
-    }
-
-    if(function_exists('gold_shpcrt_search_form') && get_option('show_search') == 1) {
-      echo gold_shpcrt_search_form();
-    }
-
-    //include("show_cats_brands.php");
-    if (get_option('cat_brand_loc') == 0) {
-      show_cats_brands();
-    }
-  }
-
 
 function add_product_meta($product_id, $key, $value, $unique = false, $custom = false) {
   global $wpdb, $post_meta_cache, $blog_id;
@@ -1638,8 +1612,10 @@ function add_product_meta($product_id, $key, $value, $unique = false, $custom = 
     if(($unique == true) && $wpdb->get_var("SELECT meta_key FROM `".WPSC_TABLE_PRODUCTMETA."` WHERE meta_key = '$key' AND product_id = '$product_id'")) {
       return false;
 		}
-    
-    $value = $wpdb->escape(maybe_serialize($value));
+		if(!is_string($value)) {
+			$value = maybe_serialize($value);
+		}
+    $value = $wpdb->escape($value);
     
     if(!$wpdb->get_var("SELECT meta_key FROM `".WPSC_TABLE_PRODUCTMETA."` WHERE meta_key = '$key' AND product_id = '$product_id'")) {
       $custom = (int)$custom;
@@ -1867,7 +1843,6 @@ include_once(WPSC_FILE_PATH.'/widgets/admin_menu_widget.php');
 
 
 include_once(WPSC_FILE_PATH.'/image_processing.php');
-include_once(WPSC_FILE_PATH."/show_cats_brands.php");
 
 
 $theme_path = WPSC_FILE_PATH . '/themes/';
@@ -1935,127 +1910,6 @@ function wpsc_admin_notices() {
 }
 
 
-/*
- *	Inserts the summary box on the WordPress Dashboard
- */
-
-//if(function_exists('wp_add_dashboard_widget')) {
-if( IS_WP27 ) {
-    add_action('wp_dashboard_setup','wpsc_dashboard_widget_setup');
-} else {
-    add_action('activity_box_end', 'wpsc_admin_dashboard_rightnow');
-}
-
-function wpsc_admin_latest_activity() {
-global $wpdb;
-		$totalOrders = $wpdb->get_var("SELECT COUNT(*) FROM `".WPSC_TABLE_PURCHASE_LOGS."`");
-	
-		 
-		/*
-		 * This is the right hand side for the past 30 days revenue on the wp dashboard
-		 */
-		
-		echo "<div id='leftDashboard'>";
-		echo "<strong class='dashboardHeading'>".TXT_WPSC_TOTAL_THIS_MONTH."</strong><br />";
-		echo "<p class='dashboardWidgetSpecial'>";
-		// calculates total amount of orders for the month
-		$year = date("Y");
-		$month = date("m");
-		$start_timestamp = mktime(0, 0, 0, $month, 1, $year);
-		$end_timestamp = mktime(0, 0, 0, ($month+1), 0, $year);
-		$sql = "SELECT COUNT(*) FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `date` BETWEEN '$start_timestamp' AND '$end_timestamp' ORDER BY `date` DESC";
-		$currentMonthOrders = $wpdb->get_var($sql);
-		
-		//calculates amount of money made for the month
-		$currentMonthsSales = nzshpcrt_currency_display(admin_display_total_price($start_timestamp, $end_timestamp),1);
-		echo $currentMonthsSales;
-		echo "<span class='dashboardWidget'>".TXT_WPSC_SALES_TITLE."</span>";
-		echo "</p>";
-		echo "<p class='dashboardWidgetSpecial'>";
-		echo "<span class='pricedisplay'>";
-		echo $currentMonthOrders;
-		echo "</span>";
-		echo "<span class='dashboardWidget'>".TXT_WPSC_ORDERS_TITLE."</span>";
-		echo "</p>";
-		echo "<p class='dashboardWidgetSpecial'>";
-		//echo "<span class='pricedisplay'>";
-		//calculates average sales amount per order for the month
-		if($currentMonthOrders > 0){
-			$monthsAverage = ((int)admin_display_total_price($start_timestamp, $end_timestamp)/(int)$currentMonthOrders);
-			echo nzshpcrt_currency_display($monthsAverage,1);
-		}
-		//echo "</span>";
-		echo "<span class='dashboardWidget'>".TXT_WPSC_AVGORDER_TITLE."</span>";
-		echo "</p>";
-		
-		
-		echo "</div>";
-		/*
-		 *This is the left side for the total life time revenue on the wp dashboard
-		 */
-		
-		echo "<div id='rightDashboard' >";
-		echo "<strong class='dashboardHeading'>".TXT_WPSC_TOTAL_INCOME."</strong><br />";
-
-		echo "<p class='dashboardWidgetSpecial'>";
-		echo nzshpcrt_currency_display(admin_display_total_price(),1);
-		echo "<span class='dashboardWidget'>".TXT_WPSC_SALES_TITLE."</span>";
-		echo "</p>";
-		echo "<p class='dashboardWidgetSpecial'>";
-		echo "<span class='pricedisplay'>";
-		echo $totalOrders;
-		echo "</span>";
-		echo "<span class='dashboardWidget'>".TXT_WPSC_ORDERS_TITLE."</span>";
-		echo "</p>";
-		echo "<p class='dashboardWidgetSpecial'>";
-		//echo "<span class='pricedisplay'>";
-		//calculates average sales amount per order for the month
-		$totalAverage = ((int)admin_display_total_price()/(int)$totalOrders);
-		echo nzshpcrt_currency_display($totalAverage,1);
-		//echo "</span>";
-		echo "<span class='dashboardWidget'>".TXT_WPSC_AVGORDER_TITLE."</span>";
-		echo "</p>";
-		echo "</div>";
-		echo "<div style='clear:both'></div>";
-
-
-}
-add_action('wpsc_admin_pre_activity','wpsc_admin_latest_activity');
-
-/*
- *	Pre-2.7 Dashboard Information
- */
-
-function wpsc_admin_dashboard_rightnow() {
-  $user = wp_get_current_user();
-	if($user->user_level>9){
-		echo "<div>";
-		echo "<h3>".TXT_WPSC_E_COMMERCE."</h3>";
-		echo "<p>";
-		do_action('wpsc_admin_pre_activity');
-//		wpsc_admin_latest_activity();
-		do_action('wpsc_admin_post_activity');
-		echo "</div>";
-    }
-}
-		
-/*
- * Dashboard Widget for 2.7 (TRansom)
- */
-function wpsc_dashboard_widget_setup() {
-    wp_add_dashboard_widget('wpsc_dashboard_widget', __('E-Commerce'),'wpsc_dashboard_widget');
-}
-
-function wpsc_dashboard_widget() {
-    do_action('wpsc_admin_pre_activity');
-//    wpsc_admin_latest_activity();
-    do_action('wpsc_admin_post_activity');
-}
-
-/*
- * END - Dashboard Widget for 2.7
- */
-
 //this adds all the admin pages, before the code was a mess, now it is slightly less so.
 
 // pe.{
@@ -2093,27 +1947,21 @@ add_filter('mod_rewrite_rules', 'wpsc_refresh_page_urls');
 
 
 if(strpos($_SERVER['SCRIPT_NAME'], "wp-admin") === false) {
-  wp_enqueue_script( 'jQuery', WPSC_URL.'/js/jquery.js', false, '1.2.3');
-// 	wp_enqueue_script('instinct_thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
-	wp_enqueue_script('ngg-thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
+  //wp_enqueue_script( 'jQuery', WPSC_URL.'/js/jquery.js', false, '1.2.3');
+	//wp_enqueue_script('ngg-thickbox',WPSC_URL.'/js/thickbox.js', 'jQuery', 'Instinct_e-commerce');
 } else {
-	wp_enqueue_script('thickbox');
+
+	//wp_enqueue_script('thickbox');
 	if(function_exists('wp_enqueue_style')) {  // DO NOT ALTER THIS!! This function is not present on older versions of wordpress
-		wp_enqueue_style( 'thickbox' );
+	//	wp_enqueue_style( 'thickbox' );
 	}
-//	wp_enqueue_script('jQuery-ui',WPSC_URL.'/js/jquery-ui.js?ver=1.6', array('jquery'), '1.6');
-	wp_enqueue_script('jEditable',WPSC_URL.'/js/jquery.jeditable.pack.js', array('jquery'), '2.7.4');
+//	wp_enqueue_script('jEditable',WPSC_URL.'/js/jquery.jeditable.pack.js', array('jquery'), '2.7.4');
 }
 if(strpos($_SERVER['REQUEST_URI'], WPSC_DIR_NAME.'') !== false) {
-// 	wp_enqueue_script('interface',WPSC_URL.'/js/interface.js', 'Interface');
-	
-		if($_GET['page'] == WPSC_DIR_NAME.'/display-items.php') {
-			wp_enqueue_script( 'postbox', '/wp-admin/js/postbox.js', array('jquery'));
-      wp_enqueue_script('new_swfupload', WPSC_URL.'/js/swfupload.js');
-      wp_enqueue_script('new_swfupload.swfobject', WPSC_URL.'/js/swfupload/swfupload.swfobject.js');
-      //wp_enqueue_script('swfupload-degrade');
-      //wp_enqueue_script('swfupload-queue');
-      //wp_enqueue_script('swfupload-handlers');
+		if($_GET['page'] == 'wpsc-edit-products') {
+		//	wp_enqueue_script( 'postbox', '/wp-admin/js/postbox.js', array('jquery'));
+     // wp_enqueue_script('new_swfupload', WPSC_URL.'/js/swfupload.js');
+     // wp_enqueue_script('new_swfupload.swfobject', WPSC_URL.'/js/swfupload/swfupload.swfobject.js');
 		}
 }
 
@@ -2133,25 +1981,25 @@ switch(get_option('cart_location')) {
   break;
   
   case 5:
-  //exit("<pre>".print_r($_SERVER,true)."</pre>");
-  if(function_exists('drag_and_drop_cart')) {
-    $shop_pages_only = 1;
-		add_action('init', 'drag_and_drop_cart_ajax');  
-		if (get_option('dropshop_display')=='product'){
-		  $url_prefix_array = explode("://", get_option('product_list_url'));
-		  $url_prefix = $url_prefix_array[0]."://";
-			if(stristr(($url_prefix.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']), get_option('product_list_url'))){
-			  
-				wp_enqueue_script('interface',WPSC_URL.'/js/interface.js', 'Interface');
-				add_action('wp_head', 'drag_and_drop_js');  
-				add_action('wp_footer', 'drag_and_drop_cart');  
-			}
-		} else {		  
-			wp_enqueue_script('interface',WPSC_URL.'/js/interface.js', 'Interface');
-			add_action('wp_head', 'drag_and_drop_js');  
-			add_action('wp_footer', 'drag_and_drop_cart');  
-		}
-	}
+//   //exit("<pre>".print_r($_SERVER,true)."</pre>");
+//   if(function_exists('drag_and_drop_cart')) {
+//     $shop_pages_only = 1;
+// 		add_action('init', 'drag_and_drop_cart_ajax');  
+// 		if (get_option('dropshop_display')=='product'){
+// 		  $url_prefix_array = explode("://", get_option('product_list_url'));
+// 		  $url_prefix = $url_prefix_array[0]."://";
+// 			if(stristr(($url_prefix.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']), get_option('product_list_url'))){
+// 			  
+// 				wp_enqueue_script('interface',WPSC_URL.'/js/interface.js', 'Interface');
+// 				add_action('wp_head', 'drag_and_drop_js');  
+// 				add_action('wp_footer', 'drag_and_drop_cart');  
+// 			}
+// 		} else {		  
+// 			wp_enqueue_script('interface',WPSC_URL.'/js/interface.js', 'Interface');
+// 			add_action('wp_head', 'drag_and_drop_js');  
+// 			add_action('wp_footer', 'drag_and_drop_cart');  
+// 		}
+// 	}
   break;
   
   case 3:
@@ -2253,32 +2101,6 @@ function thickbox_variation() {
 	}
 		echo "  <table id='productpage'>\n\r";
 		echo "    <tr>";
-		/*
-echo "  <div class='categorisation_title'>\n\r";
-		echo "		<strong class='form_group'>".TXT_WPSC_VARIATION_LIST."</strong>\n\r";
-		echo "	</div>\n\r";
-		echo "      <table id='itemlist'>\n\r";
-		echo "        <tr class='firstrow'>\n\r";
-	
-		echo "          <td>\n\r";
-		echo TXT_WPSC_NAME;
-		echo "          </td>\n\r";
-	
-		echo "          <td>\n\r";
-		echo TXT_WPSC_EDIT;
-		echo "          </td>\n\r";
-		
-		echo "        </tr>\n\r";
-		$variation_sql = "SELECT * FROM `".WPSC_TABLE_PRODUCT_VARIATIONS."` ORDER BY `id`";
-		$variation_list = $wpdb->get_results($variation_sql,ARRAY_A);
-		if($variation_list != null) {
-		  foreach($variation_list as $variation) {
-		    display_variation_row($variation);
-			}
-		}
-		  
-		echo "      </table>\n\r";
-*/
 		echo "      <td class='secondcol'>\n\r";
 		echo "        <div id='productform'>";
 		echo "  <div class='categorisation_title'>\n\r";
@@ -2345,23 +2167,12 @@ echo "     </table>\n\r";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 add_filter('favorite_actions', 'wpsc_fav_action');
 function wpsc_fav_action($actions) {
     // remove the "Add new page" link
     // unset($actions['page-new.php']);
   	// add quick link to our favorite plugin
-    $actions['admin.php?page='.WPSC_DIR_NAME.'/display-items.php'] = array('New Product', 'manage_options');
+    $actions['admin.php?page=wpsc-edit-products'] = array('New Product', 'manage_options');
     return $actions;
 }
 
@@ -2421,7 +2232,7 @@ function wpsc_duplicate() {
 			$wpdb->query($sql);
 		}
 	}
-	wp_redirect('?page='.WPSC_DIR_NAME.'/display-items.php');
+	wp_redirect('?page=wpsc-edit-products');
 }
 
 if (isset($_GET['duplicate'])) {

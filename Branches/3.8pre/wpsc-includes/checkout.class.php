@@ -12,29 +12,29 @@ function wpsc_google_checkout_submit(){
 	global $wpdb,  $wpsc_cart, $current_user;
 	$wpsc_checkout = new wpsc_checkout();
 	$purchase_log_id = $wpdb->get_var("SELECT `id` FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `sessionid` IN('".$_SESSION['wpsc_sessionid']."') LIMIT 1") ;
-			//$purchase_log_id = 1;
-			get_currentuserinfo();
-		//	exit('<pre>'.print_r($current_user, true).'</pre>');
-			if($current_user->display_name != ''){
-				foreach($wpsc_checkout->checkout_items as $checkoutfield){
-				//	exit(print_r($checkoutfield,true));
-					if($checkoutfield->unique_name == 'billingfirstname'){
-						$checkoutfield->value = $current_user->display_name;
-					}
-				}	
+	//$purchase_log_id = 1;
+	get_currentuserinfo();
+	//	exit('<pre>'.print_r($current_user, true).'</pre>');
+	if($current_user->display_name != ''){
+		foreach($wpsc_checkout->checkout_items as $checkoutfield){
+		//	exit(print_r($checkoutfield,true));
+			if($checkoutfield->unique_name == 'billingfirstname'){
+				$checkoutfield->value = $current_user->display_name;
 			}
-			if($current_user->user_email != ''){
-				foreach($wpsc_checkout->checkout_items as $checkoutfield){
-				//	exit(print_r($checkoutfield,true));
-					if($checkoutfield->unique_name == 'billingemail'){
-						$checkoutfield->value = $current_user->user_email;
-					}
-				}	
+		}	
+	}
+	if($current_user->user_email != ''){
+		foreach($wpsc_checkout->checkout_items as $checkoutfield){
+		//	exit(print_r($checkoutfield,true));
+			if($checkoutfield->unique_name == 'billingemail'){
+				$checkoutfield->value = $current_user->user_email;
 			}
-		
-			$wpsc_checkout->save_forms_to_db($purchase_log_id);
-			$wpsc_cart->save_to_db($purchase_log_id);
-			$wpsc_cart->submit_stock_claims($purchase_log_id);
+		}	
+	}
+
+	$wpsc_checkout->save_forms_to_db($purchase_log_id);
+	$wpsc_cart->save_to_db($purchase_log_id);
+	$wpsc_cart->submit_stock_claims($purchase_log_id);
 
 }
 function wpsc_have_checkout_items() {
@@ -212,11 +212,11 @@ class wpsc_checkout {
   }
   
   function form_name() {
-		if($this->form_name_is_required()){
-		return $this->checkout_item->name.' * ';
-	}else{
-		return $this->checkout_item->name;
-	}
+		if($this->form_name_is_required() && ($this->checkout_item->type != 'heading')){
+			return $this->checkout_item->name.' * ';
+		}else{
+			return $this->checkout_item->name;
+		}
   }  
    
 	function form_name_is_required(){
@@ -290,9 +290,8 @@ class wpsc_checkout {
 					break;
 
 					case "delivery_country":
-					break;
-
 					case "country":
+					case "heading":
 					break;
 					
 					default:
@@ -455,6 +454,7 @@ function wpsc_gateway_is_checked() {
 function wpsc_gateway_form_fields() {
 	global $wpsc_gateway, $gateway_checkout_form_fields;
 	return $gateway_checkout_form_fields[$wpsc_gateway->gateway['internalname']];
+
 }
 
 function wpsc_gateway_form_field_style() {
@@ -477,7 +477,7 @@ class wpsc_gateways {
 		
 		$gateway_options = get_option('custom_gateway_options');
 		foreach($nzshpcrt_gateways as $gateway) {
-			if(array_search($gateway['internalname'], $gateway_options) !== false) {
+			if(array_search($gateway['internalname'], (array)$gateway_options) !== false) {
 				$this->wpsc_gateways[] = $gateway;
 			}		
 		}

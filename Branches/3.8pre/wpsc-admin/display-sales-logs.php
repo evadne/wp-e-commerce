@@ -8,21 +8,34 @@
  * @since 3.7
  */
 
-//$purchlogs = new wpsc_purchaselogs();
+if(!isset($purchlogs)){
+	 $purchlogs = new wpsc_purchaselogs();
+}
+ function wpsc_display_sales_logs() {
+		$subpage = $_GET['subpage'];
+		switch($subpage) {
+			case 'upgrade-purchase-logs':
+				wpsc_upgrade_purchase_logs();   
+			break;
+		
+			default:
+				wpsc_display_sales_log_index();
+			break;
+		}
+	}
 
 
- function wpsc_display_sales_logs(){
- 		//$purchlogitem = new wpsc_purchaselogs_items((int)$_REQUEST['purchaselog_id']);
- 		//$purchlogs = new wpsc_purchaselogs();
+
+ function wpsc_display_sales_log_index() {
   	?>
 	<div class="wrap">
 		<?php //screen_icon(); ?>
 		<h2><?php echo wp_specialchars( TXT_WPSC_PURCHASELOG ); ?> </h2>
 		<?php //START OF PURCHASE LOG DEFAULT VIEW ?>
 		<?php if(!isset($_REQUEST['purchaselog_id'])){
-				//$purchlogs = new wpsc_purchaselogs();
-		  		$columns = array(
-		  			'cb' => '<input type="checkbox" />',
+
+		  	$columns = array(
+		  		'cb' => '<input type="checkbox" />',
 					'date' => 'Date',
 					'name' => '',
 					'amount' => 'Amount',
@@ -32,8 +45,10 @@
 				);
 				register_column_headers('display-sales-list', $columns);	
 				///// start of update message section //////
-				//update_option('wpsc_purchaselogs_fixed',false);
-				$fixpage = get_option('siteurl').'/wp-admin/admin.php?page='.WPSC_FOLDER.'/wpsc-admin/purchlogs_upgrade.php';
+				
+				//$fixpage = get_option('siteurl').'/wp-admin/admin.php?page='.WPSC_FOLDER.'/wpsc-admin/purchlogs_upgrade.php';
+				
+				$fixpage = get_option('siteurl').'/wp-admin/admin.php?page=wpsc-sales-logs&amp;subpage=upgrade-purchase-logs';
 			if (isset($_GET['skipped']) || isset($_GET['updated']) || isset($_GET['deleted']) ||  isset($_GET['locked']) ) { ?>
 			<div id="message" class="updated fade"><p>
 			<?php if ( isset($_GET['updated']) && (int) $_GET['updated'] ) {
@@ -63,32 +78,26 @@
 		
 			if(get_option('wpsc_purchaselogs_fixed')== false){ ?>
 				<div class='error' style='padding:8px;line-spacing:8px;'><span ><?php _e('When upgrading the Wp-E-Commerce Plugin from 3.6.* to 3.7 it is required that you associate your checkout form fields with the new Purchase Logs system. To do so please '); ?> <a href='<?php echo $fixpage; ?>'>Click Here</a></span></div>
-	<?php } 
+	<?php	 } 
 		///// end of update message section //////?>
 		<div id='dashboard-widgets' style='min-width: 825px;'>
 			 <div class='inner-sidebar'> 
 					<div class='meta-box-sortables'>			
 						<?php
-							//$dates = $purchlogs->wpsc_getdates();
-							//exit('<pre>'.print_r($dates, true).'</pre>');
 							if(IS_WP27){
-								//display_ecomm_admin_menu();
 								display_ecomm_rss_feed();
-								//wpsc_ordersummary();
-							   
 							}
-						
 						?>
 					</div>
 			</div>
 			<?php /* end of sidebar start of main column */ ?>
-			<div id='post-body' class='has-sidebar' style='width:95%;'>
+			<div id='post-body' class='has-sidebar metabox-holder' style='width:95%;'>
 				<div id='dashboard-widgets-main-content-wpsc' class='has-sidebar-content'>
 			
 				<?php 
 					if(function_exists('wpsc_right_now')) {
 						echo wpsc_right_now();
-				    }
+					}
 			   	
 			   		?> 
 			   	</div><br />
@@ -120,16 +129,16 @@
 			<?php
 		$page_back = remove_query_arg( array('locked', 'skipped', 'updated', 'deleted','purchaselog_id'), $_SERVER['REQUEST_URI'] );
 
-			$columns = array(
+		$columns = array(
 	  	'title' => 'Name',
-		'sku' => 'SKU',
-		'quantity' => 'Quantity',
-		'price' => 'Price',
-		'tax' => 'Tax',
-		'discount' => 'Discount',
-		'total' => 'Total'
-			);
-			register_column_headers('display-purchaselog-details', $columns); 
+			'sku' => 'SKU',
+			'quantity' => 'Quantity',
+			'price' => 'Price',
+			'tax' => 'Tax',
+			'discount' => 'Discount',
+			'total' => 'Total'
+		);
+		register_column_headers('display-purchaselog-details', $columns); 
 		?>
 			<div id='post-body' class='has-sidebar' style='width:95%;'>
 				<?php if(wpsc_has_purchlog_shipping()) { ?>
@@ -200,8 +209,10 @@
 		 			</select></p>
 		 			</form>
  			</div>
+ 				<?php wpsc_purchlogs_custom_fields(); ?>
 				</div>
 				</div>
+			
 				<div id='wpsc_purchlogitems_links'>
 				<h3><?php _e('Actions'); ?></h3>
 				<?php if(wpsc_purchlogs_have_downloads_locked() != false): ?>
@@ -230,9 +241,9 @@
  		<div class='postbox'> 
 			<h3 class='hndle'><?php echo TXT_WPSC_MENU; ?></h3>
 			<div class='inside'>
-				<a href="?page=<?php echo WPSC_DIR_NAME;?>/wpsc-admin/display-options-settings.page.php"><?php echo TXT_WPSC_SHOP_SETTINGS; ?></a><br />
-				<a href="?page=<?php echo WPSC_DIR_NAME;?>/gatewayoptions.php"><?php echo TXT_WPSC_CHECKOUT_SETTINGS; ?></a><br />
-				<a href="?page=<?php echo WPSC_DIR_NAME;?>/form_fields.php"><?php echo TXT_WPSC_CHECKOUT_SETTINGS; ?></a><br />
+				<a href='admin.php?page=wpsc-settings'><?php echo TXT_WPSC_SHOP_SETTINGS; ?></a><br />
+				<a href='admin.php?page=wpsc-settings&amp;tab=gateway'><?php echo TXT_WPSC_CHECKOUT_SETTINGS; ?></a><br />
+				<a href='admin.php?page=wpsc-settings&amp;tab=checkout'><?php echo TXT_WPSC_CHECKOUT_SETTINGS; ?></a><br />
 			</div>
 		</div>		
 	</div>
@@ -265,6 +276,7 @@
 				<?php
 			}
     }
+    
     function wpsc_ordersummary(){
     ?>
     	<div class='postbox'> 
@@ -292,9 +304,7 @@
        echo nzshpcrt_currency_display(admin_display_total_price(),1);
        ?>
       </p>
-      </div>
-      
-      
+      </div> 
      
       <div class='order_summary_subsection'>
       <strong><?php echo TXT_WPSC_RSS_FEED_HEADER; ?></strong>
@@ -383,7 +393,7 @@
 			<?php get_purchaselogs_content(); ?>
 			</tbody>
 		</table>
-		<p><strong><?php _e('Total:'); ?></strong> <?php echo nzshpcrt_currency_display(wpsc_the_purch_total(), true); ?></p>
+		<p><strong style='float:left' ><?php _e('Total:'); ?></strong>  <?php echo nzshpcrt_currency_display(wpsc_the_purch_total(), true); ?></p>
 		<?php 	
 			if(!isset($purchlogs->current_start_timestamp) && !isset($purchlogs->current_end_timestamp)){
 				$purchlogs->current_start_timestamp = $purchlogs->earliest_timestamp;
@@ -393,8 +403,9 @@
 								'rss_key'			=> 'key',
 								 'start_timestamp'	=> $purchlogs->current_start_timestamp,
 								 'end_timestamp'	=> $purchlogs->current_end_timestamp);
-		?>		
-		<p><a class='admin_download' href='<?php echo add_query_arg($arr_params) ?>' ><img class='wpsc_pushdown_img' src='<?php echo WPSC_URL; ?>/images/download.gif' alt='' title='' /> <span> <?php echo TXT_WPSC_DOWNLOAD_CSV; ?></span></a></p>
+		?>	
+		<br />	
+		<p><a class='admin_download' href='<?php echo htmlentities(add_query_arg($arr_params)) ; ?>' ><img class='wpsc_pushdown_img' src='<?php echo WPSC_URL; ?>/images/download.gif' alt='' title='' /> <span> <?php echo TXT_WPSC_DOWNLOAD_CSV; ?></span></a></p>
 	</form>
 	<br />
 	<script type="text/javascript">
@@ -409,7 +420,7 @@
 			});
 		});
 	})(jQuery);
-	columns.init('edit');
+	//columns.init('edit');
 	/* ]]> */
 	</script>
 
@@ -425,7 +436,7 @@
  		<td><?php echo wpsc_the_purch_item_date(); ?></td> <!--Date -->
  		<td><?php echo wpsc_the_purch_item_name(); ?></td> <!--Name/email -->
  		<td><?php echo nzshpcrt_currency_display(wpsc_the_purch_item_price(), true); ?></td><!-- Amount -->
- 		<td><a href='<?php echo add_query_arg('purchaselog_id', wpsc_the_purch_item_id()); ?>'><?php echo wpsc_the_purch_item_details();?> Items</a></td><!-- Details -->
+ 		<td><a href='<?php echo htmlentities(add_query_arg('purchaselog_id', wpsc_the_purch_item_id())) ; ?>'><?php echo wpsc_the_purch_item_details();?> Items</a></td><!-- Details -->
  		<td>
  		<?php if(wpsc_purchlogs_is_google_checkout() == false){ ?>
  			<select class='selector' name='<?php echo wpsc_the_purch_item_id(); ?>' title='<?php echo wpsc_the_purch_item_id(); ?>' >
@@ -466,5 +477,37 @@
  	<?php
  	endwhile;
  }
+function wpsc_purchlogs_custom_fields(){
+	if(wpsc_purchlogs_has_customfields()){?>
+	<div class='metabox-holder'>
+		<div id='purchlogs_customfields' class='postbox'>
+		<h3 class='hndle'>Users Custom Fields</h3>
+		<div class='inside'>
+		<?php $messages = wpsc_purchlogs_custommessages(); ?>
+		<?php $files = wpsc_purchlogs_customfiles(); ?>
+		<?php if(count($files) > 0){ ?>
+		<h4>Cart Items with Custom Files:</h4>	
+		<?php
+			foreach($files as $file){ 
+				echo $file;
+			}
+		}?>
+		<?php if(count($messages) > 0){ ?>
+		<h4>Cart Items with Custom Messages:</h4>	
+		<?php
+			foreach($messages as $message){ 
+				echo $message;
+			}
+		} ?>
+		</div>
+		</div>
+		</div>
+<?php }
 
- ?>
+}
+
+
+function wpsc_upgrade_purchase_logs() {
+	include(WPSC_FILE_PATH.'/wpsc-admin/includes/purchlogs_upgrade.php');
+}
+?>

@@ -15,8 +15,6 @@ function gateway_paypal_multiple($seperator, $sessionid) {
 		exit();
 	}
 	
-// 	exit( nzshpcrt_overall_total_price($_SESSION['selected_country']));
-	
   $cart_sql = "SELECT * FROM `".WPSC_TABLE_CART_CONTENTS."` WHERE `purchaseid`='".$purchase_log['id']."'";
   $cart = $wpdb->get_results($cart_sql,ARRAY_A) ;
   //written by allen
@@ -52,7 +50,8 @@ function gateway_paypal_multiple($seperator, $sessionid) {
 //   $data['lc'] = 'US';
   $data['lc'] = $paypal_currency_code;
   $data['bn'] = 'wp_e-commerce';
-  $data['no_shipping'] = '0';
+  
+  $data['no_shipping'] = get_option('paypal_ship');
   if(get_option('address_override') == 1) {
 		$data['address_override'] = '1';
 	}
@@ -156,7 +155,6 @@ function gateway_paypal_multiple($seperator, $sessionid) {
 		}
 	}
   $data['tax'] = '';
-
  
   //exit($base_shipping);
   if(($base_shipping > 0) && ($all_donations == false) && ($all_no_shipping == false)) {
@@ -265,6 +263,7 @@ function nzshpcrt_paypal_ipn() {
     
     // post back to PayPal system to validate
     $header .= "POST /cgi-bin/webscr HTTP/1.0\r\n";
+
     $header .= "Content-Type: application/x-www-form-urlencoded\r\n";
     $header .= "Content-Length: " . strlen($req) . "\r\n\r\n";
     $fp = fsockopen ($paypal_url, 80, $errno, $errstr, 30);
@@ -362,10 +361,14 @@ function submit_paypal_multiple(){
   if($_POST['address_override'] != null) {
     update_option('address_override', (int)$_POST['address_override']);
 	}
+  if($_POST['paypal_ship'] != null) {
+    update_option('paypal_ship', (int)$_POST['paypal_ship']);
+	}  
     
   foreach((array)$_POST['paypal_form'] as $form => $value) {
     update_option(('paypal_form_'.$form), $value);
 	}
+	
   return true;
 }
 
@@ -384,8 +387,13 @@ function form_paypal_multiple() {
       </td>
       <td>
       <input type='text' size='40' value='".get_option('paypal_multiple_url')."' name='paypal_multiple_url' /> <br />
-     <strong>Note:</strong>The URL to use for the paypal gateway is: https://www.paypal.com/cgi-bin/webscr
+   
       </td>
+  </tr>
+  <tr>
+  	<td colspan='2'>
+  	 <span  class='wpscsmall description'>Note: The URL to use for the paypal gateway is: https://www.paypal.com/cgi-bin/webscr</span>
+  	</td>
   </tr>
   ";
   
@@ -402,7 +410,20 @@ function form_paypal_multiple() {
 		$paypal_ipn1 = "checked ='checked'";
 		break;
 	}
+	$paypal_ship = get_option('paypal_ship');
+	$paypal_ship1 = "";
+	$paypal_ship2 = "";	
+	switch($paypal_ship){
+		case 1:
+		$paypal_ship1 = "checked='checked'";
+		break;
 		
+		case 0:
+		default:
+		$paypal_ship2 = "checked='checked'";
+		break;
+	
+	}
 	$output .= "
    <tr>
      <td>IPN
@@ -411,6 +432,19 @@ function form_paypal_multiple() {
        <input type='radio' value='1' name='paypal_ipn' id='paypal_ipn1' ".$paypal_ipn1." /> <label for='paypal_ipn1'>".TXT_WPSC_YES."</label> &nbsp;
        <input type='radio' value='0' name='paypal_ipn' id='paypal_ipn2' ".$paypal_ipn2." /> <label for='paypal_ipn2'>".TXT_WPSC_NO."</label>
      </td>
+  </tr>
+  <tr>
+     <td>Send shipping details:
+     </td>
+     <td>
+       <input type='radio' value='1' name='paypal_ship' id='paypal_ship1' ".$paypal_ship1." /> <label for='paypal_ship1'>".TXT_WPSC_YES."</label> &nbsp;
+       <input type='radio' value='0' name='paypal_ship' id='paypal_ship2' ".$paypal_ship2." /> <label for='paypal_ship2'>".TXT_WPSC_NO."</label>
+     </td>
+  </tr>
+  <tr>
+  	<td colspan='2'><span  class='wpscsmall description'>
+  	Note: If your checkout page does not have a shipping details section, or if you don't want to send Paypal shipping information. You should change this option to No.</span>
+  	</td>
   </tr>
   <tr>
       <td colspan='2'><strong class='form_group'>".__('Currency Converter')."</td>
@@ -441,6 +475,7 @@ function form_paypal_multiple() {
           <option ".$select_currency['PLN']." value='PLN'>Polish Zloty</option>
           <option ".$select_currency['NOK']." value='NOK'>Norwegian Krone</option>
           <option ".$select_currency['CZK']." value='CZK'>Czech Koruna</option>
+          <option ".$select_currency['MXN']." value='MXN'>Mexican Peso</option>
         </select> 
       </td>
    </tr>";

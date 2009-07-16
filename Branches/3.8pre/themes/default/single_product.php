@@ -8,7 +8,7 @@ $image_height = get_option('single_view_image_height');
 	
 	<?php if(wpsc_has_breadcrumbs()) :?>
 		<div class='breadcrumb'>
-			<a href='<?php echo get_option('siteurl'); ?>'><?php echo get_option('blogname'); ?></a> &raquo;
+			<a href='<?php echo get_option('home'); ?>'><?php echo get_option('blogname'); ?></a> &raquo;
 			<?php while (wpsc_have_breadcrumbs()) : wpsc_the_breadcrumb(); ?>
 				<?php if(wpsc_breadcrumb_url()) :?> 	   
 					<a href='<?php echo wpsc_breadcrumb_url(); ?>'><?php echo wpsc_breadcrumb_name(); ?></a> &raquo;
@@ -19,6 +19,7 @@ $image_height = get_option('single_view_image_height');
 		</div>
 	<?php endif; ?>
 	
+	<?php do_action('wpsc_top_of_products_page'); // Plugin hook for adding things to the top of the products page, like the live search ?>
 	
 	<div class="productdisplay">
 	<?php /** start the product loop here, this is single products view, so there should be only one */?>
@@ -75,16 +76,18 @@ $image_height = get_option('single_view_image_height');
             	if( function_exists('wpsc_addl_desc_show') ) {
             		echo wpsc_addl_desc_show( $addl_descriptions );
             	} else {
-            	echo $value;
+								echo $the_addl_desc;
             	}
             ?>
 						</p>
 					<?php endif; ?>
 				
-					<?php /** the custom meta HTML and loop */?>
+					<?php do_action('wpsc_product_addon_after_descr', wpsc_the_product_id()); ?>
+
+					<?php /** the custom meta HTML and loop */ ?>
 					<div class="custom_meta">
 						<?php while (wpsc_have_custom_meta()) : wpsc_the_custom_meta(); 	?>
-							<strong><?php echo wpsc_custom_meta_name(); ?>: </strong><?php echo wpsc_custom_meta_name(); ?><br />
+							<strong><?php echo wpsc_custom_meta_name(); ?>: </strong><?php echo wpsc_custom_meta_value(); ?><br />
 						<?php endwhile; ?>
 					</div>
 					<?php /** the custom meta HTML and loop ends here */?>
@@ -129,15 +132,16 @@ $image_height = get_option('single_view_image_height');
 					<?php if(wpsc_has_multi_adding()): ?>
 						<label class='wpsc_quantity_update' for='wpsc_quantity_update'><?php echo TXT_WPSC_QUANTITY; ?>:</label>
 						
-						<input type="text" id='wpsc_quantity_update' name="wpsc_quantity_update" size="2" value="<?php echo wpsc_cart_item_quantity(); ?>"/>
+						<input type="text" id='wpsc_quantity_update' name="wpsc_quantity_update" size="2" value="1"/>
 						<input type="hidden" name="key" value="<?php echo wpsc_the_cart_item_key(); ?>"/>
 						<input type="hidden" name="wpsc_update_quantity" value="true"/>
 					<?php endif ;?>
 					
-						<p class="wpsc_product_price">
+						<div class="wpsc_product_price">
 							<?php if(wpsc_product_is_donation()) : ?>
-								<label for='donation_price_<?php echo wpsc_the_product_id(); ?>'><?php echo TXT_WPSC_DONATION; ?></label><br />
-								<input type='text' id='donation_price_<?php echo wpsc_the_product_id(); ?>' name='donation_price' value='<?php echo $wpsc_query->product['price']; ?>' size='6' /><br />
+								<label for='donation_price_<?php echo wpsc_the_product_id(); ?>'><?php echo TXT_WPSC_DONATION; ?>:</label>
+								<input type='text' id='donation_price_<?php echo wpsc_the_product_id(); ?>' name='donation_price' value='<?php echo $wpsc_query->product['price']; ?>' size='6' />
+								<br />
 							
 							
 							<?php else : ?>
@@ -149,7 +153,7 @@ $image_height = get_option('single_view_image_height');
 									<?php echo TXT_WPSC_PNP; ?>:  <span class="pricedisplay"><?php echo wpsc_product_postage_and_packaging(); ?></span><br />
 								<?php endif; ?>							
 							<?php endif; ?>
-						</p>
+						</div>
 					<?php if(function_exists('wpsc_akst_share_link') && (get_option('wpsc_share_this') == 1)) {
 						echo wpsc_akst_share_link('return');
 					} ?>
@@ -163,16 +167,27 @@ $image_height = get_option('single_view_image_height');
 					
 					
 					<!-- END OF QUANTITY OPTION -->
-					<?php if(get_option('addtocart_or_buynow') !='1') : ?>
+					<?php if((get_option('hide_addtocart_button') == 0) && (get_option('addtocart_or_buynow') !='1')) : ?>
 						<?php if(wpsc_product_has_stock()) : ?>
-							<input type="submit" value="<?php echo TXT_WPSC_ADDTOCART; ?>" name="Buy" class="wpsc_buy_button" id="product_<?php echo wpsc_the_product_id(); ?>_submit_button"/>
+							<?php if(wpsc_product_external_link(wpsc_the_product_id()) != '') : ?>
+										<?php	$action =  wpsc_product_external_link(wpsc_the_product_id()); ?>
+										<input class="wpsc_buy_button" type='button' value='<?php echo TXT_WPSC_BUYNOW; ?>' onclick='gotoexternallink("<?php echo $action; ?>")'>
+										<?php else: ?>
+									<input type="submit" value="<?php echo TXT_WPSC_ADDTOCART; ?>" name="Buy" class="wpsc_buy_button" id="product_<?php echo wpsc_the_product_id(); ?>_submit_button"/>
+										<?php endif; ?>
+							
+							<div class='wpsc_loading_animation'>
+								<img title="Loading" alt="Loading" src="<?php echo WPSC_URL ;?>/images/indicator.gif" class="loadingimage" />
+								<?php echo TXT_WPSC_UDPATING_CART; ?>
+							</div>
+							
 						<?php else : ?>
 							<p class='soldout'><?php echo TXT_WPSC_PRODUCTSOLDOUT; ?></p>
 						<?php endif ; ?>
 					<?php endif ; ?>
 					</form>
 					
-					<?php if(get_option('addtocart_or_buynow')=='1') : ?>
+					<?php if((get_option('hide_addtocart_button') == 0) && (get_option('addtocart_or_buynow')=='1')) : ?>
 						<?php echo wpsc_buy_now_button(wpsc_the_product_id()); ?>
 					<?php endif ; ?>
 					
@@ -180,14 +195,13 @@ $image_height = get_option('single_view_image_height');
 						
 						
 					<?php
-						if(function_exists('gold_shpcrt_display_gallery')) :
-					
+						if(function_exists('gold_shpcrt_display_gallery')) :					
 							echo gold_shpcrt_display_gallery(wpsc_the_product_id());
 						endif;
 					?>
 					</div>
 		
-					<form onsubmit="submitform(this);return false;" action="http://www.instinct.co.nz/wordpress_2.6/products-page/?category=" method="post" name="product_<?php echo wpsc_the_product_id(); ?>" id="product_extra_<?php echo wpsc_the_product_id(); ?>">
+					<form onsubmit="submitform(this);return false;" action="<?php echo wpsc_this_page_url(); ?>" method="post" name="product_<?php echo wpsc_the_product_id(); ?>" id="product_extra_<?php echo wpsc_the_product_id(); ?>">
 						<input type="hidden" value="<?php echo wpsc_the_product_id(); ?>" name="prodid"/>
 						<input type="hidden" value="<?php echo wpsc_the_product_id(); ?>" name="item"/>
 					</form>
@@ -204,8 +218,6 @@ $image_height = get_option('single_view_image_height');
 			echo fancy_notifications();
 		}
 		?>
-		<div class="clear"/>
-	</div>
+	
+
 </div>
-
-

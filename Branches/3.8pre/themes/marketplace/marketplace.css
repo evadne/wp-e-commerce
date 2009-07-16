@@ -1099,6 +1099,7 @@ span.soldoutgrid {
 	background-image:url(images/itembg.gif);
 	height:86px;
 	width:116px;
+	margin:0 auto;
 }
  
 div.item_image img {
@@ -1332,4 +1333,17 @@ td.shipping_header {
 
 select#current_country {
   width: 260px;
+}
+
+
+div.wpsc_category_details {
+  margin: 0px 0px 8px 0px;
+}
+
+div.wpsc_category_details img {
+  float: left;
+  margin: 0px 6px 12px 0px;
+}
+div.wpsc_page_numbers a.selected {
+	text-decoration: underline;
 }

@@ -51,6 +51,11 @@ switch($page) {
 	wpsc_options_presentation();
 	break;
 	
+	case "import";
+	require_once('includes/settings-pages/import.php');
+	wpsc_options_import();
+	break;
+	
 	default;
 	case "general";
 	require_once('includes/settings-pages/general.php');
@@ -75,6 +80,7 @@ function wpsc_settings_tabs() {
 		'admin' => __('Admin'),
 		'shipping' => __('Shipping'),
 		'gateway' => __('Payment Options'),
+		'import' => __('Import'),
 		'checkout' => __('Checkout')
 	);
 
@@ -88,7 +94,7 @@ global $redir_tab;
 	$tabs = wpsc_settings_tabs();
 
 	if ( !empty($tabs) ) {
-		echo '<div id="wpsc_settings_nav_bar" style:"width:100%;">';
+		echo '<div id="wpsc_settings_nav_bar" style="width:100%;">';
 		echo "<ul id='sidemenu' style='width:682px;float:left;margin:0 auto;padding-left:0;' >\n";
 		if ( isset($redir_tab) && array_key_exists($redir_tab, $tabs) )
 			$current = $redir_tab;
@@ -103,6 +109,7 @@ global $redir_tab;
 			if ( $current == $callback )
 				$class = " class='current'";
 			$href = add_query_arg(array('tab'=>$callback, 's'=>false, 'paged'=>false, 'post_mime_type'=>false, 'm'=>false));
+			$href = remove_query_arg('isocode', $href);
 			$link = "<a href='" . clean_url($href) . "'$class>$text</a>";
 			echo "\t<li id='" . attribute_escape("tab-$callback") . "'>$link</li>\n";
 		}

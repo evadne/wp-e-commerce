@@ -1,13 +1,9 @@
 <?php
 function wpsc_auto_update() {
   global $wpdb;
-
-  wpsc_create_or_update_tables();
-  
-  include_once('updates/updating_tasks.php');
-  
+  wpsc_create_or_update_tables();  
+  include_once('updates/updating_tasks.php');  
   wpsc_create_upload_directories();
-
   wpsc_product_files_htaccess();  
   wpsc_check_and_copy_files();
   
@@ -17,10 +13,9 @@ function wpsc_auto_update() {
 	}
 }
 
-function nzshpcrt_install()
-   {
-   global $wpdb, $user_level, $wp_rewrite, $wp_version;
-   $table_name = $wpdb->prefix . "product_list";
+function wpsc_install() {
+	global $wpdb, $user_level, $wp_rewrite, $wp_version;
+	$table_name = $wpdb->prefix . "product_list";
 
   $first_install = false;
   $result = mysql_list_tables(DB_NAME);
@@ -30,6 +25,7 @@ function nzshpcrt_install()
 	}
   if(!in_array($table_name, $tables)) {
     $first_install = true;
+	add_option('wpsc_purchaselogs_fixed',true);
 	}    
 
   if(get_option('wpsc_version') == null) {
@@ -37,8 +33,7 @@ function nzshpcrt_install()
 	}
 
   // run the create or update code here.
-  wpsc_create_or_update_tables();
-  
+  wpsc_create_or_update_tables();  
   wpsc_create_upload_directories();
   
 	
@@ -52,13 +47,11 @@ function nzshpcrt_install()
   $add_initial_category = $wpdb->get_results("SELECT COUNT(*) AS `count` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."`;",ARRAY_A);
   if($add_initial_category[0]['count'] == 0) {
 		$wpdb->query("INSERT INTO `".WPSC_TABLE_CATEGORISATION_GROUPS."` (`id`, `name`, `description`, `active`, `default`) VALUES (1, 'Categories', 'Product Categories', '1', '1')");
-		$wpdb->query("INSERT INTO `".WPSC_TABLE_CATEGORISATION_GROUPS."` (`id`, `name`, `description`, `active`, `default`) VALUES (2, 'Brands', 'Product Brands', '1', '0')");	
-		
+		$wpdb->query("INSERT INTO `".WPSC_TABLE_CATEGORISATION_GROUPS."` (`id`, `name`, `description`, `active`, `default`) VALUES (2, 'Brands', 'Product Brands', '1', '0')");			
     $wpdb->query("INSERT INTO `".WPSC_TABLE_PRODUCT_CATEGORIES."` (`group_id`, `name` , `description`, `active`) VALUES ('1', '".TXT_WPSC_EXAMPLECATEGORY."', '".TXT_WPSC_EXAMPLEDETAILS."', '1');");    
     $wpdb->query("INSERT INTO `".WPSC_TABLE_PRODUCT_CATEGORIES."` (`group_id`, `name` , `description`, `active`) VALUES ('2', '".TXT_WPSC_EXAMPLEBRAND."', '".TXT_WPSC_EXAMPLEDETAILS."', '1');");
 	}
   
-
   $purchase_statuses_data  = $wpdb->get_results("SELECT COUNT(*) AS `count` FROM `".WPSC_TABLE_PURCHASE_STATUSES."`",ARRAY_A);
   if($purchase_statuses_data[0]['count'] == 0) {
     $wpdb->query("INSERT INTO `".WPSC_TABLE_PURCHASE_STATUSES."` (`name` , `active` , `colour` ) 
@@ -184,6 +177,9 @@ function nzshpcrt_install()
 		update_option('wpsc_gallery_image_width', '96');
 	}
 		
+	if(!is_array(get_option('custom_gateway_options'))) {
+		update_option('custom_gateway_options', array('testmode'));	
+	}
   
   wpsc_product_files_htaccess();
   
@@ -671,6 +667,9 @@ function wpsc_create_or_update_tables($debug = false) {
   
   $template_hash = sha1(serialize($wpsc_database_template));
   
+  // Filter for adding to or altering the wpsc database template, make sure you return the array your function gets passed, else you will break updating the database tables
+	$wpsc_database_template = apply_filters('wpsc_alter_database_template', $wpsc_database_template);
+  
   if((get_option('wpsc_database_check') == $template_hash) && ($debug == false)) {
     //return true;
   }
@@ -739,7 +738,6 @@ function wpsc_create_or_update_tables($debug = false) {
         $column_name = $existing_table_column['Field'];
         $existing_table_columns[] = $column_name;
         
-        
         $null_match = false;
 				if($existing_table_column['Null'] = 'NO') {
 				  if(stristr($table_data['columns'][$column_name], "NOT NULL") !== false) {
@@ -750,8 +748,7 @@ function wpsc_create_or_update_tables($debug = false) {
 				    $null_match = true;
 					}
 				}
-          
-         //echo "<pre>".print_r($existing_table_column['Null'],true)."</pre>";
+				
         if(isset($table_data['columns'][$column_name]) && ((stristr($table_data['columns'][$column_name], $existing_table_column['Type']) === false) || ($null_match != true))) {
           if(isset($table_data['actions']['before'][$column_name]) && is_callable($table_data['actions']['before'][$column_name])) {
             $table_data['actions']['before'][$column_name]($column_name);
@@ -760,8 +757,6 @@ function wpsc_create_or_update_tables($debug = false) {
 						$upgrade_failed = true;
 						$failure_reasons[] = $wpdb->last_error;
           }
-          //echo "<pre>".print_r($upgrade_failed,true)."</pre>";
-          //echo "ALTER TABLE `$table_name` CHANGE `$column_name` `$column_name` {$table_data['columns'][$column_name]} <br />";
 				}
         
       }
@@ -807,7 +802,6 @@ function wpsc_create_or_update_tables($debug = false) {
       
       // compare the supplied and existing indxes to find the differences
       $missing_or_extra_table_indexes = array_diff($supplied_table_indexes, $existing_table_indexes);
-      
       
       if(count($missing_or_extra_table_indexes) > 0) {
         foreach($missing_or_extra_table_indexes as $missing_or_extra_table_index) {

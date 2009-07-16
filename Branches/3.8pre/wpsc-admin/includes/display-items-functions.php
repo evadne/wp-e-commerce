@@ -65,7 +65,7 @@ function wpsc_display_product_form ($product_id = 0) {
 	//$variations_processor = new nzshpcrt_variations;
   if($product_id > 0) {
 
-		$product_data = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id`={$product_id} LIMIT 1",ARRAY_A);
+		$product_data = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id`='{$product_id}' LIMIT 1",ARRAY_A);
 
 		$product_data['meta']['external_link'] = get_product_meta($product_id,'external_link',true);
 		$product_data['meta']['merchant_notes'] = get_product_meta($product_id,'merchant_notes',true);
@@ -77,19 +77,17 @@ function wpsc_display_product_form ($product_id = 0) {
 		$product_data['meta']['table_rate_price'] = get_product_meta($product_id,'table_rate_price',true);
 				
 		if(function_exists('wp_insert_term')) {
-			$term_relationships = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."term_relationships WHERE object_id = {$product_id}", ARRAY_A);
+			$term_relationships = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}term_relationships WHERE object_id = '{$product_id}'", ARRAY_A);
 			
 			foreach ((array)$term_relationships as $term_relationship) {
 				$tt_ids[] = $term_relationship['term_taxonomy_id'];
 			}
 			foreach ((array)$tt_ids as $tt_id) {
-				$results = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."term_taxonomy WHERE term_taxonomy_id = ".$tt_id." AND taxonomy = 'product_tag'", ARRAY_A);
-				$term_ids[] = $results[0]['term_id'];
+				$term_ids[] = $wpdb->get_var("SELECT `term_id` FROM `{$wpdb->prefix}term_taxonomy` WHERE `term_taxonomy_id` = '{$tt_id}' AND `taxonomy` = 'product_tag' LIMIT 1");
 			}
 			foreach ((array)$term_ids as $term_id ) {
 				if ($term_id != NULL){
-				$results = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."terms WHERE term_id=".$term_id." ",ARRAY_A);
-				$tags[] = $results[0]['name'];
+					$tags[] = $wpdb->get_var("SELECT `name` FROM `{$wpdb->prefix}terms` WHERE `term_id`='{$term_id}' LIMIT 1");
 				}
 			}
 			if ($tags != NULL){ 
@@ -100,26 +98,23 @@ function wpsc_display_product_form ($product_id = 0) {
 		$check_variation_value_count = $wpdb->get_var("SELECT COUNT(*) as `count` FROM `".WPSC_TABLE_VARIATION_VALUES_ASSOC."` WHERE `product_id` = '{$product_id}'");
 		
   } else {
-		$product_data =$wpsc_product_defaults;
+    if(isset($_SESSION['wpsc_failed_product_post_data']) && (count($_SESSION['wpsc_failed_product_post_data']) > 0 )) {
+			$product_data = array_merge($wpsc_product_defaults, $_SESSION['wpsc_failed_product_post_data']);
+			$_SESSION['wpsc_failed_product_post_data'] = null;
+    } else {
+			$product_data = $wpsc_product_defaults;
+		}
   }
 	$current_user = wp_get_current_user();
   
   // we put the closed postboxes array into the product data to propagate it to each form without having it global.
-  $product_data['closed_postboxes'] = (array)get_usermeta( $current_user->ID, 'closedpostboxes_products_page_edit-products');
-  $product_data['hidden_postboxes'] = (array)get_usermeta( $current_user->ID, 'metaboxhidden_products_page_edit-products');
+  $product_data['closed_postboxes'] = (array)get_usermeta( $current_user->ID, 'closedpostboxes_products_page_wpsc-edit-products');
+  $product_data['hidden_postboxes'] = (array)get_usermeta( $current_user->ID, 'metaboxhidden_products_page_wpsc-edit-products');
   
   if(count($product_data) > 0) {
 		wpsc_product_basic_details_form($product_data);
   }
 }
-
-
-
-
-
-
-
-
 
 function wpsc_product_basic_details_form(&$product_data) {
   global $wpdb,$nzshpcrt_imagesize_info;
@@ -141,7 +136,7 @@ function wpsc_product_basic_details_form(&$product_data) {
 				<td colspan='2' class='itemfirstcol'>  
 					<label for="wpsc_product_name">Product Name</label>
 					<div class='admin_product_name'>
-						<input id='wpsc_product_name' class='wpsc_product_name' size='30' type='text' class='text'  name='title' value='<?php echo htmlentities(stripslashes($product_data['name']), ENT_QUOTES, 'UTF-8'); ?>' />
+						<input id='wpsc_product_name' class='wpsc_product_name text' size='30' type='text' name='title' value='<?php echo htmlentities(stripslashes($product_data['name']), ENT_QUOTES, 'UTF-8'); ?>' />
 						<a href='#' class='shorttag_toggle'></a>
 					</div>
 					<div class='admin_product_shorttags'>
@@ -159,6 +154,7 @@ function wpsc_product_basic_details_form(&$product_data) {
 							<dt><?php echo TXT_WPSC_DISPLAY_PRODUCT_TEMPLATE_TAG; ?>: </dt><dd> &lt;?php echo wpsc_display_products('product_id=<?php echo $product_data['id'];?>'); ?&gt;</dd>
 							<dt><?php echo TXT_WPSC_BUY_NOW_PHP; ?>: </dt><dd>&lt;?php echo wpsc_buy_now_button(<?php echo $product_data['id'];?>); ?&gt;</dd>
 							<dt><?php echo TXT_WPSC_ADD_TO_CART_PHP; ?>: </dt><dd>&lt;?php echo wpsc_add_to_cart_button(<?php echo $product_data['id'];?>); ?&gt;</dd>
+							<dt><?php echo TXT_WPSC_PRODUCT_SKU; ?>: </dt><dd>&lt;?php echo wpsc_product_sku(<?php echo $product_data['id'];?>); ?&gt;</dd>
 						</dl>
 	
 						<p>
@@ -177,7 +173,7 @@ function wpsc_product_basic_details_form(&$product_data) {
 				</td>
 				<td  class='skuandprice'>
 					<?php echo TXT_WPSC_PRICE; ?> :<br />
-					<input type='text' class='text' size='30' name='price' value='<?php echo $product_data['price']; ?>'>
+					<input type='text' class='text' size='30' name='price' value='<?php echo $product_data['price']; ?>' />
 				</td>
 			</tr>
 		
@@ -185,14 +181,9 @@ function wpsc_product_basic_details_form(&$product_data) {
 				<td colspan='2'>
 					<div id="<?php echo user_can_richedit() ? 'postdivrich' : 'postdiv'; ?>" class="postarea" >
 				 <?php
-				 wpsc_the_editor($product_data['description'], 'content', false, false);
+						wpsc_the_editor($product_data['description'], 'content', false, false);
 				 ?>
 				 </div>
-				 <?php
-					 /*<div id='editorcontainer'>
-						<textarea name='description' class='mceEditor' cols='40' rows='8' ><?php echo stripslashes($product_data['description']); ?></textarea>
-					</div>*/
-				 ?>
 				</td>
 			</tr>
 		
@@ -201,7 +192,7 @@ function wpsc_product_basic_details_form(&$product_data) {
 					
 					<strong ><?php echo TXT_WPSC_ADDITIONALDESCRIPTION; ?> :</strong><br />			
 					
-					<textarea name='additional_description' id='additional_description'cols='40' rows='5' ><?php echo stripslashes($product_data['additional_description']); ?></textarea>
+					<textarea name='additional_description' id='additional_description' cols='40' rows='5' ><?php echo stripslashes($product_data['additional_description']); ?></textarea>
 				</td>
 			</tr>
 		</table>
@@ -312,17 +303,18 @@ function wpsc_product_category_and_tag_forms($product_data=''){
 					
 					$categorisation_groups =  $wpdb->get_results("SELECT * FROM `".WPSC_TABLE_CATEGORISATION_GROUPS."` WHERE `active` IN ('1')", ARRAY_A);
 					//exit('<pre>'.print_r($categorisation_groups, true).'</pre>');
-						foreach($categorisation_groups as $categorisation_group){
+						foreach((array)$categorisation_groups as $categorisation_group){
 							$category_count = $wpdb->get_var("SELECT COUNT(*) FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `group_id` IN ('{$categorisation_group['id']}')");
 							if($category_count > 0) {
 								$output .= "<p>";
 								$category_group_name = str_replace("[categorisation]", $categorisation_group['name'], TXT_WPSC_PRODUCT_CATEGORIES);
 								$output .= "".$category_group_name.":<br />";
+								$output .= "</p>";
 								if ($product_data == '')
 									$output .= wpsc_category_list($categorisation_group['id'], false, 'add_');
 								else 
 									$output .= wpsc_category_list($categorisation_group['id'], $product_data['id'], 'edit_');
-								$output .= "</p>";
+								
 							}
 						}
 
@@ -332,7 +324,7 @@ function wpsc_product_category_and_tag_forms($product_data=''){
      <td class='itemfirstcol product_tags'>
 				<span class='howto'> ".TXT_WPSC_PRODUCT_TAGS."</span><br />
 				<p id='jaxtag'>
-					<label for='newtag' class='hidden'>".TXT_WPSC_PRODUCT_TAGS."</label>
+					<label for='tags-input' class='hidden'>".TXT_WPSC_PRODUCT_TAGS."</label>
 					<input type='text' value='".$imtags."' tabindex='3' size='20' id='tags-input' class='tags-input' name='product_tags'/>
 				<span class='howto'>".__('Separate tags with commas')."</span>
 				</p>
@@ -359,116 +351,133 @@ return $output;
 
 }
 function wpsc_product_price_and_stock_forms($product_data=''){
-	global $closed_postboxes, $wpdb, $variations_processor;
-	$table_rate_price = get_product_meta($product_data['id'], 'table_rate_price');
-	$output = '';
-	if ($product_data == 'empty') {
-		$display = "style='visibility:hidden;'";
-	}
-	$output .= "<div id='wpsc_product_price_and_stock_forms' class='wpsc_product_price_and_stock_forms postbox ".((array_search('wpsc_product_price_and_stock_forms', $product_data['closed_postboxes']) !== false) ? 'closed' : '')."' ".((array_search('wpsc_product_price_and_stock_forms', $product_data['hidden_postboxes']) !== false) ? 'style="display: none;"' : '')." >";
+		global $closed_postboxes, $wpdb, $variations_processor;
+		$table_rate_price = get_product_meta($product_data['id'], 'table_rate_price');
+		
+		if ($product_data == 'empty') {
+			$display = "style='visibility:hidden;'";
+		}
+		echo "<div id='wpsc_product_price_and_stock_forms' class='wpsc_product_price_and_stock_forms postbox ".((array_search('wpsc_product_price_and_stock_forms', $product_data['closed_postboxes']) !== false) ? 'closed' : '')."' ".((array_search('wpsc_product_price_and_stock_forms', $product_data['hidden_postboxes']) !== false) ? 'style="display: none;"' : '')." >";
 
-    if (IS_WP27) {
-        $output .= "<h3 class='hndle'>";
-    } else {
-        $output .= "<h3>
-	    <a class='togbox'>+</a>";
-    }
-    $output .= TXT_WPSC_PRICE_AND_STOCK_CONTROL;
-    $output .= "
+		echo "<h3 class='hndle'>";
+
+    echo TXT_WPSC_PRICE_AND_STOCK_CONTROL;
+    echo "
 	</h3>
     <div class='inside'>
     <table>
-    <!--<tr>
-      <td>
-       ".TXT_WPSC_PRICE.":&nbsp;<input type='text' size='10' name='price' value='".$product_data['price']."' />
-      </td>
-    </tr>-->
+    ";
+    
+    echo "
     <tr>
        <td>
           <input id='add_form_tax' type='checkbox' name='notax' value='yes' ".(($product_data['notax'] == 1) ? 'checked="true"' : '')."/>&nbsp;<label for='add_form_tax'>".TXT_WPSC_TAXALREADYINCLUDED."</label>
        </td>
-    </tr>
+    </tr>";
+    echo "
     <tr>
 
        <td>
-          <input id='add_form_donation' type='checkbox' name='donation' value='yes' ".(($product_data['donation'] == 1) ? 'checked="true"' : '').">&nbsp;<label for='add_form_donation'>".TXT_WPSC_IS_DONATION."</label>
+          <input id='add_form_donation' type='checkbox' name='donation' value='yes' ".(($product_data['donation'] == 1) ? 'checked="true"' : '')." />&nbsp;<label for='add_form_donation'>".TXT_WPSC_IS_DONATION."</label>
        </td>
-    </tr>
-    <tr>
-
-      
-    </tr>
+    </tr>";
+    echo "
     <tr>
       <td>
-        <input type='checkbox' onclick='hideelement(\"add_special\")' value='yes' name='special' id='add_form_special' ".(($product_data['special'] == 1) ? 'checked="true"' : '')."/>
+        <input type='checkbox' onclick='hideelement(\"add_special\")' value='yes' name='special' id='add_form_special' ".(($product_data['special'] == 1) ? 'checked="true"' : '')." />
         <label for='add_form_special'>".TXT_WPSC_SPECIAL."</label>
         <div style='display:".(($product_data['special'] == 1) ? 'block' : 'none').";' id='add_special'>
-          <input type='text' size='10' value='".($product_data['price'] - $product_data['special_price'])."' name='special_price'/>
+          <input type='text' size='10' value='".number_format(($product_data['price'] - $product_data['special_price']), 2)."' name='special_price'/>
         </div>
       </td>
-    </tr>
+    </tr>";
+    
+				
+    ?>
      <tr>
       <td>
-        <input type='checkbox' value='yes' name='table_rate_price' id='table_rate_price'/>
-        <label for='table_rate_price'>".TXT_WPSC_TABLE_RATED_PRICE."</label>
-        <div style='display:".(($table_rate_price != '') ? 'block' : 'none').";' id='table_rate'>
-          <a class='add_level' style='cursor:pointer;'>Add level</a><br />
+        <input type='checkbox' value='1' name='table_rate_price' id='table_rate_price'  <?php echo ((count($table_rate_price['quantity']) > 0) ? 'checked=\'checked\'' : ''); ?> <?php echo ((wpsc_product_has_variations($product_data['id'])) ? 'disabled=\'disabled\'' : ''); ?> />
+        <label for='table_rate_price'><?php echo TXT_WPSC_TABLE_RATED_PRICE; ?></label>
+        <div style='display:<?php echo ((($table_rate_price != '') &&  !wpsc_product_has_variations($product_data['id'])) ? 'block' : 'none'); ?>;' id='table_rate'>
+          <a class='add_level' style='cursor:pointer;'>+ Add level</a><br />
           <table>
-          <tr><td>".TXT_WPSC_QUANTITY."</td><td>".TXT_WPSC_PRICE."</td></tr>";
-          
-          	if ($table_rate_price != '') {
-          		foreach($table_rate_price['quantity'] as $key => $qty) {
-					if ($qty != '')
-						$output .= '<tr><td><input type="text" size="10" value="'.$qty.'" name="productmeta_values[table_rate_price][quantity][]"/> and above</td><td><input type="text" size="10" value="'.$table_rate_price['table_price'][$key].'" name="productmeta_values[table_rate_price][table_price][]"/></td><td><img src="'.WPSC_URL.'/images/cross.png" class="remove_line"></td></tr>';
-				}
-			}
-          
-          $output .= "<tr><td><input type='text' size='10' value='' name='productmeta_values[table_rate_price][quantity][]'/> and above</td><td><input type='text' size='10' value='' name='productmeta_values[table_rate_price][table_price][]'/></td></tr>
+						<tr>
+							<td><?php echo TXT_WPSC_QUANTITY; ?></td>
+							<td><?php echo TXT_WPSC_PRICE; ?></td>
+						</tr>
+						<?php
+						//print_r($table_rate_price);
+						if($table_rate_price != '') {
+							foreach($table_rate_price['quantity'] as $key => $qty) {
+								if($qty != '') {
+									?>
+									<tr>
+										<td>
+											<input type="text" size="10" value="<?php echo $qty; ?>" name="productmeta_values[table_rate_price][quantity][]"/> and above
+										</td>
+										<td>
+											<input type="text" size="10" value="<?php echo $table_rate_price['table_price'][$key]; ?>" name="productmeta_values[table_rate_price][table_price][]" />
+										</td>
+										<td><img src="<?php echo WPSC_URL; ?>/images/cross.png" class="remove_line"></td>
+									</tr>
+									<?php
+								}
+							}
+						}
+						?>						
+						<tr>
+							<td><input type='text' size='10' value='' name='productmeta_values[table_rate_price][quantity][]'/> and above</td>
+							<td><input type='text' size='10' value='' name='productmeta_values[table_rate_price][table_price][]'/></td>
+						</tr>
           </table>
         </div>
       </td>
     </tr>
+    <?php
+    
+    echo "
     <tr>
       <td style='width:430px;'>
-      <input class='limited_stock_checkbox' id='add_form_quantity_limited' type='checkbox' value='yes'".(($product_data['quantity_limited'] == 1) ? 'checked="true"' : '')."name='quantity_limited'/>"; //onclick='hideelement(\"add_stock\")'
-	$output .= "&nbsp;<label for='add_form_quantity_limited' class='small'>".TXT_WPSC_UNTICKBOX."</label>";
-	if ($product_data['id'] > 0){
-			$variations_output = $variations_processor->variations_grid_view($product_data['id']); 
-      
-  		if($variations_output != '') {
-  	    	$output .= "<div class='edit_stock' style='display: none;'>\n\r";
-  	    	
-  	    	$output .= "<input type='hidden' name='quantity' value='".$product_data['quantity']."' />";
-  	    	$output .= "</div>\n\r";
-  	    } else {
-  	    	switch($product_data['quantity_limited']) {
-  	    		case 1:
-  	    		$output .= "            <div class='edit_stock' style='display: block;'>\n\r";
-  	    		break;
-  	    		
-  	    		default:
-  	    		$output .= "            <div class='edit_stock' style='display: none;'>\n\r";
-  	    		break;
-  	    	}
-  	    	
-  	    	$output .= "<input type='text' name='quantity' size='10' value='".$product_data['quantity']."' />";
-  	    	$output .= "              </div>\n\r";
-  	    }
-	} else {
-  	  		$output .= "
-        <div style='display: none;' class='edit_stock'>
-          <input type='text' name='quantity' value='0' size='10' />
-        </div>";  
-  	}
-$output .= "
-      
-      </td>
-    </tr>
-  </table>
- </div>
+      <input class='limited_stock_checkbox' id='add_form_quantity_limited' type='checkbox' value='yes' ".(($product_data['quantity_limited'] == 1) ? 'checked="true"' : '')." name='quantity_limited'/>"; //onclick='hideelement(\"add_stock\")'
+		echo "&nbsp;<label for='add_form_quantity_limited' class='small'>".TXT_WPSC_UNTICKBOX."</label>";
+		if ($product_data['id'] > 0){
+				$variations_output = $variations_processor->variations_grid_view($product_data['id']); 
+				
+				if(wpsc_product_has_variations($product_data['id'])) {
+						echo "<div class='edit_stock' style='display: none;'>\n\r";
+						
+						echo "<input type='hidden' name='quantity' value='".$product_data['quantity']."' />";
+						echo "</div>\n\r";
+					} else {
+						switch($product_data['quantity_limited']) {
+							case 1:
+							echo "            <div class='edit_stock' style='display: block;'>\n\r";
+							break;
+							
+							default:
+							echo "            <div class='edit_stock' style='display: none;'>\n\r";
+							break;
+						}
+						
+						echo "<input type='text' name='quantity' size='10' value='".$product_data['quantity']."' />";
+						echo "              </div>\n\r";
+					}
+		} else {
+						echo "
+					<div style='display: none;' class='edit_stock'>
+						<input type='text' name='quantity' value='0' size='10' />
+					</div>";  
+			}
+	echo "
+				
+				</td>
+			</tr>";
+	echo "
+		</table>
+	</div>
 </div>";
 
-return $output;
+//return $output;
 
 }
 
@@ -535,18 +544,18 @@ function wpsc_product_shipping_forms($product_data=''){
 			".TXT_WPSC_WEIGHT."
 		</td>
 		<td>
-			<input type='text' size='5' name='weight' value='".$product_data['weight']."'>
+			<input type='text' size='5' name='weight' value='".$product_data['weight']."' />
 			<select name='weight_unit'>
-				<option value='pound' ". (($product_data['weight_unit'] == 'pound') ? 'selected' : '') .">Pounds</option>
-				<option value='once' ". (($product_data['weight_unit'] == 'once') ? 'selected' : '') .">Ounces</option>
-				<option value='gram' ". (($product_data['weight_unit'] == 'gram') ? 'selected' : '') .">Grams</option>
-				<option value='kilogram' ". (($product_data['weight_unit'] == 'kilogram') ? 'selected' : '') .">Kilograms</option>
+				<option value='pound' ". (($product_data['weight_unit'] == 'pound') ? 'selected="selected"' : '') .">Pounds</option>
+				<option value='once' ". (($product_data['weight_unit'] == 'once') ? 'selected="selected"' : '') .">Ounces</option>
+				<option value='gram' ". (($product_data['weight_unit'] == 'gram') ? 'selected="selected"' : '') .">Grams</option>
+				<option value='kilogram' ". (($product_data['weight_unit'] == 'kilogram') ? 'selected="selected"' : '') .">Kilograms</option>
 			</select>
 		</td>
     </tr>
     <!--USPS shipping changes ends-->
 
-    <tr>
+ 
     <tr>
       <td colspan='2'>
       <strong>".TXT_WPSC_FLAT_RATE_SETTINGS."</strong> 
@@ -582,8 +591,9 @@ function wpsc_product_shipping_forms($product_data=''){
 
 function wpsc_product_advanced_forms($product_data='') {
 	global $closed_postboxes,$wpdb;
+	//exit('<pre>'.print_r($product_data, true).'</pre>');
 	$merchant_note = $product_data['meta']['metchant_notes'];
-	$engraved_text = $product_data['meta']['engraved'];
+	$engraved_text = $product_data['meta']['engrave'];
 	$can_have_uploaded_image = $product_data['meta']['can_have_uploaded_image'];
 	$external_link = $product_data['meta']['external_link'];
 	$enable_comments = $product_data['meta']['enable_comments'];
@@ -632,13 +642,13 @@ function wpsc_product_advanced_forms($product_data='') {
 		<input type='text' name='new_custom_meta[name][]' value='' class='text'/><br />
 		
 		".TXT_WPSC_DESCRIPTION.": <br />
-		<textarea name='new_custom_meta[value][]' value='' class='text' ></textarea>
-		<br /></td></tr>";
+		<textarea name='new_custom_meta[value][]' cols='40' rows='10' class='text' ></textarea>
+		<br /></div></td></tr>";
 		
 	    $output .= "<tr>
       <td class='itemfirstcol' colspan='2'><br /> <strong>". TXT_WPSC_ADMINNOTES .":</strong><br />
       
-        <textarea cols='40' rows='3' type='text' name='productmeta_value[merchant_notes]' id='merchant_notes'>".stripslashes($merchant_note)."</textarea> 
+        <textarea cols='40' rows='3' name='productmeta_value[merchant_notes]' id='merchant_notes'>".stripslashes($merchant_note)."</textarea> 
       	<small>".TXT_WPSC_NOTE_ONLY_AVAILABLE_HERE."</small>
       </td>
     </tr>
@@ -646,8 +656,8 @@ function wpsc_product_advanced_forms($product_data='') {
     <tr>
       <td class='itemfirstcol' colspan='2'><br />
        <strong>". TXT_WPSC_PERSONALISATION_OPTIONS .":</strong><br />
-        <input type='hidden' name='productmeta_values[engraved]' id='add_engrave_text' value='0'>
-        <input type='checkbox' name='productmeta_values[engraved]' ".(($engraved_text == 'on') ? 'checked="true"' : '')." id='add_engrave_text'>
+        <input type='hidden' name='productmeta_values[engraved]' value='0' />
+        <input type='checkbox' name='productmeta_values[engraved]' ".(($engraved_text == 'on') ? 'checked="checked"' : '')." id='add_engrave_text' />
         <label for='add_engrave_text'> ".TXT_WPSC_ADMIN_ENGRAVE."</label>
         <br />
       </td>
@@ -655,8 +665,8 @@ function wpsc_product_advanced_forms($product_data='') {
     <tr>
       <td class='itemfirstcol' colspan='2'>
       
-        <input type='hidden' name='productmeta_values[can_have_uploaded_image]' id='add_engrave_text' value='0'>
-        <input type='checkbox' name='productmeta_values[can_have_uploaded_image]' ".(($can_have_uploaded_image == 'on') ? 'checked="true"' : '')." id='can_have_uploaded_image'>
+        <input type='hidden' name='productmeta_values[can_have_uploaded_image]' value='0' />
+        <input type='checkbox' name='productmeta_values[can_have_uploaded_image]' ".(($can_have_uploaded_image == 'on') ? 'checked="checked"' : '')." id='can_have_uploaded_image' />
         <label for='can_have_uploaded_image'> ".TXT_WPSC_ALLOW_UPLOADING_IMAGE."</label>
         <br />
       </td>
@@ -685,7 +695,7 @@ function wpsc_product_advanced_forms($product_data='') {
        <strong>".TXT_WPSC_OFF_SITE_LINK.":</strong><br />
        <small>".TXT_WPSC_USEONLYEXTERNALLINK."</small><br /><br />
 		<label for='external_link'>".TXT_WPSC_EXTERNALLINK."</label>:<br />
-		  <input type='text' class='text' name='productmeta_values[external_link]' value='".$external_link."' id='external_link' size='40'> 
+		  <input type='text' class='text' name='productmeta_values[external_link]' value='".$external_link."' id='external_link' size='40' /> 
       </td>
     </tr>";
 	if (get_option('wpsc_enable_comments') == 1) {
@@ -712,55 +722,94 @@ function wpsc_product_image_forms($product_data='') {
 	if ($product_data == 'empty') {
 		$display = "style='display:none;'";
 	}
+
+
+	//As in WordPress,  If Mac and mod_security, no Flash
+	$flash = true;
+	if ( (false !== strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'mac')) && apache_mod_loaded('mod_security') ) {
+		$flash = false;
+	}
+	
+	$flash_action_url = admin_url('async-upload.php');
+	$flash = apply_filters('flash_uploader', $flash);
 	?>
 	<div id='wpsc_product_image_forms' class='postbox <?php echo ((array_search('wpsc_product_image_forms', $product_data['closed_postboxes']) !== false) ? 'closed' : ''); ?>' <?php echo ((array_search('wpsc_product_image_forms', $product_data['hidden_postboxes']) !== false) ? 'style="display: none;"' : ''); ?> >
 		<h3 class='hndle'> <?php echo	TXT_WPSC_PRODUCTIMAGES; ?></h3>
 		<div class='inside'>
 		
+		<?php if ( $flash ) : ?>
+			<script type="text/javascript" >
+			/* <![CDATA[ */
+			jQuery("span#spanButtonPlaceholder").livequery(function() {
+				swfu = new SWFUpload({
+					button_text: '<span class="button"><?php _e('Select Files'); ?></span>',
+					button_text_style: '.button { text-align: center; font-weight: bold; font-family:"Lucida Grande","Lucida Sans Unicode",Tahoma,Verdana,sans-serif; }',
+					button_height: "24",
+					button_width: "132",
+					button_image_url: '<?php echo includes_url('images/upload.png'); ?>',
+					button_placeholder_id: "spanButtonPlaceholder",
+					upload_url : "<?php echo attribute_escape( $flash_action_url ); ?>",
+					flash_url : "<?php echo includes_url('js/swfupload/swfupload.swf'); ?>",
+					file_post_name: "async-upload",
+					file_types: "<?php echo apply_filters('upload_file_glob', '*.*'); ?>",
+					post_params : {
+						"product_id" : "<?php echo absint($product_data['id']); ?>",
+						"auth_cookie" : "<?php if ( is_ssl() ) echo $_COOKIE[SECURE_AUTH_COOKIE]; else echo $_COOKIE[AUTH_COOKIE]; ?>",
+						"_wpnonce" : "<?php echo wp_create_nonce('product-swfupload'); ?>",
+						"wpsc_admin_action" : "wpsc_add_image"
+					},
+					file_size_limit : "<?php echo wp_max_upload_size(); ?>b",
+					file_dialog_start_handler : wpsc_fileDialogStart,
+					file_queued_handler : wpsc_fileQueued,
+					upload_start_handler : wpsc_uploadStart,
+					upload_progress_handler : wpsc_uploadProgress,
+					upload_error_handler : wpsc_uploadError,
+					upload_success_handler : wpsc_uploadSuccess,
+					upload_complete_handler : wpsc_uploadComplete,
+					file_queue_error_handler : wpsc_fileQueueError,
+					file_dialog_complete_handler : wpsc_fileDialogComplete,
+					swfupload_pre_load_handler: wpsc_swfuploadPreLoad,
+					swfupload_load_failed_handler: wpsc_swfuploadLoadFailed,
+					custom_settings : {
+						degraded_element_id : "html-upload-ui", // id of the element displayed when swfupload is unavailable
+						swfupload_element_id : "flash-upload-ui" // id of the element displayed when swfupload is available
+					},
+					debug: true
+				});
+			});
+		/* ]]> */
+		</script>
+		
+		<?php endif; ?>
+		
+    <div class='flash-image-uploader'>
+			<span id='spanButtonPlaceholder'></span><br />
+				<div id='media-items'> </div>
+				<p><?php echo wpsc_check_memory_limit(); ?></p>
+				<p><?php echo TXT_WPSC_FLASH_UPLOADER; ?></p>
+    </div>
+    
+    
 		
 		  <div class='browser-image-uploader'>
 				<h4><?php _e("Select an image to upload:"); ?></h4>
 				<ul>  
 					<li>
 						<input type="file" value="" name="image" />
-					</li>
-					<li>			<?php echo wpsc_check_memory_limit(); ?> 
-</li>
-					<li>
-						<input type="radio" onclick='hideOptionElement(null, "image_resize0");' class="image_resize" id="add_image_resize0" value="0" name="image_resize" /> <label for="add_image_resize0">do not resize thumbnail image</label>
+						<input type="hidden" value="1" name="image_resize" />
 					</li>
 					<li>
-						<input type="radio" onclick='hideOptionElement(null, "image_resize1");' class="image_resize" id="add_image_resize1" value="1" name="image_resize" checked="true"/> <label for="add_image_resize1">use default size (<abbr title="This is set on the Settings Page"><?php echo get_option('product_image_width'); ?> × <?php echo get_option('product_image_height'); ?>px</abbr>) </label>
-					</li>
-					<li>
-						<input type="radio" onclick='hideOptionElement("heightWidth", "image_resize2");' class="image_resize" id="add_image_resize2" value="2" name="image_resize"/>
-						<label for="add_image_resize2">use specific size</label>        
-						<div style="display: none;" id="heightWidth">
-							<input type="text" value="" name="width" size="4"/><label for="add_image_resize2">px width</label>
-							<input type="text" value="" name="height" size="4"/><label for="add_image_resize2">px height</label>
-						</div>
-					</li>
-					<li>
-						<input type="radio" onclick='hideOptionElement("browseThumb", "image_resize3");' class="image_resize" id="add_image_resize3" value="3" name="image_resize"/>
-						<label for="add_image_resize3">use separate thumbnail</label><br/>
-						<div style="display: none;" id="browseThumb">
-							<input type="file" value="" name="thumbnailImage"/>
-						</div>
+						<?php echo wpsc_check_memory_limit(); ?>
 					</li>
 				</ul>
+				<p><?php echo TXT_WPSC_BROWSER_UPLOADER; ?></p>
 				<br />
 				
 			</div>
-			<?php 
-			//exit('<pre>'.print_r($product_data, true).'</pre>');
-			if($product_data['image'] != ''){ ?>
 			<p><strong <?php echo $display; ?>><?php _e('Manage your thumbnails'); ?></strong></p>
 			<?php
 			edit_multiple_image_gallery($product_data);
-			}
 			?>
-			
-<!-- 					<p>You are using the Browser uploader.  Problems?  Try the <a onclick='wpsc_upload_switcher("flash")' class="wpsc_upload_switcher">Flash uploader</a> instead.</p> -->
 
 		</div>
 	</div>
@@ -901,30 +950,25 @@ function edit_multiple_image_gallery($product_data) {
 	$main_image = $wpdb->get_row("SELECT `images`.* FROM `".WPSC_TABLE_PRODUCT_IMAGES."` AS `images` JOIN `".WPSC_TABLE_PRODUCT_LIST."` AS `product` ON `product`.`image` = `images`.`id`  WHERE `product`.`id` = '{$product_data['id']}' LIMIT 1", ARRAY_A);
 	
 	$timestamp = time();
-	//echo "<pre>".print_r("SELECT `images`.* FROM `".WPSC_TABLE_PRODUCT_IMAGES."` AS `images` JOIN `".WPSC_TABLE_PRODUCT_LIST."` AS `product` ON `product`.`image` = `images`.`id`  WHERE `product`.`id` = '{$main_image_id}' LIMIT 1",true)."</pre>";
-	//echo ;
-
-	
 	?>
 	<ul id="gallery_list" class="ui-sortable" style="position: relative;">
-	
-		
 		<li class='first' id='product_image_<?php echo $main_image['id']; ?>'>
 			<input type='hidden' name='gallery_product_id[]' class='image-id' value='<?php echo $main_image['id']; ?>' />
 			<div class='previewimage' id='gallery_image_<?php echo $main_image['id']; ?>'>
 				<?php if ($main_image['image'] != '') { ?>
 					<?php
-				$image_data = getimagesize(WPSC_IMAGE_DIR.$main_image['image']);			
-				//exit('<pre>'.print_r($image_data, true).'</pre>');
-				?>
-				<a id='extra_preview_link_0' href='<?php echo "admin.php?wpsc_admin_action=crop_image&imagename=".$main_image['image']."&imgheight=".$image_data[1]."&imgwidth=".$image_data[0]."&width=630&height=500&product_id=".$product_data['id']; ?>'  title='Crop Image' rel='product_extra_image_0' class='thickbox' ><img class='previewimage' src='<?php echo WPSC_IMAGE_URL.$main_image['image']; ?>' alt='<?php echo TXT_WPSC_PREVIEW; ?>' title='<?php echo TXT_WPSC_PREVIEW; ?>' /></a>
+					$image_data = getimagesize(WPSC_IMAGE_DIR.$main_image['image']);
+					?>
+					<a id='extra_preview_link_0' href='<?php echo htmlentities("admin.php?wpsc_admin_action=crop_image&imagename=".$main_image['image']."&imgheight=".$image_data[1]."&imgwidth=".$image_data[0]."&width=630&height=500&product_id=".$product_data['id']); ?>'  title='Crop Image' rel='product_extra_image_0' class='thickbox' >
+					  <img class='previewimage' src='<?php echo WPSC_IMAGE_URL.$main_image['image']; ?>' alt='<?php echo TXT_WPSC_PREVIEW; ?>' title='<?php echo TXT_WPSC_PREVIEW; ?>' />
+					</a>
 				<?php } ?>
 
 				
 				
 				<div id='image_settings_box'>
 					<div class='upper_settings_box'>
-						<div class='upper_image'><img src='<?php echo WPSC_URL; ?>/images/pencil.png'/></div>
+						<div class='upper_image'><img src='<?php echo WPSC_URL; ?>/images/pencil.png' alt='' /></div>
 						<div class='upper_txt'><?php _e('Thumbnail Settings'); ?><a class='closeimagesettings'>X</a></div>
 					</div>
 				
@@ -932,7 +976,7 @@ function edit_multiple_image_gallery($product_data) {
 						<input type='hidden' id='current_thumbnail_image' name='current_thumbnail_image' value='<?php echo $product_data['thumbnail_image']; ?>' />
 					  <ul>
 					    <li>
-								<input type='radio' checked='true' name='gallery_resize' value='0' id='gallery_resize0' class='image_resize' onclick='image_resize_extra_forms(this)' /> <label for='gallery_resize0'> <?php echo TXT_WPSC_DONOTRESIZEIMAGE; ?></label><br />
+								<input type='radio' checked='checked' name='gallery_resize' value='0' id='gallery_resize0' class='image_resize' onclick='image_resize_extra_forms(this)' /> <label for='gallery_resize0'> <?php echo TXT_WPSC_DONOTRESIZEIMAGE; ?></label><br />
 							</li>
 							
 					    <li>
@@ -944,8 +988,8 @@ function edit_multiple_image_gallery($product_data) {
 					    <li>
 								<input type='radio'  name='gallery_resize' value='2' id='gallery_resize2' class='image_resize' onclick='image_resize_extra_forms(this)' /> <label for='gallery_resize2'><?php echo TXT_WPSC_USESPECIFICSIZE; ?> </label>
 								<div class='heightWidth image_resize_extra_forms'>
-									<input id='gallery_image_width' type='text' size='4' name='gallery_width' value='' /><label for='gallery_image_resize2'><?php echo TXT_WPSC_PXWIDTH; ?></label>
-									<input id='gallery_image_height' type='text' size='4' name='gallery_height' value='' /><label for='gallery_image_resize2'><?php echo TXT_WPSC_PXHEIGHT; ?> </label>
+									<input id='gallery_image_width' type='text' size='4' name='gallery_width' value='' /><label for='gallery_image_width'><?php echo TXT_WPSC_PXWIDTH; ?></label>
+									<input id='gallery_image_height' type='text' size='4' name='gallery_height' value='' /><label for='gallery_image_height'><?php echo TXT_WPSC_PXHEIGHT; ?> </label>
 								</div>
 					    </li>
 							
@@ -961,7 +1005,7 @@ function edit_multiple_image_gallery($product_data) {
 						</ul>
 					</div>
 				</div>
-				<a class='editButton'>Edit   <img src='<?php echo WPSC_URL; ?>/images/pencil.png'/></a>
+				<a class='editButton'>Edit   <img src='<?php echo WPSC_URL; ?>/images/pencil.png' alt='' /></a>
 			</div>
 		</li>
 	<?php
@@ -980,9 +1024,9 @@ function edit_multiple_image_gallery($product_data) {
 						$image_data = getimagesize(WPSC_IMAGE_DIR.$image['image']);			
             ?>
             <li id="product_image_<?php echo $image['id']; ?>">
-							<input type='hidden' class='image-id'  name='gallery_product_id[]' value='<?php echo $image['id']; ?>' />
+							<input type='hidden' class='image-id'  name='gallery_image_id[]' value='<?php echo $image['id']; ?>' />
 							<div class='previewimage' id='gallery_image_<?php echo $image['id']; ?>'>
-							  <a id='extra_preview_link_<?php echo $image['id']; ?>' href='<?php echo "admin.php?wpsc_admin_action=crop_image&imagename=".$image['image']."&imgheight=".$image_data[1]."&imgwidth=".$image_data[0]."&width=630&height=500&product_id=".$product_data['id']; ?>' rel='product_extra_image_<?php echo $image['id']; ?>' class='thickbox'>
+							  <a id='extra_preview_link_<?php echo $image['id']; ?>' href='<?php echo htmlentities("admin.php?wpsc_admin_action=crop_image&imagename=".$image['image']."&imgheight=".$image_data[1]."&imgwidth=".$image_data[0]."&width=630&height=500&product_id=".$product_data['id']); ?>' rel='product_extra_image_<?php echo $image['id']; ?>' class='thickbox'>
 							    <img class='previewimage' src='<?php echo WPSC_IMAGE_URL.$image['image']; ?>' alt='<?php echo TXT_WPSC_PREVIEW; ?>' title='<?php echo TXT_WPSC_PREVIEW; ?>' />
 							  </a>
 								<img alt='-' class='deleteButton' src='<?php echo WPSC_URL; ?>/images/cross.png' />
@@ -1014,9 +1058,9 @@ function wpsc_category_list($group_id, $product_id = '', $unique_id = '', $categ
     $values = $wpdb->get_results("SELECT * FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `group_id` IN ('$group_id') AND  `active`='1' AND `category_parent` = '0'  ORDER BY `id` ASC",ARRAY_A);
 	}
 	
-	if($category_id < 1 ) {
-		$output .= "<ul class='list:category categorychecklist form-no-clear' id='categorychecklist'>\n\r";
-	} else {
+	if($category_id < 1) {
+		$output .= "<ul class='list:category categorychecklist form-no-clear'>\n\r";
+	} elseif((count($values) >0) ){
 		$output .= "<ul class='children'>\n\r";
 	}
 		
@@ -1026,19 +1070,21 @@ function wpsc_category_list($group_id, $product_id = '', $unique_id = '', $categ
       $category_assoc = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."` WHERE `product_id` IN('".$product_id."') AND `category_id` IN('".$option['id']."')  LIMIT 1",ARRAY_A); 
       //echo "<pre>".print_r($category_assoc,true)."</pre>";
       if(is_numeric($category_assoc['id']) && ($category_assoc['id'] > 0)) {
-        $selected = "checked='true'";
+        $selected = "checked='checked'";
 			}
 		}
 		
 		$output .= "  <li id='category-".$option['id']."'>\n\r";
-    $output .= "    <label class='selectit'><input  id='in-category-{$unique_id}' type='checkbox' $selected name='category[]' value='".$option['id']."'><label for='".$unique_id."category_form_".$option['id']."' class='greytext' >".stripslashes($option['name'])."</label>";
+    $output .= "    <label class='selectit'><input  id='".$unique_id."category_form_".$option['id']."' type='checkbox' $selected name='category[]' value='".$option['id']."' /></label><label for='".$unique_id."category_form_".$option['id']."' class='greytext' >".stripslashes($option['name'])."</label>";
     $output .= wpsc_category_list($group_id, $product_id, $unique_id, $option['id'], $iteration+1);
     
 		$output .= "  </li>\n\r";
     
     $selected = "";
 	}
-	$output .= "</ul>\n\r";
+	if((count($values) >0) ){
+		$output .= "</ul>\n\r";
+	}
   return $output;
 }
 
@@ -1072,68 +1118,55 @@ function wpsc_the_editor($content, $id = 'content', $prev_id = 'title', $media_b
 		$media_buttons = false;
 
 	$richedit =  user_can_richedit();
-	$rows = "rows='$rows'";
+	$class = '';
 
 	if ( $richedit || $media_buttons ) { ?>
 	<div id="editor-toolbar">
-	<?php if ( $richedit ) {
+<?php
+	if ( $richedit ) {
 		$wp_default_editor = wp_default_editor(); ?>
 		<div class="zerosize"><input accesskey="e" type="button" onclick="switchEditors.go('<?php echo $id; ?>')" /></div>
-		<?php if ( 'html' == $wp_default_editor ) {
+<?php	if ( 'html' == $wp_default_editor ) {
 			add_filter('the_editor_content', 'wp_htmledit_pre'); ?>
-			<a id="edButtonHTML" class="active" onclick="switchEditors.go('<?php echo $id; ?>', 'html');"><?php _e('HTML'); ?></a>
-			<a id="edButtonPreview" onclick="switchEditors.go('<?php echo $id; ?>', 'tinymce');"><?php _e('Visual'); ?></a>
-		<?php } else {
+			<a id="edButtonHTML" class="active hide-if-no-js" onclick="switchEditors.go('<?php echo $id; ?>', 'html');"><?php _e('HTML'); ?></a>
+			<a id="edButtonPreview" class="hide-if-no-js" onclick="switchEditors.go('<?php echo $id; ?>', 'tinymce');"><?php _e('Visual'); ?></a>
+<?php	} else {
+			$class = " class='theEditor'";
 			add_filter('the_editor_content', 'wp_richedit_pre'); ?>
-			<a id="edButtonHTML" onclick="switchEditors.go('<?php echo $id; ?>', 'html');"><?php _e('HTML'); ?></a>
-			<a id="edButtonPreview" class="active" onclick="switchEditors.go('<?php echo $id; ?>', 'tinymce');"><?php _e('Visual'); ?></a>
-		<?php }
-		}
+			<a id="edButtonHTML" class="hide-if-no-js" onclick="switchEditors.go('<?php echo $id; ?>', 'html');"><?php _e('HTML'); ?></a>
+			<a id="edButtonPreview" class="active hide-if-no-js" onclick="switchEditors.go('<?php echo $id; ?>', 'tinymce');"><?php _e('Visual'); ?></a>
+<?php	}
+	}
 
-		if ( $media_buttons ) { ?>
-			<div id="media-buttons" class="hide-if-no-js">
-			<?php do_action( 'media_buttons' ); ?>
-			</div>
-		<?php } ?>
+	if ( $media_buttons ) { ?>
+		<div id="media-buttons" class="hide-if-no-js">
+<?php	do_action( 'media_buttons' ); ?>
+		</div>
+<?php
+	} ?>
 	</div>
-	<?php } ?>
-
-	<div id="quicktags">
-	<?php wp_print_scripts( 'quicktags' ); ?>
-		<div id="ed_toolbar">
+<?php
+	}
+?>
+	<div id="quicktags"><?php
+	wp_print_scripts( 'quicktags' ); ?>
+	  <div id="ed_toolbar">
 		</div>
 		<script type="text/javascript">wpsc_edToolbar()</script>
+
 	</div>
 
-	<?php $the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea $rows cols='40' name='$id' tabindex='$tab_index' id='$id'>%s</textarea></div>\n");
+<?php
+	$the_editor = apply_filters('the_editor', "<div id='editorcontainer'><textarea rows='$rows'$class cols='40' name='$id' tabindex='$tab_index' id='$id'>%s</textarea></div>\n");
 	$the_editor_content = apply_filters('the_editor_content', $content);
 
 	printf($the_editor, $the_editor_content);
 
-	?>
+?>
 	<script type="text/javascript">
-	// <![CDATA[
 	edCanvas = document.getElementById('<?php echo $id; ?>');
-	<?php if ( user_can_richedit() && $prev_id ) { ?>
-	var dotabkey = true;
-	// If tinyMCE is defined.
-	if ( typeof tinyMCE != 'undefined' ) {
-		// This code is meant to allow tabbing from Title to Post (TinyMCE).
-		jQuery('#<?php echo $prev_id; ?>')[jQuery.browser.opera ? 'keypress' : 'keydown'](function (e) {
-			if (e.which == 9 && !e.shiftKey && !e.controlKey && !e.altKey) {
-				if ( (jQuery("#post_ID").val() < 1) && (jQuery("#title").val().length > 0) ) { autosave(); }
-				if ( tinyMCE.activeEditor && ! tinyMCE.activeEditor.isHidden() && dotabkey ) {
-					e.preventDefault();
-					dotabkey = false;
-					tinyMCE.activeEditor.focus();
-					return false;
-				}
-			}
-		});
-	}
-	<?php } ?>
-	// ]]>
 	</script>
-	<?php
+<?php
 }
+
 ?>

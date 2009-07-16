@@ -7,8 +7,15 @@
  * @package wp-e-commerce
  * @since 3.7
  */
- 
- 
+ function wpsc_special_widget(){
+ 	global $wpdb; 
+ 	wpsc_add_to_cart();
+ 	//exit();
+ }
+if($_REQUEST['wpsc_ajax_action'] == 'special_widget') {
+	add_action('init', 'wpsc_special_widget');
+}
+
 /**
 	* add_to_cart function, used through ajax and in normal page loading.
 	* No parameters, returns nothing
@@ -34,7 +41,7 @@ function wpsc_add_to_cart() {
   }
   if($_POST['quantity'] > 0 && (!isset($_POST['wpsc_quantity_update']))) {
 		$provided_parameters['quantity'] = (int)$_POST['quantity'];
-  }elseif(isset($_POST['wpsc_quantity_update'])){
+  }else if(isset($_POST['wpsc_quantity_update'])){
   		//exit('<pre>'.print_r($wpsc_cart, true).'</pre>IM HERE');
 		 $wpsc_cart->remove_item($_POST['key']);
   		$provided_parameters['quantity'] = (int)$_POST['wpsc_quantity_update'];
@@ -49,20 +56,36 @@ function wpsc_add_to_cart() {
 			$provided_parameters['file_data'] = $_FILES['custom_file'];
 		}
 	}
+	if(((float)$_POST['donation_price'] > 0)) {
+		$provided_parameters['provided_price'] = (float)$_POST['donation_price'];
+	}
   
   $parameters = array_merge($default_parameters, (array)$provided_parameters);
-  	if(!isset($_POST['wpsc_quantity_update'])){
-		$state = $wpsc_cart->set_item($product_id,$parameters); 
-	}else{
-		$state = $wpsc_cart->set_item($product_id,$parameters, true); 	
+  echo "/*\n\r".print_r($parameters,true)."*/\n\r";
+	$state = $wpsc_cart->set_item($product_id,$parameters); 
+	
+	$product = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id`='".$product_id."' LIMIT 1",ARRAY_A);
+  
+  if($state == true) {
+		$cart_messages[] = str_replace("[product_name]", stripslashes($product['name']), TXT_WPSC_YOU_JUST_ADDED);
+	} else {
+	  if($parameters['quantity'] <= 0) {
+	    $cart_messages[] = TXT_WPSC_ZERO_QUANTITY_REQUESTED;
+	  } else if($wpsc_cart->get_remaining_quantity($product_id,$parameters['variation_values'], $parameters['quantity']) > 0) {
+			$cart_messages[] = str_replace("[number]", $wpsc_cart->get_remaining_quantity($product_id,$parameters['variation_values'], $parameters['quantity']), TXT_WPSC_INSUFFICIENT_REMAINING);
+	  } else {
+	    $cart_messages[] = str_replace("[product_name]", $product['name'], TXT_WPSC_SORRY_NONE_LEFT);
+	  }
 	}
+	
   if($_GET['ajax'] == 'true') {
 		if(($product_id != null) &&(get_option('fancy_notifications') == 1)) {
 			echo "if(jQuery('#fancy_notification_content')) {\n\r";
-			echo "  jQuery('#fancy_notification_content').html(\"".str_replace(Array("\n","\r") , Array('\n','\r'),addslashes(fancy_notification_content($product_id, (!$state)))). "\");\n\r";
+			echo "  jQuery('#fancy_notification_content').html(\"".str_replace(array("\n","\r") , array('\n','\r'), addslashes(fancy_notification_content($cart_messages))). "\");\n\r";
 			echo "  jQuery('#loading_animation').css('display', 'none');\n\r";
 			echo "  jQuery('#fancy_notification_content').css('display', 'block');\n\r";
 			echo "}\n\r";
+			$error_messages = array();
 		}
 		ob_start();
 		include_once(WPSC_FILE_PATH . "/themes/".WPSC_THEME_DIR."/cart_widget.php");
@@ -76,7 +99,7 @@ function wpsc_add_to_cart() {
 
     
 		if(get_option('show_sliding_cart') == 1)	{
-			if(wpsc_cart_item_count() > 0) {
+			if((wpsc_cart_item_count() > 0) || (count($cart_messages) > 0)) {
 				$_SESSION['slider_state'] = 1;
 				echo "
 					jQuery('#sliding_cart').slideDown('fast',function(){
@@ -95,8 +118,6 @@ function wpsc_add_to_cart() {
 		}
 
 		do_action('wpsc_alternate_cart_html');
-    
-    echo "wpsc_bind_to_events();\n";
 		exit();
   }
 }
@@ -113,7 +134,7 @@ if($_REQUEST['wpsc_ajax_action'] == 'add_to_cart') {
 */
 function wpsc_empty_cart() {
   global $wpdb, $wpsc_cart;
-  $wpsc_cart->empty_cart();
+  $wpsc_cart->empty_cart(false);
   
   if($_REQUEST['ajax'] == 'true') {
 		ob_start();
@@ -136,9 +157,14 @@ function wpsc_empty_cart() {
 				});
 		";
 		}
-
 		exit();
   }
+
+  // this if statement is needed, as this function also runs on returning from the gateway
+  if($_REQUEST['wpsc_ajax_action'] == 'empty_cart') { 
+		wp_redirect(remove_query_arg(array('wpsc_ajax_action','ajax')));
+		exit();
+	}
 }
 // execute on POST and GET
 if(($_REQUEST['wpsc_ajax_action'] == 'empty_cart') || ($_GET['sessionid'] > 0)) {
@@ -157,20 +183,20 @@ function wpsc_coupon_price($currCoupon = '') {
 	  $_SESSION['coupon_numbers'] = $coupon;
 	  $wpsc_coupons = new wpsc_coupons($coupon);
 	  
-	  if($wpsc_coupons->validate_coupon()){
+	  if ($wpsc_coupons->validate_coupon()){
 	  	$discountAmount = $wpsc_coupons->calculate_discount();
 	  	$wpsc_cart->apply_coupons($discountAmount, $coupon);
 	  	$wpsc_coupons->errormsg = false;
-	  }else{
+	  } else {
 	  	$wpsc_coupons->errormsg = true;
 	  	$wpsc_cart->coupons_amount = 0;
 	  	$wpsc_cart->coupons_name = '';
 	  }
 
-  }elseif($_POST['coupon_num'] == '' && $currCoupon == ''){
+  } else if ($_POST['coupon_num'] == '' && $currCoupon == ''){
    		$wpsc_cart->coupons_amount = 0;
   		$wpsc_cart->coupons_name = '';
-  }elseif($currCoupon != ''){
+  } else if ($currCoupon != '') {
   	  $coupon = $wpdb->escape($currCoupon);
 	  $_SESSION['coupon_numbers'] = $coupon;
 	  $wpsc_coupons = new wpsc_coupons($coupon);
@@ -222,7 +248,7 @@ function wpsc_update_item_quantity() {
 	echo "jQuery('div.shopping-cart-wrapper').html('$output');\n";
 	do_action('wpsc_alternate_cart_html');
 	
-	echo "wpsc_bind_to_events();\n";
+	
 	exit();
  }
 	
@@ -348,15 +374,19 @@ if($_REQUEST['wpsc_ajax_actions'] == 'update_location') {
 	* No parameters, returns nothing
 */
 function wpsc_submit_checkout() {
-  global $wpdb, $wpsc_cart, $user_ID,$nzshpcrt_gateways;
+  global $wpdb, $wpsc_cart, $user_ID,$nzshpcrt_gateways, $wpsc_shipping_modules;
+	$_SESSION['wpsc_checkout_misc_error_messages'] = array();
 	$wpsc_checkout = new wpsc_checkout();
 	//exit('coupons:'.$wpsc_cart->coupons_name);
 	$selected_gateways = get_option('custom_gateway_options');
 	$submitted_gateway = $_POST['custom_gateway'];
-	
-	
+
+	$options = get_option('custom_shipping_options');
 	$form_validity = $wpsc_checkout->validate_forms();
-	// 	exit('<pre>'.print_r($form_validity, true).'</pre>');
+	
+	//exit('<pre>'.print_r($_POST, true).'</pre>');
+
+	//	exit('2<pre>'.print_r($_SESSION['wpsc_zipcode'], true).'</pre>');
 	extract($form_validity); // extracts $is_valid and $error_messages
  	if(isset($_POST['log']) || isset($_POST['pwd']) || isset($_POST['user_email']) ) {
 		$results = wpsc_add_new_user($_POST['log'], $_POST['pwd'], $_POST['user_email']);
@@ -374,13 +404,18 @@ function wpsc_submit_checkout() {
 		} else {
 			$is_valid = false;		
 		}
-   }
+	}
+	
+	if($_POST['agree'] != 'yes') {
+		$_SESSION['wpsc_checkout_misc_error_messages'][] = TXT_WPSC_PLEASEAGREETERMSANDCONDITIONS;
+		$is_valid = false;		
+	}
 	
 	if($our_user_id < 1) {
 	  $our_user_id = $user_ID;
 	}
 	
-   //exit('<pre>'.print_r($results, true).'</pre>');
+   //exit('<pre>'.print_r($_POST, true).'</pre>');
 	
 	$selectedCountry = $wpdb->get_results("SELECT id, country FROM `".WPSC_TABLE_CURRENCY_LIST."` WHERE isocode='".$wpdb->escape($_SESSION['wpsc_delivery_country'])."'", ARRAY_A);
 
@@ -410,10 +445,12 @@ function wpsc_submit_checkout() {
   } else {
 		$is_valid = false;
   }
-  
-  
-	//exit('<pre>'.print_r($is_valid, true).'</pre>');
-	if($is_valid == true) {
+  	if((get_option('do_not_use_shipping') != 1) && (in_array('ups', (array)$options)) && $_SESSION['wpsc_zipcode'] == '')	{
+		//exit('Not being called');
+		$_SESSION['categoryAndShippingCountryConflict'] = __('Please enter a Zipcode and click calculate to proceed');
+		$is_valid = false;		
+	}
+	if($is_valid == true || $_GET['gateway'] == 'noca') {
 		$_SESSION['categoryAndShippingCountryConflict']= '';
 		// check that the submitted gateway is in the list of selected ones
 	
@@ -425,7 +462,6 @@ function wpsc_submit_checkout() {
 		$total = $wpsc_cart->calculate_total_price();
 		
 				
-
 		$wpdb->query("INSERT INTO `".WPSC_TABLE_PURCHASE_LOGS."` (`totalprice`,`statusno`, `sessionid`, `user_ID`, `date`, `gateway`, `billing_country`,`shipping_country`, `base_shipping`,`shipping_method`, `shipping_option`, `plugin_version`, `discount_value`, `discount_data`) VALUES ('$total' ,'0', '{$sessionid}', '".(int)$user_ID."', UNIX_TIMESTAMP(), '{$submitted_gateway}', '{$wpsc_cart->delivery_country}', '{$wpsc_cart->selected_country}', '{$base_shipping}', '{$wpsc_cart->selected_shipping_method}', '{$wpsc_cart->selected_shipping_option}', '".WPSC_VERSION."', '{$wpsc_cart->coupons_amount}','{$wpsc_cart->coupons_name}')");
 		
 		
@@ -435,12 +471,13 @@ function wpsc_submit_checkout() {
 		$wpsc_cart->save_to_db($purchase_log_id);
 		$wpsc_cart->submit_stock_claims($purchase_log_id);
 		do_action('wpsc_submit_checkout', array("purchase_log_id" => $purchase_log_id, "our_user_id" => $our_user_id));
-		
+	
 		if(get_option('permalink_structure') != '') {
 			$seperator = "?";
 		} else {
 			$seperator = "&";
 		}
+// 		exit();
 		// submit to gateway
 		foreach($nzshpcrt_gateways as $gateway) {
 			if($gateway['internalname'] == $submitted_gateway ) {
@@ -450,7 +487,13 @@ function wpsc_submit_checkout() {
 				break;
 			}
 		}
-		exit('');
+
+		if(isset($_GET['gateway']) && $_GET['gateway'] == 'noca'){
+			//exit('HERE2');
+			echo transaction_results($sessionid, true);
+		}else{
+			exit('HERE');
+		}
 } else {
 	
 	}

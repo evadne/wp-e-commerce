@@ -1,15 +1,117 @@
 /*
 * This is the new WPSC Admin CSS file 
 */
+/*
+ *Start Flot CSS styling
+ */
+#flotplaceholder{
+	 width: 100%; 
+	 height: 200px; 
+	 position: relative;
+/* 	 margin-left:20px; */
+ }
+#flotproductlist{
+	 padding-left:43px;
+	 padding-top: 20px;
+	 padding-bottom:20px;
+}
+#flotHeader{
+	 padding-left:50px;
 
+}
+span.wpscsmall{
+font-size: 11px;
+}
+td.wpsc_gateway_table{
+width:130px;
+border-top: none;
+}
+/*
+ *End of Flot CSS
+ */
+
+
+/**
+ *Dashboard Widget CSS
+ *
+ */
+ #leftDashboard{
+width:45%; 
+float:left;
+text-align:right;
+border-right:1px #999999 solid;
+
+}
+#leftDashboard strong{
+float:left;
+padding-left: 40px;
+}
+#rightDashboard strong{
+float:left;
+padding-left: 40px;
+}
+#rightDashboard{
+width:45%; 
+float:right;
+text-align:right;
+
+}
+.pricedisplay{
+/* width:40%; */
+float:left;
+}
+.dashboardWidgetSpecial{
+font-family:Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+color:#21759B;
+font-size:15px!important;
+margin: 5px 0 5px 0;
+}
+.dashboardWidget{
+color:#777777;
+padding-left:10px;
+padding-right: 30px;
+
+}
+span.wpsc_quart_left{
+width:40%;
+float:left;
+}
+p.atglance{
+color:#777777;
+font-family:Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+font-size:13px;
+font-style:italic;
+}
+span.wpsc_quart_right{
+width:60%;
+float:right;
+text-align: right;
+}
+#box span{
+border-bottom: 1px solid #999999;
+}
+p.quarterly{
+color:#21759B;
+font-family:Georgia,"Times New Roman","Bitstream Charter",Times,serif;
+font-size:12px;
+line-height: 140%;
+margin:5px 0;
+}
+/* end of dashboard widget css */
 /*
  *Display Purchase log Details CSS is HERE
  */
+#purchlogs_customfields{
+	clear:both; 
+}
 th#details{
-width:75px;
+width:70px;
 }
 th#amount{
 width:75px;
+}
+th#name{
+width:220px;
 }
 .google_checkout_logo{
 padding-right:10px;
@@ -64,13 +166,16 @@ text-align:right;
 
 }
 /*
- *Display Purchase log Details CSS ends HERE
+ * Display Purchase log Details CSS ends HERE
+ * Display Products CSS starts here
  */
-/*
-	* Display Products CSS starts here
-	*/
-	
-	
+.tablenav select[name="bulkAction"] {
+width:100px;
+}
+textarea#additional_description{
+border: 1px solid #dfdfdf;
+/* width:465px !important; */
+}	
 .wpsc-separator {
 	background:transparent url(../../images/menu-arrows.gif) no-repeat scroll left 5px;
 	cursor:w-resize;
@@ -90,7 +195,7 @@ text-align:right;
 }
 
 div.search-box input#page-search-input {
-  width: 134px;
+  width: 80px;
 
 }
 
@@ -164,6 +269,15 @@ table.product_editform {
 }
 #wpsc_product_list tbody tr.ui-sortable-helper td.product-price {
 	width: 40px;
+}
+
+
+div.price-editing-fields input.the-product-price {
+	width: 51px;
+}
+
+div.price-editing-fields {
+	display: none;
 }
 		
 div.product-placeholder {
@@ -337,9 +451,20 @@ div.product_custom_meta br {
 }
 
 /* image form styling */
-table.flash-image-uploader tr td p {
-  clear: both;
+div.flash-image-uploader {
+  display: none;
 }
+
+#wpbody-content div.flash-image-uploader #media-items {
+  position: relative;
+  border: none;
+}
+#wpbody-content div.flash-image-uploader #media-items .progress{
+  position: static;
+  margin:0 0 6px;
+  height: 16px;
+}
+
 
 button#add-product-image {
   float: left;
@@ -518,7 +643,9 @@ table.product_variation_grid th.variation_name{
  padding-bottom: 1px;
  }
  
-
+div#edit_variations_container {
+  margin-top: 12px;
+}
 table.product_variation_grid {
  border-collapse: collapse;
  margin-top: 0px;
@@ -697,7 +824,7 @@ div.select_product_file, div.edit_select_product_file {
 	overflow-y:auto;
 	padding:2px 2px 6px;
 	position:relative;
-	width:300px;
+	width:360px;
 }
 
 img.file_delete_button {
@@ -856,10 +983,18 @@ div#productform{ display: none; width: 99.5%; }
 div#edititem27{ display: none; width: 586px; }
 
 div#productform table tr td{ height: 11px !important; }
- 
-div#additem{ display: block;}
 
-/* div#additem table tr td{ height: 11px; } */
+
+
+
+div#blank_item{ display: block;}
+ 
+#poststuff div#blank_item h3{
+	margin-top: 0px;
+
+}
+ 
+div#additem{ display: none;}
 
 div#productform td.itemfirstcol{ padding-left:4px;  vertical-align: top; }
 
@@ -971,7 +1106,9 @@ td.product_groups_page td.category_presentation_settings {
   padding-bottom: 1ex;
 }
 
-
+td.product-price .pricedisplay{
+  border-bottom: 1px dotted #333;
+}
 
 div.editing_this_group {
 	font-size:8pt;
@@ -986,9 +1123,10 @@ div.editing_this_group dl {
 }
 
 
-a.add_category_link{
+#blank_item a.add_category_link{
  display: block;
- margin: 8px;
+ margin: 8px 8px 8px 0px;
+ text-decoration: underline;
 }
 
 div.product_group {
@@ -1108,6 +1246,57 @@ table.category_forms  a.delete_button {
 
 table.category_forms td.last_row {
   padding: 16px 0px 0px 0px;
+}
+
+.wpsc_gold_float{
+	min-width:45%;
+	float:left;
+}
+.wpsc_gold_side{
+	margin-top:50px;
+	float:right;
+	width:40%;
+}
+.wpsc_gold_text{
+	width:70%;
+	float:left;
+}
+
+.wpsc_gold_info{
+	width:30%;
+	float:right;
+	text-align: center;
+	font-size:20px;
+}
+.wpsc_gold_module{
+	width:100%;
+	float:left;
+	border-bottom: 1px solid #DFDFDF;
+}
+#visitInstinct{
+	float:right;
+	margin:5px 20px 0 0;
+}
+
+#gold_cart_form .postbox p img{
+	padding-bottom:10px;
+}
+#wpsc_gold_options_outside{
+width:400px;
+}
+#gold_cart_form .postbox p{
+  padding-left: 4px;
+}
+#gold_cart_form .postbox{
+	width:100%;
+	max-width:500px;
+}
+#gold_cart_form .postbox p{
+	padding-left:10px;
+}
+#gold_cart_form .postbox p label{
+	width:80px;
+	float:left;
 }
 
 

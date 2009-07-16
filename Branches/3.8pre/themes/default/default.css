@@ -75,6 +75,7 @@ div#sideshoppingcart div h2{
  }
  
 input.wpsc_buy_button{
+ float: left;
  }
  
 a.wpsc_product_title{
@@ -320,6 +321,22 @@ p.wpsc_variation_forms label{
  margin: 0px 0px 0px 0px;
  }
  
+  div.wpsc_product_price{ 
+  }
+  
+ div.wpsc_product_price label{
+   display: inline;
+ }
+ 
+ div.wpsc_product_price input{
+/*    float: left; */
+ }
+ 
+ 
+  div.wpsc_product_price br{ 
+    clear: both;
+  }
+ 
  p.galleryheading{
 	font-weight:bold;
 }
@@ -347,6 +364,7 @@ label.wpsc_quantity_update {
     */ 
     div.product_footer{
     position: relative;
+    clear: both;
     padding: 0px !important;
     width: 100%;
     border-top: 1px dashed #cccccc;
@@ -435,7 +453,20 @@ table.list_productdisplay tr.list_view_description td{
 table.list_productdisplay tr.list_view_description td div{
  display: none;
  padding: 3px;
- }  
+}  
+ 
+div.wpsc_buy_button_container {
+/*  overflow: auto; */
+}
+ 
+div.wpsc_loading_animation {
+ margin-top: 3px;
+ margin-left: 6px;
+  float: left;
+}
+div.wpsc_loading_animation img {
+	margin-bottom:-3px;
+}
  
  /*
  * end list product display styling
@@ -726,7 +757,7 @@ a.termsandconds
  }
   
 .PeCatsBrands  ul.SubCategories{
- margin: 0px;
+/*  margin: 0px; */
  }
   
 .PeCatsBrands  ul.SubCategories li{
@@ -876,9 +907,35 @@ div#form_field_form_container{ padding: 0px; margin: 0px; }
 
 div#form_field_form_container div, div#form_field_form_container div table{  padding: 0px;  margin: 0px;  width: 100%;  border-collapse: collapse; }  
 
-div#form_field_form_container div table tr td{ padding: 0px; margin: 0px; }  
+div#form_field_form_container div table tr td{ padding: 0px; margin: 0px; }
 
-div.order_status{ border: 1px solid #eeeeee; display: none; width: 100%; }
+table.logdisplay td.details {
+  padding: 0px;
+}
+
+div.order_status {
+	border-bottom: 1px solid #eeeeee;
+	display: none;
+	width: 100%;
+	text-align: left;
+	padding:13px 8px 1px 9px;
+}
+
+div.order_status table {
+  width: 97%;
+}
+
+div.order_status table.logdisplay{
+	margin: 4px 0px 4px 0px;
+}
+
+div.order_status table.customer_details {
+	margin: 4px 0px 4px 0px;
+}
+
+div.order_status table.customer_details tr td {
+	text-align: left;
+}
 
 div.order_status div{ width: 100%; padding:0px 0px 1ex 0px; display: block !important;}
   
@@ -1107,7 +1164,7 @@ table.logdisplay {
 }
 
 select#current_country {
-  width: 204px;
+margin-right:10px;
 }
 
 input#zipcode {
@@ -1350,3 +1407,27 @@ img.ui-datepicker-trigger {
 div.custom_meta {
   clear: both;
 }
+
+
+div.wpsc_category_details {
+  margin: 0px 0px 8px 0px;
+}
+
+div.wpsc_category_details img {
+  float: left;
+  margin: 0px 6px 12px 0px;
+}
+
+div.wpsc_page_numbers a.selected {
+	text-decoration: underline;
+}
+/*
+span.emptycart button {
+  border: none;
+  padding: 0px;
+  display: inline;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}*/

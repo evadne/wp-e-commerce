@@ -223,36 +223,19 @@ function nzshpcrt_currency_display($price_in, $tax_status, $nohtml = false, $id 
     return $shipping;
 	}
   
-function admin_display_total_price($start_timestamp = '', $end_timestamp = '')
-  {
+function admin_display_total_price($start_timestamp = '', $end_timestamp = '') {
   global $wpdb;
-  if(($start_timestamp != '') && ($end_timestamp != ''))
-    {
-    $sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `processed` > '1' AND `date` BETWEEN '$start_timestamp' AND '$end_timestamp' ORDER BY `date` DESC";
-    }
-    else
-      {
-      $sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `processed` > '1' AND `date` != ''";
-      }
-  $purchase_log = $wpdb->get_results($sql,ARRAY_A) ;
-  $total = 0;
-  if($purchase_log != null)
-    {
-    foreach($purchase_log as $purchase)
-      {
-//       $country_sql = "SELECT * FROM `".WPSC_TABLE_SUBMITED_FORM_DATA."` WHERE `log_id` = '".$purchase['id']."' AND `form_id` = '".get_option('country_form_field')."' LIMIT 1";
-//       $country_data = $wpdb->get_results($country_sql,ARRAY_A);
-//       $country = $country_data[0]['value'];
-//       $total += nzshpcrt_find_total_price($purchase['id'],$country);
-         $total += $purchase['totalprice'];
-      }
-    }
+  if(($start_timestamp != '') && ($end_timestamp != '')) {
+    $sql = "SELECT SUM(`totalprice`) FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `processed` > '1' AND `date` BETWEEN '$start_timestamp' AND '$end_timestamp'";
+	} else {
+		$sql = "SELECT SUM(`totalprice`) FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `processed` > '1' AND `date` != ''";
+	}
+  $total = $wpdb->get_var($sql);
   return $total;
-  }
+}
   
 
-
-function calculate_product_price($product_id, $variations = false, $pm='',$extras=false) {
+function calculate_product_price($product_id, $variations = false, $no_special=false) {
   global $wpdb;
   if(is_numeric($product_id)) {
     if(is_array($variations) && (count($variations) >= 1)) {
@@ -276,7 +259,7 @@ function calculate_product_price($product_id, $variations = false, $pm='',$extra
     } else {	
       $product_data = $wpdb->get_row("SELECT `price`,`special`,`special_price` FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id`='".$product_id."' LIMIT 1",ARRAY_A);
      // echo '<span style="color:#f00;">'.print_r($product_data, true).'</span><br />'.;
-      if($product_data['special_price'] > 0) {
+      if(($product_data['special_price'] > 0) && ($no_special == false)) {
         $price = $product_data['price'] - $product_data['special_price'];
       } else {
         $price = $product_data['price'];
@@ -398,13 +381,6 @@ function wpsc_item_process_image($id, $input_file, $output_filename, $width = 0,
 				$width  = (int)get_option('product_image_width');
 				break;
 			}
-// 			if(($resize_method == 3) && ($_FILES['thumbnailImage'] != null) && file_exists($_FILES['thumbnailImage']['tmp_name'])) {
-// 				$imagefield='thumbnailImage';
-// 				$image= image_processing($_FILES['thumbnailImage']['tmp_name'], (WPSC_THUMBNAIL_DIR.$image_name),null,null,$imagefield);
-// 				$thumbnail_image = $image;
-// 			} else {
-			//	exit($height.' '.$width);	
-				// exit('Aha!'.(int)get_option('product_image_height'));	
 					if($width < 1) {
 						$width = 96;
 					}
@@ -459,17 +435,7 @@ function wpsc_item_process_image($id, $input_file, $output_filename, $width = 0,
 		}
 	} else {
 			$image_data = $wpdb->get_row("SELECT `id`,`image` FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id`='".(int)$id."' LIMIT 1",ARRAY_A);
-			//exit("<pre>".print_r($image_data,true)."</pre>");
-			
-// 		if(($_POST['image_resize'] == 3) && ($_FILES['thumbnailImage'] != null) && file_exists($_FILES['thumbnailImage']['tmp_name'])) {
-// 			$imagefield='thumbnailImage';
-// 			$image=image_processing($_FILES['thumbnailImage']['tmp_name'], WPSC_THUMBNAIL_DIR.$_FILES['thumbnailImage']['name'],null,null,$imagefield);
-// 			$thumbnail_image = $image;
-// 			$wpdb->query("UPDATE `".WPSC_TABLE_PRODUCT_LIST."` SET `thumbnail_image` = '".$thumbnail_image."' WHERE `id` = '".$image_data['id']."'");
-// 			$stat = stat( dirname( (WPSC_THUMBNAIL_DIR.$image_data['image']) ));
-// 			$perms = $stat['mode'] & 0000775;
-// 			@ chmod( (WPSC_THUMBNAIL_DIR.$image_data['image']), $perms );	
-// 		}
+
 		$image = false;
 	}
   return $image;
@@ -921,7 +887,7 @@ function wpsc_check_stock($state, $product) {
  */
 function wpsc_check_weight($state, $product) {
 	global $wpdb;
-	$custom_shipping = get_option('custom_shipping_options');
+	$custom_shipping = (array)get_option('custom_shipping_options');
 	$has_no_weight = false;
 	// only do anything if UPS is on and shipping is used
 	if((array_search('ups', $custom_shipping) !== false) && ($product['no_shipping'] != 1)) {

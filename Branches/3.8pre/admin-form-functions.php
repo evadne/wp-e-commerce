@@ -483,7 +483,7 @@ function coupon_edit_form($coupon) {
 $conditions = unserialize($coupon['condition']);
 $conditions = $conditions[0];
 	//exit('<pre>'.print_r($conditions, true).'</pre>');
-	/**/
+	
   $start_timestamp = strtotime($coupon['start']);
   $end_timestamp = strtotime($coupon['expiry']);
   $id = $coupon['id'];
@@ -565,15 +565,15 @@ $conditions = $conditions[0];
   $output .= "  </td>\n\r";
   $output .= "  <td>\n\r";
   $output .= "   <input type='hidden' value='0' name='edit_coupon[".$id."][use-once]' />\n\r";
-  $output .= "   <input type='checkbox' value='1' ".(($coupon['use-once'] == 1) ? "checked='true'" : '')." name='edit_coupon[".$id."][use-once]' />\n\r";
+  $output .= "   <input type='checkbox' value='1' ".(($coupon['use-once'] == 1) ? "checked='checked'" : '')." name='edit_coupon[".$id."][use-once]' />\n\r";
   $output .= "  </td>\n\r";
   $output .= "  <td>\n\r";
   $output .= "   <input type='hidden' value='0' name='edit_coupon[".$id."][active]' />\n\r";
-  $output .= "   <input type='checkbox' value='1' ".(($coupon['active'] == 1) ? "checked='true'" : '')." name='edit_coupon[".$id."][active]' />\n\r";
+  $output .= "   <input type='checkbox' value='1' ".(($coupon['active'] == 1) ? "checked='checked'" : '')." name='edit_coupon[".$id."][active]' />\n\r";
   $output .= "  </td>\n\r";
   $output .= "  <td>\n\r";
   $output .= "   <input type='hidden' value='0' name='edit_coupon[".$id."][every_product]' />\n\r";
-  $output .= "   <input type='checkbox' value='1' ".(($coupon['every_product'] == 1) ? "checked='true'" : '')." name='edit_coupon[".$id."][every_product]' />\n\r";
+  $output .= "   <input type='checkbox' value='1' ".(($coupon['every_product'] == 1) ? "checked='checked'" : '')." name='edit_coupon[".$id."][every_product]' />\n\r";
   $output .= "  </td>\n\r";
   $output .= "  <td>\n\r";
   $output .= "   <input type='hidden' value='".$id."' name='edit_coupon[".$id."][id]' />\n\r";
@@ -704,7 +704,7 @@ return $output;
 }  
 function setting_button(){
 	$itemsFeedURL = "http://www.google.com/base/feeds/items";
-	$next_url  = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']."?page=".WPSC_DIR_NAME."/display-items.php";
+	$next_url  = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']."?page=wpsc-edit-products";
 	$redirect_url = 'https://www.google.com/accounts/AuthSubRequest?session=1';
 	$redirect_url .= '&next=';
 	$redirect_url .= urlencode($next_url);
@@ -716,9 +716,9 @@ function setting_button(){
 	$output.="<span id='settings_button' style='width:180px;background-color:#f1f1f1;position:absolute; right: 10px; border:1px solid black; display:none;'>";
 	$output.="<ul class='settings_button'>";
 	
-	$output.="<li><a href='admin.php?page=".WPSC_DIR_NAME."/options.php'>".TXT_WPSC_SHOP_SETTINGS."</a></li>";
-	$output.="<li><a href='admin.php?page=".WPSC_DIR_NAME."/options.php#ui-tabs-76'>".TXT_WPSC_MONEY_AND_PAYMENT."</a></li>";
-	$output.="<li><a href='admin.php?page=".WPSC_DIR_NAME."/options.php#ui-tabs-78'>".TXT_WPSC_CHECKOUT_PAGE_SETTINGS."</a></li>";
+	$output.="<li><a href='admin.php?page=wpsc-settings'>".TXT_WPSC_SHOP_SETTINGS."</a></li>";
+	$output.="<li><a href='admin.php?page=wpsc-settings&amp;tab=gateway'>".TXT_WPSC_MONEY_AND_PAYMENT."</a></li>";
+	$output.="<li><a href='admin.php?page=wpsc-settings&amp;tab=checkout'>".TXT_WPSC_CHECKOUT_PAGE_SETTINGS."</a></li>";
 	//$output.="<li><a href='?page=".WPSC_DIR_NAME."/instructions.php'>Help/Upgrade</a></li>";
 	//$output.="<li><a href='{$redirect_url}'>".TXT_WPSC_LOGIN_TO_GOOGLE_BASE."</a></li>";
 	$output.="</ul>";
@@ -773,7 +773,6 @@ function wpsc_right_now() {
 		$output.="<div id='dashboard_right_now' class='postbox'>";
 		$output.="	<h3 class='hndle'>";
 		$output.="		<span>".TXT_WPSC_CURRENT_MONTH."</span>";
-		//$output.="		<a class='rbutton' href='admin.php?page=".WPSC_DIR_NAME."/display-items.php'><strong>".TXT_WPSC_ADDNEWPRODUCT."</strong></a>";
 		$output.="		<br class='clear'/>";
 		$output.="	</h3>";
 		
@@ -785,13 +784,13 @@ function wpsc_right_now() {
 		
 		$output .= "<tr class='first'>";
 		$output .= "<td class='first b'>";
-		$output .= "<a href='?page=".WPSC_DIR_NAME."/display-items.php'>".$product_count."</a>";
+		$output .= "<a href='?page=wpsc-edit-products'>".$product_count."</a>";
 		$output .= "</td>";
 		$output .= "<td class='t'>";
 		$output .= ucfirst($product_unit);
 		$output .= "</td>";
 		$output .= "<td class='b'>";
-		$output .= "<a href='?page=".WPSC_DIR_NAME."/display-log.php'>".$sales_count."</a>";
+		$output .= "<a href='?page=wpsc_display_sales_logs'>".$sales_count."</a>";
 		$output .= "</td>";
 		$output .= "<td class='last'>";
 		$output .= ucfirst($sales_unit);
@@ -800,15 +799,15 @@ function wpsc_right_now() {
 		
 		$output .= "<tr>";
 		$output .= "<td class='first b'>";
-		$output .= "<a href='?page=".WPSC_DIR_NAME."/display-category.php'>".$group_count."</a>";
+		$output .= "<a href='?page=wpsc-edit-groups'>".$group_count."</a>";
 		$output .= "</td>";
 		$output .= "<td class='t'>";
 		$output .= ucfirst($group_unit);
 		$output .= "</td>";
 		$output .= "<td class='b'>";
-		$output .= "<a href='?page=".WPSC_DIR_NAME."/display-log.php'>".$pending_sales."</a>";
+		$output .= "<a href='?page=wpsc_display_sales_logs'>".$pending_sales."</a>";
 		$output .= "</td>";
-		$output .= "<td class='last t waiting'>".TXT_WPSC_PENDING;
+		$output .= "<td class='last t waiting'>".TXT_WPSC_PENDING." ";
 		$output .= ucfirst($pending_sales_unit);
 		$output .= "</td>";
 		$output .= "</tr>";
@@ -821,9 +820,9 @@ function wpsc_right_now() {
 		$output .= ucfirst($variation_unit);
 		$output .= "</td>";
 		$output .= "<td class='b'>";
-		$output .= "<a href='?page=".WPSC_DIR_NAME."/display-log.php'>".$accept_sales."</a>";
+		$output .= "<a href='?page=wpsc_display_sales_logs'>".$accept_sales."</a>";
 		$output .= "</td>";
-		$output .= "<td class='last t approved'>".TXT_WPSC_CLOSED;
+		$output .= "<td class='last t approved'>".TXT_WPSC_CLOSED." ";
 		$output .= ucfirst($accept_sales_unit);
 		$output .= "</td>";
 		$output .= "</tr>";
@@ -831,7 +830,7 @@ function wpsc_right_now() {
 		$output .= "</table>";
 		$output .= "</div>";
 		$output .= "<div class='versions'>";
-		$output .= "<p><a class='button rbutton' href='admin.php?page=".WPSC_DIR_NAME."/display-items.php'><strong>".TXT_WPSC_ADD_NEW_PRODUCT."</strong></a>".TXT_WPSC_HERE_YOU_CAN_ADD."</p>";
+		$output .= "<p><a class='button rbutton' href='admin.php?page=wpsc-edit-products'><strong>".TXT_WPSC_ADD_NEW_PRODUCT."</strong></a>".TXT_WPSC_HERE_YOU_CAN_ADD."</p>";
 		$output .= "</div>";
 		$output .= "</div>";
 		$output.="</div>";
@@ -839,7 +838,7 @@ function wpsc_right_now() {
 		$output="";	
 		$output.="<div id='rightnow'>\n\r";
 		$output.="	<h3 class='reallynow'>\n\r";
-		$output.="		<a class='rbutton' href='admin.php?page=".WPSC_DIR_NAME."/display-items.php'><strong>".TXT_WPSC_ADD_NEW_PRODUCT."</strong></a>\n\r";
+		$output.="		<a class='rbutton' href='admin.php?page=wpsc-edit-products'><strong>".TXT_WPSC_ADD_NEW_PRODUCT."</strong></a>\n\r";
 		$output.="		<span>"._('Right Now')."</span>\n\r";
 		
 		//$output.="		<br class='clear'/>\n\r";
@@ -1055,13 +1054,6 @@ function wpsc_packing_slip($purchase_id) {
 
 
 function wpsc_product_item_row() {
-/*
-"<tr class='products'>	<td class='imagecol' style='width: 25%;'>
-<input type='checkbox' value='3' class='deletecheckbox' name='productdelete[]'/><img width='35' height='35' alt='Praying Mantis' title='Drag to a new position' src='http://apps.instinct.co.nz/wp_2.6.5/wp-content/uploads/wpsc/product_images/thumbnails/mantis-3.jpg'/></td><td width='25%'><a onclick='filleditform(3);return false;' href='#'>Praying Mantis</a></td><td id='3'><span class='pricedisplay' id='3' title='Click to edit...'>$32.00</span>            </td><td>
-
-<a href='?page=".WPSC_DIR_NAME."/display-items.php&amp;catid=1'>Arthropods</a></td>				
-</tr>
-";*/
 }
 
 ?>

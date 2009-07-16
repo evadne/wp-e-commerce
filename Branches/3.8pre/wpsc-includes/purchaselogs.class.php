@@ -1,10 +1,60 @@
 <?php
-if(!isset($purchlog)){
-//echo 'yesa';
-	$purchlogs = new wpsc_purchaselogs();
-}
+
 if(isset($_REQUEST['purchaselog_id'])){
 $purchlogitem = new wpsc_purchaselogs_items((int)$_REQUEST['purchaselog_id']);
+}
+function wpsc_purchlogs_has_customfields($id = ''){
+	global $purchlogitem;
+	//return true;
+	if($id == ''){
+		foreach($purchlogitem->allcartcontent as $cartitem){
+			if($cartitem->files != 'N;' || $cartitem->custom_message != ''){
+				return true;
+			}
+		}
+		return false;
+	}else{
+		$purchlogitem = new wpsc_purchaselogs_items($id);
+		foreach($purchlogitem->allcartcontent as $cartitem){
+			if($cartitem->files != 'N;' || $cartitem->custom_message != ''){
+				return true;
+			}
+		}
+		return false;
+	}
+	return false;
+
+}
+function wpsc_purchlogs_custommessages(){
+	global $purchlogitem;
+	foreach($purchlogitem->allcartcontent as $cartitem){
+		if($cartitem->custom_message != ''){
+			//exit('<pre>'.print_r($cartitem,true).'</pre>');
+			$messages[] = $cartitem->name.' :<br />'.$cartitem->custom_message;
+			//return true;
+		}
+	}
+	return $messages;
+}
+function wpsc_purchlogs_customfiles(){
+	global $purchlogitem;
+	foreach($purchlogitem->allcartcontent as $cartitem){
+		if($cartitem->files != 'N;'){
+			$file = unserialize($cartitem->files);
+			//exit('<pre>'.var_dump($file,true).'</pre>');
+			if($file["mime_type"] == "image/jpeg" ||$file["mime_type"] == "image/png"||$file["mime_type"] == "image/gif"){
+				$image  = "<a href='".WPSC_USER_UPLOADS_URL.$file['file_name']."' >";
+				$image .= "<img src='index.php?image_name=".$file['file_name']."' alt='' />";
+				$image .="</a>";
+				$files[] = $cartitem->name.' :<br />'.$image;
+			}else{
+				$files[] = $cartitem->name.' :<br />'.$file['file_name'];
+			}
+			
+			//return true;
+		}
+	}
+	return $files;
 }
 function wpsc_purchlogs_is_google_checkout(){
 	global $purchlogs;
@@ -29,7 +79,10 @@ function wpsc_the_purch_item(){
 
 function wpsc_the_purch_item_price(){
 	global $purchlogs;
+	//	exit('<pre>'.print_r($purchlogs->purchitem, true).'</pre>');
+	if($purchlogs->purchitem->processed > 1 && $purchlogs->purchitem->processed != 5){
 	$purchlogs->totalAmount += $purchlogs->purchitem->totalprice;
+	}
 	return $purchlogs->purchitem->totalprice;
 }
 function wpsc_the_purch_item_id(){
@@ -43,7 +96,12 @@ function wpsc_the_purch_item_date(){
 }
 function wpsc_the_purch_item_name(){
 	global $purchlogs;
-	return $purchlogs->the_purch_item_name();
+	//exit('<pre>'.print_r($purchlogs, true).'</pre>');
+	if(wpsc_purchlogs_has_customfields(wpsc_the_purch_item_id())){
+		return $purchlogs->the_purch_item_name().'<img src="'.WPSC_URL.'/images/info_icon.jpg" title="This Purchase has custom user content" alt="exclamation icon" />';
+	}else{
+		return $purchlogs->the_purch_item_name();
+	}
 }
 function wpsc_the_purch_item_details(){
 	global $purchlogs;
@@ -95,10 +153,11 @@ function wpsc_purchlogs_getfirstdates(){
 }
 function wpsc_change_purchlog_view($viewby, $status){
 	global $purchlogs;
-	//exit('<pre>'.print_r($viewby,true).'</pre>');
+//	exit('<pre>'.print_r($status,true).'</pre>');
 	if($viewby == 'all'){
 		$dates = $purchlogs->getdates();
 		$purchaselogs = $purchlogs->get_purchlogs($dates, $status);
+		$_SESSION['newlogs'] = $purchaselogs;
 		$purchlogs->allpurchaselogs = $purchaselogs;
 	}elseif($viewby == '3mnths'){
 		$dates = $purchlogs->getdates();
@@ -108,6 +167,7 @@ function wpsc_change_purchlog_view($viewby, $status){
 		$purchlogs->current_end_timestamp = $dates[0]['end'];
 	//	exit('<pre>'.print_r($dates,true).'</pre>');		
 		$newlogs = $purchlogs->get_purchlogs($dates, $status);
+		$_SESSION['newlogs'] = $newlogs;
 		//exit('<pre>'.print_r($newlogs, true).'</pre>');
 		$purchlogs->allpurchaselogs = $newlogs;
 		//exit(print_r($date, true)."".$purchlogs->current_timestamp);
@@ -121,6 +181,7 @@ function wpsc_change_purchlog_view($viewby, $status){
 		$purchlogs->current_end_timestamp =  $dates[1];
 		$newlogs = $purchlogs->get_purchlogs($date, $status);
 		//exit('<pre>'.print_r($newlogs, true).'</pre>');
+		$_SESSION['newlogs'] = $newlogs;
 		$purchlogs->allpurchaselogs = $newlogs;
 	}
 
@@ -188,7 +249,10 @@ function wpsc_purchaselog_details_date(){
 }
 function wpsc_purchaselog_details_total(){
 	global $purchlogitem;
-	$total = $purchlogitem->purchitem->price*$purchlogitem->purchitem->quantity+$purchlogitem->extrainfo->discount_value+$purchlogitem->purchitem->tax_charged;
+	$total = 0;
+  $total += ($purchlogitem->purchitem->price*$purchlogitem->purchitem->quantity);
+  $total += ($purchlogitem->purchitem->tax_charged*$purchlogitem->purchitem->quantity);
+  $total += $purchlogitem->extrainfo->discount_value;
 	$purchlogitem->totalAmount += $total;
 	return $total;
 }
@@ -212,7 +276,6 @@ function wpsc_display_purchlog_totalprice(){
 }
 function wpsc_display_purchlog_buyers_name(){
 	global $purchlogitem;
-	//exit('<pre>'.print_r($purchlogitem->userinfo,true).'</pre>');
 	return $purchlogitem->userinfo['billingfirstname']['value'].' '.$purchlogitem->userinfo['billinglastname']['value'];
 }
 function wpsc_display_purchlog_buyers_email(){
@@ -343,11 +406,16 @@ class wpsc_purchaselogs{
 
 		$this->getall_formdata();
 		if(!isset($_POST['view_purchlogs_by']) || !isset($_POST['purchlogs_searchbox'])){
-		$dates = $this->getdates();
-		$purchaselogs = $this->get_purchlogs($dates);
+			$dates = $this->getdates();
+			if(isset($_SESSION['newlogs'])){
+				$purchaselogs = $_SESSION['newlogs'];
+				unset($_SESSION['newlogs']);
+			}else{
+				$firstDates[] = $dates[0]; 
+				$purchaselogs = $this->get_purchlogs($firstDates);
+			}
 		
-		$this->allpurchaselogs = $purchaselogs;
-	//	$this->the_purch_item();
+			$this->allpurchaselogs = $purchaselogs;
 		}else{
 			$this->getdates();
 		}
@@ -358,29 +426,33 @@ class wpsc_purchaselogs{
 	
 	function get_purchlogs($dates, $status=''){
 		global $wpdb;
-	//	exit(print_r($dates,true).'tset?'.$status);
-// 		echo "<pre>".print_r(debug_backtrace(),true)."<pre>";
-		$purchlog = array();
+		$purchlog2 = array();
 		if($status=='' || $status=='-1'){
-			   foreach((array)$dates as $date_pair){
-			        if(($date_pair['end'] >= $this->earliest_timestamp) && ($date_pair['start'] <= $this->current_timestamp)) {   
-			          $sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `date` BETWEEN '".$date_pair['start']."' AND '".$date_pair['end']."' ORDER BY `date` DESC";
-			          $purchase_logs = $wpdb->get_results($sql) ;
-						array_push($purchlog, $purchase_logs);
-					}
+		   foreach((array)$dates as $date_pair){
+		        if(($date_pair['end'] >= $this->earliest_timestamp) && ($date_pair['start'] <= $this->current_timestamp)) {   
+		          $sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `date` BETWEEN '".$date_pair['start']."' AND '".$date_pair['end']."' ORDER BY `date` DESC";
+		          $purchase_logs = $wpdb->get_results($sql) ;
+				  array_push($purchlog2, $purchase_logs);
 				}
+			}
 		}else{
 		   foreach((array)$dates as $date_pair){
 			        if(($date_pair['end'] >= $this->earliest_timestamp) && ($date_pair['start'] <= $this->current_timestamp)) {   
-			          $sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `date` BETWEEN '".$date_pair['start']."' AND '".$date_pair['end']."' AND `processed`=".$status." ORDER BY `date` DESC";
+			          $sql = "SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `date` BETWEEN '".$date_pair['start']."' AND '".$date_pair['end']."' AND `processed`='".$status."' ORDER BY `date` DESC";
+			        // exit($sql);
 			          $purchase_logs = $wpdb->get_results($sql) ;
-			          array_push($purchlog, $purchase_logs);
+			          $purchlog2 = $purchase_logs;
+	          	  	  $this->allpurchaselogs = $purchlog2;
+	 				  $this->purch_item_count = count($this->allpurchaselogs);
+					  return $purchlog2;
+			        //  array_push($purchlog2, $purchase_logs);
+
 					}
 				}
 
-	  	
 	  	}
-	  	foreach($purchlog as $purch){
+	  	
+	  	foreach($purchlog2 as $purch){
 	  		if(is_array($purch)){
 		  		foreach($purch as $log){
 		  			$newarray[] = $log;
@@ -389,7 +461,7 @@ class wpsc_purchaselogs{
 	  			exit('Else :'.print_r($purch));
 	  		}	  		
 	  	}
-	 // 	exit('<pre>'.print_r($newarray,true).'<pre>');
+	//  	exit('<pre>'.print_r($newarray,true).'<pre>');
 	   	$this->allpurchaselogs = $newarray;
 	   	$this->purch_item_count = count($this->allpurchaselogs);
 	  return $newarray;

@@ -1,34 +1,9 @@
 // This is the wp-e-commerce front end javascript "library"
 
 jQuery(document).ready( function () {
-  //this makes the additional description textarea into a jWysiwyg field
-/*
-  jQuery('#enableWysiwyg').livequery(function(){
-  	jQuery(this).click(function (event){
-  		 jQuery('#additional_description').wysiwyg();
-  		 event.preventDefault();
-  	});
-  
-  });
-  jQuery('#disableWysiwyg').livequery(function(){
-  	jQuery(this).click(function (event){
-//		var x= document.getElementById("wysiwygBODY");
-//  		html =	jQuery('#additional_descriptionIFrame body').html();
-		//var x = document.getElementById("additional_descriptionIFrame").innerHTML();
-		var x = document.getElementById('additional_descriptionIFrame').contentDocument;
-		x = x.childNodes[0].nodeValue;
-  		alert(x);
-  		 jQuery('div.wysiwyg').remove('div.wysiwyg');
-  		 jQuery(this).append("<textarea name='additional_description' id='additional_description' style='width:200px;' cols='40' rows='5' >"+x+"</textarea>");
-  		 
-  		 
-  		 
-  		 event.preventDefault();
-  	});
-  
-  });
-*/
-  
+
+
+
   // this makes the product list table sortable
   jQuery('table#wpsc_product_list').sortable({
 		update: function(event, ui) {
@@ -95,6 +70,59 @@ jQuery(document).ready( function () {
 	 tb_init(this);
 	});
 	
+
+	// Code for using AJAX to change thr product price starts here
+	ajax_submit_price = function(event) {
+		target_element_id= event.data;
+		form_data = jQuery("#"+target_element_id+" input").serialize();
+		//console.log(form_data);
+		jQuery.ajax({
+				type: "POST",
+				url: "admin.php?wpsc_admin_action=modify_price",
+				data: form_data,
+				success: function(returned_data) {
+					eval(returned_data);
+				  if(success == 1) {
+						parent_container = jQuery("#"+target_element_id+"").parent('.product-price');
+						jQuery(".pricedisplay", parent_container).html(new_price);
+				  }
+					jQuery('span.pricedisplay').css('display', 'block');
+					jQuery('div.price-editing-fields').css('display', 'none');
+					jQuery('form#posts-filter').unbind('submit.disable');
+				}
+			});
+		jQuery('form#posts-filter').unbind('submit.disable');
+		return false;
+	};
+
+	
+	jQuery("table#wpsc_product_list .product-price").livequery(function(){
+		jQuery("span.pricedisplay", this).click( function(event) {
+			jQuery('span.pricedisplay').css('display', 'block');
+			jQuery('div.price-editing-fields').css('display', 'none');
+			jQuery(this).css('display', 'none');
+			jQuery('div.price-editing-fields', jQuery(this).parent('.product-price')).css('display', 'block');
+
+			target_element_id = jQuery('div.price-editing-fields', jQuery(this).parent('.product-price')).attr('id');
+			jQuery('form#posts-filter').bind('submit.disable',target_element_id, ajax_submit_price);
+			
+			jQuery('div.price-editing-fields .the-product-price', jQuery(this).parent('.product-price')).focus();
+		});
+		
+		jQuery('.the-product-price',this).keyup(function(event){
+			target_element_id = jQuery(jQuery(this).parent('.price-editing-fields')).attr('id');
+			if(event.keyCode == 13) {
+				jQuery('form#posts-filter').bind('submit.disable', target_element_id, ajax_submit_price);
+			}
+		});
+		
+		target_element_id = jQuery('.price-editing-fields',this).attr('id');
+		
+ 		jQuery('.the-product-price',this).bind('blur', target_element_id, ajax_submit_price);
+	});
+
+// Code for using AJAX to change thr product price ends here
+	
 	jQuery("div.admin_product_name a.shorttag_toggle").livequery(function(){
 	  jQuery(this).toggle(
 			function () {
@@ -107,7 +135,7 @@ jQuery(document).ready( function () {
 				return false;
 			}
 		);
-	});
+	}); 
 	
 	jQuery('a.add_variation_item_form').livequery(function(){
 	  jQuery(this).click( function() {
@@ -129,9 +157,14 @@ jQuery(document).ready( function () {
 			
 			
 			if(element_count > 1) {
-						
-			  post_values = "admin=true&ajax	=true&remove_variation_value=true&variation_value_id="+variation_value_id;			
-				jQuery.post( 'index.php?wpsc_admin_action=load_product', post_values, function(returned_data) {
+			
+			
+			  parent_element = jQuery(this).parent("div.variation_value");
+			  
+			  variation_value_id = jQuery("input.variation_values_id", parent_element).val();
+			  //console.log(variation_value_id);
+			  post_values = "remove_variation_value=true&variation_value_id="+variation_value_id;			
+				jQuery.post( 'index.php?admin=true&ajax=true', post_values, function(returned_data) {
 			
 				});
 				jQuery(this).parent("div.variation_value").remove();
@@ -150,7 +183,7 @@ jQuery(document).ready( function () {
 				} else {
 					jQuery('a.togbox',this).html('&ndash;');
 				}
-				wpsc_save_postboxes_state('products_page_edit-products', '#poststuff');
+				wpsc_save_postboxes_state('products_page_wpsc-edit-products', '#poststuff');
 		});		
 	});
 	
@@ -189,7 +222,7 @@ jQuery(document).ready( function () {
 					postboxes.pbhide( box );
 				}
 			}
-			postboxes.save_state('products_page_edit-products');
+			postboxes.save_state('products_page_wpsc-edit-products');
 		});
 	});
 	
@@ -219,7 +252,6 @@ jQuery(document).ready( function () {
 					action: 'product-page-order',
 					ajax: 'true'
 				}
-				//jQuery(this).css("border","1px solid red");
 				jQuery(this).each( function() {
 					postVars["order[" + this.id.split('-')[0] + "]"] = jQuery(this).sortable( 'toArray' ).join(',');
 				} );
@@ -257,7 +289,7 @@ jQuery(document).ready( function () {
 						img_id = jQuery('#gallery_image_'+set[0]).parent('li').attr('id');
 						
 						jQuery('#gallery_image_'+set[0]).children('img.deleteButton').remove();
-						jQuery('#gallery_image_'+set[0]).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png'/></a>");
+						jQuery('#gallery_image_'+set[0]).append("<a class='editButton'>Edit   <img src='"+WPSC_URL+"/images/pencil.png' alt ='' /></a>");
 						jQuery('#gallery_image_'+set[0]).parent('li').attr('id', 0);
 						//for(i=1;i<set.length;i++) {
 						//	jQuery('#gallery_image_'+set[i]).children('a.editButton').remove();
@@ -526,14 +558,14 @@ function remove_meta(e, meta_id) {
 function wpsc_upload_switcher(target_state) {
   switch(target_state) {
     case 'flash':
-    jQuery("table.browser-image-uploader").css("display","none");
-    jQuery("table.flash-image-uploader").css("display","block");
+    jQuery("div.browser-image-uploader").css("display","none");
+    jQuery("div.flash-image-uploader").css("display","block");
     jQuery.post( 'index.php?admin=true', "admin=true&ajax=true&save_image_upload_state=true&image_upload_state=1", function(returned_data) { });
     break;
     
     case 'browser':
-    jQuery("table.flash-image-uploader").css("display","none");
-    jQuery("table.browser-image-uploader").css("display","block");
+    jQuery("div.flash-image-uploader").css("display","none");
+    jQuery("div.browser-image-uploader").css("display","block");
     jQuery.post( 'index.php?admin=true', "admin=true&ajax=true&save_image_upload_state=true&image_upload_state=0", function(returned_data) { });
     break;
   }
@@ -569,6 +601,7 @@ function hideOptionElement(id, option) {
 
 
 function wpsc_save_postboxes_state(page, container) {
+  //console.log(container);
 	var closed = jQuery(container+' .postbox').filter('.closed').map(function() { return this.id; }).get().join(',');
 	jQuery.post(postboxL10n.requestFile, {
 		action: 'closed-postboxes',
@@ -628,10 +661,10 @@ function wpsc_edShowButton(button, i) {
 function fillcategoryform(catid) {
   post_values = 'ajax=true&admin=true&catid='+catid;
 	jQuery.post( 'index.php', post_values, function(returned_data) {
-	  
 		jQuery('#formcontent').html( returned_data );
 		jQuery('form.edititem').css('display', 'block');
 		jQuery('#additem').css('display', 'none');
+		jQuery('#blank_item').css('display', 'none');
 		jQuery('#productform').css('display', 'block');
 		jQuery("#loadingindicator_span").css('visibility','hidden');
 	});
@@ -641,8 +674,9 @@ function submit_status_form(id) {
   document.getElementById(id).submit();
 } 
 function showaddform() {
-   document.getElementById('productform').style.display = 'none';
-   document.getElementById('additem').style.display = 'block';
+   jQuery('#blank_item').css('display', 'none');
+   jQuery('#productform').css('display', 'none');
+   jQuery('#additem').css('display', 'block');
    return false;
 }
 //used to add new form fields in the checkout setting page

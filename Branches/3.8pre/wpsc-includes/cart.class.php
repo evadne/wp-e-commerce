@@ -27,21 +27,30 @@ function wpsc_cart_item_count() {
 * coupon amount function, no parameters
 * * @return integer the item count
 */
-function wpsc_coupon_amount() {
+function wpsc_coupon_amount($forDisplay=true) {
 	global $wpsc_cart;
-	return $wpsc_cart->process_as_currency($wpsc_cart->coupons_amount);
+	if($forDisplay == true) {
+	  $output = $wpsc_cart->process_as_currency($wpsc_cart->coupons_amount);
+	} else {
+		$output = $wpsc_cart->coupons_amount;
+	}
+	return $output;
 }
 /**
 * cart total function, no parameters
 * @return string the total price of the cart, with a currency sign
 */
-function wpsc_cart_total() {
+function wpsc_cart_total($forDisplay=true) {
 	global $wpsc_cart;  
 	$total = $wpsc_cart->calculate_subtotal();
 	$total += $wpsc_cart->calculate_total_shipping();
 	$total += $wpsc_cart->calculate_total_tax();
 	$total -= $wpsc_cart->coupons_amount;
-	return $wpsc_cart->process_as_currency($total);
+	if($forDisplay){
+		return $wpsc_cart->process_as_currency($total);
+	}else{
+		return $total;
+	}
 }
 
 /**
@@ -70,9 +79,28 @@ function wpsc_cart_weight_total() {
 * tax total function, no parameters
 * @return float the total weight of the cart
 */
-function wpsc_cart_tax() {
+function wpsc_cart_tax($forDisplay = true) {
 	global $wpsc_cart;
-	return $wpsc_cart->process_as_currency($wpsc_cart->calculate_total_tax());
+	if($forDisplay){
+		return $wpsc_cart->process_as_currency($wpsc_cart->calculate_total_tax());
+	}else{
+		return $wpsc_cart->calculate_total_tax();
+	}
+}
+
+
+/**
+* wpsc_cart_show_plus_postage function, no parameters
+* For determining whether to show "+ Postage & tax" after the total price
+* @return boolean true or false, for use with an if statement
+*/
+function wpsc_cart_show_plus_postage() {
+	global $wpsc_cart;
+	if(($_SESSION['wpsc_has_been_to_checkout'] == null ) && (get_option('add_plustax') == 1)) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /**
@@ -81,7 +109,13 @@ function wpsc_cart_tax() {
 */
 function wpsc_uses_shipping() {
 	global $wpsc_cart;
-	return $wpsc_cart->uses_shipping();
+	$shippingoptions = get_option('custom_shipping_options');
+	if(count($shippingoptions) >= 1 && $shippingoptions[0] != '' && get_option('do_not_use_shipping') == 0) {
+		$status = $wpsc_cart->uses_shipping();
+	} else {
+	  $status = false;
+	}
+	return $status;
 }
   
 /**
@@ -155,6 +189,7 @@ function wpsc_cart_item_quantity() {
 	global $wpsc_cart;
 	return $wpsc_cart->cart_item->quantity;
 }
+
 function wpsc_cart_item_quantity_single_prod($id) {
 	global $wpsc_cart;
 	//exit('<pre>'.print_r($wpsc_cart, true).'</pre>');
@@ -220,7 +255,6 @@ function wpsc_strleft($s1, $s2) {
 	return  $values;
 }
 function wpsc_google_checkout(){
-//	exit('<pre>'.print_r($_SESSION, true).'</pre>');
 	$currpage = wpsc_selfURL();
 	if (array_search("google",(array)get_option('custom_gateway_options')) !== false && $currpage != get_option('checkout_url')) {
 		global $nzshpcrt_gateways;
@@ -231,6 +265,13 @@ function wpsc_google_checkout(){
 			}
 		}
 	}
+}
+function wpsc_empty_google_logs(){
+	global $wpdb;
+	$sql="DELETE FROM  `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `sessionid`=".$_SESSION['wpsc_sessionid'];
+	$wpdb->query($sql);
+	unset($_SESSION['wpsc_sessionid']);
+	
 }
 /**
 * have shipping methods function, no parameters
@@ -477,7 +518,7 @@ class wpsc_cart {
 	  $this->shipping_methods = get_option('custom_shipping_options');
 	  $this->shipping_method_count = count($this->shipping_methods);
 		
-		if((get_option('do_not_use_shipping') != 1) && (count($this->shipping_methods) > 0) ) {
+		if((get_option('do_not_use_shipping') != 1) && (count($this->shipping_methods) > 0)  ) {
 			if(array_search($this->selected_shipping_method, (array)$this->shipping_methods) === false) {
 				//unset($this->selected_shipping_method);
 			}
@@ -613,12 +654,12 @@ class wpsc_cart {
   function set_item($product_id, $parameters, $updater = false) {
     // default action is adding
     
-    if($this->check_remaining_quantity($product_id, $parameters['variation_values'], $parameters['quantity']) == true) {
+    if(($parameters['quantity'] > 0) && ($this->check_remaining_quantity($product_id, $parameters['variation_values'], $parameters['quantity']) == true)) {
 			$new_cart_item = new wpsc_cart_item($product_id,$parameters, $this);
 			
 			$add_item = true;
 			$edit_item = false;
-			if(count($this->cart_items) > 0) {
+			if((count($this->cart_items) > 0) && ($new_cart_item->is_donation != 1)) {
 				//loop through each cart item
 				foreach($this->cart_items as $key => $cart_item) {
 					// compare product ids and variations.
@@ -629,7 +670,7 @@ class wpsc_cart {
 						// if they are the same, increment the count, and break out;
 						if(!$updater){
 							$this->cart_items[$key]->quantity  += $new_cart_item->quantity;
-						}else{
+						} else {
 							$this->cart_items[$key]->quantity  = $new_cart_item->quantity;
 
 						}
@@ -716,7 +757,6 @@ class wpsc_cart {
 			}
 	    if($stock > 0) {
 				$claimed_stock = $wpdb->get_var("SELECT SUM(`stock_claimed`) FROM `".WPSC_TABLE_CLAIMED_STOCK."` WHERE `product_id` IN('$product_id') AND `variation_stock_id` IN('$priceandstock_id')");
-				echo "/*".print_r($claimed_stock,true)."*/";
 				if(($claimed_stock + $quantity) <= $stock) {
 					$output = true;
 				} else {
@@ -731,6 +771,50 @@ class wpsc_cart {
     }
     return $output;
   }
+  
+	/**
+	 * get remaining quantity method
+	 * currently only checks remaining stock, in future will do claimed stock and quantity limits
+	 * will need to return errors, then, rather than true/false, maybe use the wp_error object?
+	 * @access public
+	 *
+	 * @param integer a product ID key
+	 * @param array  variations on the product
+	 * @return boolean true on sucess, false on failure
+	*/
+  function get_remaining_quantity($product_id, $variations = array(), $quantity = 1) {
+    global $wpdb;
+		$quantity_data = $wpdb->get_row("SELECT `quantity_limited`, `quantity`  FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id` IN ('$product_id') LIMIT 1", ARRAY_A);
+		// check to see if the product uses stock
+		if($quantity_data['quantity_limited'] == 1){
+			if(count($variations) > 0) { /// if so and we have variations, select the stock for the chosen variations
+				$variation_ids = $wpdb->get_col("SELECT `variation_id` FROM `".WPSC_TABLE_VARIATION_VALUES."` WHERE `id` IN ('".implode("','",$variations)."')");
+				asort($variation_ids);
+				$all_variation_ids = implode(",", $variation_ids);
+				
+				$priceandstock_id = $wpdb->get_var("SELECT `priceandstock_id` FROM `".WPSC_TABLE_VARIATION_COMBINATIONS."` WHERE `product_id` = '".(int)$product_id."' AND `value_id` IN ( '".implode("', '",$variations )."' )  AND `all_variation_ids` IN('$all_variation_ids')  GROUP BY `priceandstock_id` HAVING COUNT( `priceandstock_id` ) = '".count($variations)."' LIMIT 1");
+				
+				$variation_stock_data = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_VARIATION_PROPERTIES."` WHERE `id` = '{$priceandstock_id}' LIMIT 1", ARRAY_A);
+				$stock = $variation_stock_data['stock'];
+				
+			} else { /// if so and we have no variations, select the stock for the product
+			  $stock = $quantity_data['quantity'];
+			  $priceandstock_id = 0;
+			}
+			
+			
+			
+	    if($stock > 0) {
+				$claimed_stock = $wpdb->get_var("SELECT SUM(`stock_claimed`) FROM `".WPSC_TABLE_CLAIMED_STOCK."` WHERE `product_id` IN('$product_id') AND `variation_stock_id` IN('$priceandstock_id')");
+				$output = $stock - $claimed_stock;				
+		  } else {
+				$output = 0;
+		  }
+	     
+    }
+    return $output;
+  }
+  
   
 	/**
 	 * Remove Item method 
@@ -759,7 +843,12 @@ class wpsc_cart {
 	 *
 	 * No parameters, nothing returned
 	*/
-  function empty_cart() {
+  function empty_cart($fromwidget = true) {
+  		if(isset($_SESSION['wpsc_sessionid']) && !($fromwidget)){
+  		//	exit('google triggered');
+  			///wpsc_empty_google_logs();
+  		}
+  	
 		$this->cart_items = array();
 		$this->cart_item = null;
 		$this->cart_item_count = 0;
@@ -1120,6 +1209,7 @@ class wpsc_cart {
 			$unprocessed_shipping_quotes = $wpsc_shipping_modules[$this->shipping_method]->getQuote();
 
     }
+   // exit('<pre>'.print_r($unprocessed_shipping_quotes,true).'</pre>');
     $num = 0;
     foreach((array)$unprocessed_shipping_quotes as $shipping_key => $shipping_value) {
       
@@ -1178,6 +1268,7 @@ class wpsc_cart {
 	
 	function the_shipping_quote() {
 		$this->shipping_quote = $this->next_shipping_quote();
+		
 	}
 	
 	function have_shipping_quotes() {
@@ -1307,6 +1398,11 @@ class wpsc_cart_item {
     global $wpdb, $wpsc_shipping_modules;
     $product = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id` = '{$this->product_id}' LIMIT 1", ARRAY_A);
     $priceandstock_id = 0;
+
+    if(defined('WPSC_ADD_DEBUG_PAGE') && (constant('WPSC_ADD_DEBUG_PAGE') == true)) {
+			$this->product_data = $wpdb->get_row("SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id` = '{$this->product_id}' LIMIT 1", ARRAY_A);
+    }
+    
     if(count($this->variation_values) > 0) {
       // if there are variations, get the price of the combination and the names of the variations.
 			$variation_data = $wpdb->get_results("SELECT *FROM `".WPSC_TABLE_VARIATION_VALUES."` WHERE `id` IN ('".implode("','",$this->variation_values)."')", ARRAY_A);
@@ -1342,21 +1438,21 @@ class wpsc_cart_item {
 					$sale_discount = 0;
         }
         $price = $product['price'] - $sale_discount;
-        $file_id = $product['file'];
-        
-        
-        // if we are using table rate price
-				$levels = get_product_meta($this->product_id, 'table_rate_price');
-				if ($levels != '') {
-					foreach($levels['quantity'] as $key => $qty) {
-						if ($this->quantity >= $qty) {
-							$unit_price = $levels['table_price'][$key];
-							if ($unit_price != '')
-								$price = $unit_price;
-						}
+			}
+			$file_id = $product['file'];
+			
+			
+			// if we are using table rate price
+			$levels = get_product_meta($this->product_id, 'table_rate_price');
+			if ($levels != '') {
+				foreach($levels['quantity'] as $key => $qty) {
+					if ($this->quantity >= $qty) {
+						$unit_price = $levels['table_price'][$key];
+						if ($unit_price != '')
+							$price = $unit_price;
 					}
 				}
-      }
+			}
 		}
 		// create the string containing the product name.
 		$product_name = $product['name'];

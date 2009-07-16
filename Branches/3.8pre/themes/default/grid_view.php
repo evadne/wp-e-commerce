@@ -3,9 +3,9 @@ global $wpsc_query, $wpdb;
 ?>
 <div id='products_page_container' class="wpsc_container productdisplay example-category">
 	
-	<?php if(wpsc_has_breadcrumbs()) : ?>
+<?php if(wpsc_has_breadcrumbs()) : ?>
 		<div class='breadcrumb'>
-			<a href='<?php echo get_option('siteurl'); ?>'><?php echo get_option('blogname'); ?></a> &raquo;
+			<a href='<?php echo get_option('home'); ?>'><?php echo get_option('blogname'); ?></a> &raquo;
 			<?php while (wpsc_have_breadcrumbs()) : wpsc_the_breadcrumb(); ?>
 				<?php if(wpsc_breadcrumb_url()) :?> 	   
 					<a href='<?php echo wpsc_breadcrumb_url(); ?>'><?php echo wpsc_breadcrumb_name(); ?></a> &raquo;
@@ -16,8 +16,22 @@ global $wpsc_query, $wpdb;
 		</div>
 	<?php endif; ?>
 	
+	<?php do_action('wpsc_top_of_products_page'); // Plugin hook for adding things to the top of the products page, like the live search ?>
 	
-	<?php if(wpsc_has_pages() && (get_option('wpsc_page_number_position') == (1 || 3)) ) : ?>
+	<?php if(wpsc_is_in_category()) : ?>
+		<div class='wpsc_category_details'>
+			<?php if(get_option('show_category_thumbnails') && wpsc_category_image()) : ?>
+				<img src='<?php echo wpsc_category_image(); ?>' alt='<?php echo wpsc_category_name(); ?>' title='<?php echo wpsc_category_name(); ?>' />
+			<?php endif; ?>
+			
+			<?php if(get_option('wpsc_category_description') &&  wpsc_category_description()) : ?>
+				<?php echo wpsc_category_description(); ?>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
+	
+	
+	<?php if(wpsc_has_pages() && ((get_option('wpsc_page_number_position') == 1 ) || (get_option('wpsc_page_number_position') == 3)))  : ?>
 		<div class='wpsc_page_numbers'>
 		  Pages: 
 			<?php while (wpsc_have_pages()) : wpsc_the_page(); ?>
@@ -59,7 +73,7 @@ global $wpsc_query, $wpdb;
 						<?php endif; ?>
 							
 							<br/>
-							Price: <span class="pricedisplay"><?php echo wpsc_product_normal_price(); ?></span>
+							Price: <span id="product_price_<?php echo wpsc_the_product_id(); ?>"  class="pricedisplay"><?php echo wpsc_product_normal_price(); ?></span>
 							
 						<?php if(get_option('display_moredetails') == 1) : ?>
 							<br />
@@ -110,7 +124,7 @@ global $wpsc_query, $wpdb;
 			</div>
 			
 			
-			<?php if((($wpsc_query->current_product +1) % get_option('grid_number_per_row')) == 0) :?>
+			<?php if((get_option('grid_number_per_row') > 0) && ((($wpsc_query->current_product +1) % get_option('grid_number_per_row')) == 0)) :?>
 			  <div class='grid_view_newline'></div>
 			<?php endif ; ?>
 		
