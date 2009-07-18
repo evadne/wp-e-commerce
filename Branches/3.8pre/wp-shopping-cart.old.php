@@ -1,14 +1,20 @@
 <?php
+/**
+ * @todo 	Why is old shopping cart still being used
+ */
+_deprecated_file(__FILE__, '3.8', "WPSC wp-shopping-cart.old.php"); // File and all functions herein marked as deprecated for debugging purposes
 $wpsc_currency_data = array();
 $wpsc_title_data = array();
 if(WPSC_DEBUG === true) {
 	function microtime_float() {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 		list($usec, $sec) = explode(" ", microtime()); 
 		return ((float)$usec + (float)$sec);
 	}
 	
 	function wpsc_debug_start_subtimer($name, $action, $loop = false) {	
 		global $wpsc_debug_sections,$loop_debug_increment;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 		
 		if($loop === true) {
 			if ($action == 'start') {
@@ -25,6 +31,7 @@ if(WPSC_DEBUG === true) {
   $wpsc_start_time = microtime_float();
 } else {
 	function wpsc_debug_start_subtimer($name) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 		return null;
 	}
 }
@@ -65,6 +72,7 @@ $nzshpcrt_log_states[2]['name'] = TXT_WPSC_PROCESSED;
 
 function nzshpcrt_style() {
   global $wpdb,$wp_query;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   return;
   if(function_exists('xili_display4mobile')) {  //check for the function before using it
     if (xili_display4mobile() === true) {
@@ -213,6 +221,7 @@ function nzshpcrt_style() {
   
 function nzshpcrt_javascript()
   {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
       return null;
   $siteurl = get_option('siteurl'); 
   if(function_exists('xili_display4mobile')) {  //check for the function before using it
@@ -312,6 +321,7 @@ jQuery(document).ready( function() {
 
 
 function wpsc_admin_css() {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $siteurl = get_option('siteurl'); 
   if((strpos($_SERVER['REQUEST_URI'], WPSC_DIR_NAME) !== false) || ($_GET['mass_upload'] == 'true') || ((strpos($_SERVER['REQUEST_URI'], 'wp-admin/index.php') !== false) && !isset($_GET['page']))) {
   	if(function_exists('add_object_page')) {
@@ -436,6 +446,7 @@ var borderSize = 10;
 function nzshpcrt_submit_ajax()
   {
   global $wpdb,$user_level,$wp_rewrite;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   get_currentuserinfo();  
   if(get_option('permalink_structure') != '') {
     $seperator ="?";
@@ -1102,14 +1113,14 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
     
     // LIMIT $startnum
     if(is_numeric($_GET['product_id'])) {
-      $sql = "SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `active` IN('1') AND `id` IN('".$_GET['product_id']."') LIMIT 1";
+      $sql = "SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `active` IN('1') AND `publish` IN ('1') AND `id` IN('".$_GET['product_id']."') LIMIT 1";
       } else if($_GET['random'] == 'true') {
-      $sql = "SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `active` IN('1') ORDER BY RAND() $limit";
+      $sql = "SELECT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `active` IN('1') AND `publish` IN ('1') ORDER BY RAND() $limit";
       } else if(is_numeric($_GET['category_id'])) {
       /* man, this is a hard to read SQL statement */
-      $sql = "SELECT DISTINCT `".WPSC_TABLE_PRODUCT_LIST."`.*, `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id`,`".WPSC_TABLE_PRODUCT_ORDER."`.`order`, IF(ISNULL(`".WPSC_TABLE_PRODUCT_ORDER."`.`order`), 0, 1) AS `order_state` FROM `".WPSC_TABLE_PRODUCT_LIST."` LEFT JOIN `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."` ON `".WPSC_TABLE_PRODUCT_LIST."`.`id` = `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`product_id` LEFT JOIN `".WPSC_TABLE_PRODUCT_ORDER."` ON ( ( `".WPSC_TABLE_PRODUCT_LIST."`.`id` = `".WPSC_TABLE_PRODUCT_ORDER."`.`product_id` ) AND ( `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id` = `".WPSC_TABLE_PRODUCT_ORDER."`.`category_id` ) ) WHERE `".WPSC_TABLE_PRODUCT_LIST."`.`active` = '1' AND `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id` IN ('".$_GET['category_id']."') ORDER BY `order_state` DESC,`".WPSC_TABLE_PRODUCT_ORDER."`.`order` ASC $limit";      
+      $sql = "SELECT DISTINCT `".WPSC_TABLE_PRODUCT_LIST."`.*, `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id`,`".WPSC_TABLE_PRODUCT_ORDER."`.`order`, IF(ISNULL(`".WPSC_TABLE_PRODUCT_ORDER."`.`order`), 0, 1) AS `order_state` FROM `".WPSC_TABLE_PRODUCT_LIST."` LEFT JOIN `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."` ON `".WPSC_TABLE_PRODUCT_LIST."`.`id` = `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`product_id` LEFT JOIN `".WPSC_TABLE_PRODUCT_ORDER."` ON ( ( `".WPSC_TABLE_PRODUCT_LIST."`.`id` = `".WPSC_TABLE_PRODUCT_ORDER."`.`product_id` ) AND ( `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id` = `".WPSC_TABLE_PRODUCT_ORDER."`.`category_id` ) ) WHERE `".WPSC_TABLE_PRODUCT_LIST."`.`active` = '1' AND `".WPSC_TABLE_PRODUCT_LIST."`.`publish` IN ('1') AND `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id` IN ('".$_GET['category_id']."') ORDER BY `order_state` DESC,`".WPSC_TABLE_PRODUCT_ORDER."`.`order` ASC $limit";      
     } else {
-      $sql = "SELECT DISTINCT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `active` IN('1') ORDER BY `id` DESC $limit";
+      $sql = "SELECT DISTINCT * FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `active` IN('1') AND `publish` IN ('1') ORDER BY `id` DESC $limit";
     }
     
 //     include_once(WPSC_FILE_PATH."/product_display_functions.php");
@@ -1213,8 +1224,10 @@ foreach($nzshpcrt_shipping_list as $nzshpcrt_shipping) {
 
 function nzshpcrt_download_file() {
   global $wpdb,$user_level,$wp_rewrite; 
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   get_currentuserinfo();  
   function readfile_chunked($filename, $retbytes = true) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
     $chunksize = 1 * (1024 * 1024); // how many bytes per chunk
     $buffer = '';
     $cnt = 0;
@@ -1344,6 +1357,7 @@ function nzshpcrt_download_file() {
 
 function nzshpcrt_display_preview_image() {
 	  global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 	  if(is_numeric($_GET['productid']) || is_numeric($_GET['image_id'])|| isset($_GET['image_name'])) {
 		if(function_exists("getimagesize")) {
 			if(is_numeric($_GET['productid'])) {
@@ -1391,6 +1405,7 @@ function nzshpcrt_display_preview_image() {
 }
 
 function nzshpcrt_listdir($dirname) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   /*
   lists the merchant directory
   */
@@ -1415,6 +1430,7 @@ function nzshpcrt_listdir($dirname) {
 function nzshpcrt_product_rating($prodid)
       {
       global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
       $get_average = $wpdb->get_results("SELECT AVG(`rated`) AS `average`, COUNT(*) AS `count` FROM `".WPSC_TABLE_PRODUCT_RATING."` WHERE `productid`='".$prodid."'",ARRAY_A);
       $average = floor($get_average[0]['average']);
       $count = $get_average[0]['count'];
@@ -1437,6 +1453,7 @@ function nzshpcrt_product_rating($prodid)
 function nzshpcrt_product_vote($prodid, $starcontainer_attributes = '')
       {
       global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
       $output = null;
       $useragent = $_SERVER['HTTP_USER_AGENT'];
       $visibility = "style='display: none;'";
@@ -1549,6 +1566,7 @@ function nzshpcrt_product_vote($prodid, $starcontainer_attributes = '')
  function get_country($country_code)  
   {
   global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $country = $wpdb->get_var("SELECT `country` FROM `".WPSC_TABLE_CURRENCY_LIST."` WHERE `isocode` IN ('".$country_code."') LIMIT 1");
   return $country; 
   }
@@ -1556,15 +1574,18 @@ function nzshpcrt_product_vote($prodid, $starcontainer_attributes = '')
  function get_region($region_code)  
   {
   global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $region = $wpdb->get_var("SELECT `name` FROM `".WPSC_TABLE_REGION_TAX."` WHERE `id` IN('$region_code')");
   return $region; 
   }
   
-function get_brand($brand_id) {  }
+function get_brand($brand_id) { _deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
+ }
 
 
 function filter_input_wp($input) {
   // if the input is numeric, then its probably safe
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   if(is_numeric($input)) {
     $output = $input;
 	} else {
@@ -1579,6 +1600,7 @@ function filter_input_wp($input) {
 }
     
 function make_csv($array) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $count = count($array);
   $num = 1;
   foreach($array as $value) {
@@ -1592,10 +1614,12 @@ function make_csv($array) {
 }   
   
 function nzshpcrt_product_log_rss_feed() {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   echo "<link type='application/rss+xml' href='".get_option('siteurl')."/wp-admin/index.php?rss=true&amp;rss_key=key&amp;action=purchase_log&amp;type=rss' title='WP E-Commerce Purchase Log RSS' rel='alternate'/>";
 }
   
 function nzshpcrt_product_list_rss_feed() {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   if(isset($_GET['category']) and is_numeric($_GET['category'])){
     $selected_category = "&amp;category_id=".$_GET['category']."";
 	}
@@ -1607,6 +1631,7 @@ function nzshpcrt_product_list_rss_feed() {
 
 function add_product_meta($product_id, $key, $value, $unique = false, $custom = false) {
   global $wpdb, $post_meta_cache, $blog_id;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $product_id = (int)$product_id;
   if($product_id > 0) {
     if(($unique == true) && $wpdb->get_var("SELECT meta_key FROM `".WPSC_TABLE_PRODUCTMETA."` WHERE meta_key = '$key' AND product_id = '$product_id'")) {
@@ -1630,6 +1655,7 @@ function add_product_meta($product_id, $key, $value, $unique = false, $custom = 
   
 function delete_product_meta($product_id, $key, $value = '') {
   global $wpdb, $post_meta_cache, $blog_id;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $product_id = (int)$product_id;
   if($product_id > 0) {
     if ( empty($value) ) {
@@ -1650,6 +1676,7 @@ function delete_product_meta($product_id, $key, $value = '') {
 
 function get_product_meta($product_id, $key, $single = false) {
   global $wpdb, $post_meta_cache, $blog_id;  
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $product_id = (int)$product_id;
   if($product_id > 0) {
     $meta_id = $wpdb->get_var("SELECT `id` FROM `".WPSC_TABLE_PRODUCTMETA."` WHERE `meta_key` IN('$key') AND `product_id` = '$product_id' LIMIT 1");
@@ -1674,6 +1701,7 @@ function get_product_meta($product_id, $key, $single = false) {
 
 function update_product_meta($product_id, $key, $value, $prev_value = '') {
   global $wpdb, $blog_id;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   $product_id = (int)$product_id;
   if($product_id > 0) {
   $value = $wpdb->escape(maybe_serialize($value));
@@ -1700,6 +1728,7 @@ function update_product_meta($product_id, $key, $value, $prev_value = '') {
     
 function wpsc_refresh_page_urls($content) {
  global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
  $wpsc_pageurl_option['product_list_url'] = '[productspage]';
  $wpsc_pageurl_option['shopping_cart_url'] = '[shoppingcart]';
  $check_chekout = $wpdb->get_var("SELECT `guid` FROM `".$wpdb->prefix."posts` WHERE `post_content` LIKE '%[checkout]%' AND `post_type` NOT IN('revision') LIMIT 1");
@@ -1725,6 +1754,7 @@ function wpsc_refresh_page_urls($content) {
 
 		function wpsc_product_permalinks($rewrite_rules) {
 		global $wpdb, $wp_rewrite;  
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 		
 		$page_details = $wpdb->get_row("SELECT * FROM `".$wpdb->posts."` WHERE `post_content` LIKE '%[productspage]%' AND `post_type` NOT IN('revision') LIMIT 1", ARRAY_A);
 		$is_index = false;
@@ -1797,6 +1827,7 @@ function wpsc_refresh_page_urls($content) {
 
 
 function wpsc_query_vars($vars) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 	//   $vars[] = "product_category";
 	//   $vars[] = "product_name";
   $vars[] = "category_id";
@@ -1819,6 +1850,7 @@ add_filter('page_rewrite_rules', 'wpsc_product_permalinks');
 
 // need to sort the merchants here, after the gold ones are included. 
 function wpsc_merchant_sort($a, $b) { 
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   return strnatcmp(strtolower($a['name']), strtolower($b['name'])); 
 } 
 uasort($nzshpcrt_gateways, 'wpsc_merchant_sort'); 
@@ -1867,7 +1899,8 @@ add_filter('single_post_title','wpsc_post_title_seo');
 
  
 function wpsc_include_css_and_javascript() {
-  // This must be weapped in a function in order to selectively prevent it from running using filters
+  // This must be wrapped in a function in order to selectively prevent it from running using filters
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   if(!apply_filters( 'wpsc_override_header', false)) {
     // expects false in order to to include the css and javascript
     add_action('wp_head', 'nzshpcrt_style');
@@ -1898,6 +1931,7 @@ if(stristr($_GET['page'], WPSC_DIR_NAME)) {
 
 function wpsc_admin_notices() {
   global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
   if(get_option('wpsc_default_category') != 'all') {
 		if((get_option('wpsc_default_category') < 1) || $wpdb->get_var("SELECT `id` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `id` IN ('".get_option('wpsc_default_category')."') AND `active` NOT IN ('1');")) {  // if there is no default category or it is deleted
 			if(!$_POST['wpsc_default_category']) { // if we are not changing the default category
@@ -1921,6 +1955,7 @@ if((get_option('wpsc_share_this') == 1) && (get_option('product_list_url') != ''
  
 add_filter('option_update_plugins', 'wpsc_plugin_no_upgrade');
 function wpsc_plugin_no_upgrade($option) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 	$this_plugin = plugin_basename(__FILE__);
   //echo "<pre>".print_r($option->response[ $this_plugin ],true)."</pre>";
 	if( isset($option->response[ $this_plugin ]) ) {
@@ -2018,6 +2053,8 @@ switch(get_option('cart_location')) {
 
 function thickbox_variation() {
 	global $wpdb, $siteurl;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
+
 	$variations_processor = new nzshpcrt_variations;
 	echo "<head>";
 	echo "<link rel='stylesheet' href='{$siteurl}/wp-admin/wp-admin.css?ver=2.6.3' type='text/css' media='all' />
@@ -2169,6 +2206,7 @@ echo "     </table>\n\r";
 
 add_filter('favorite_actions', 'wpsc_fav_action');
 function wpsc_fav_action($actions) {
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
     // remove the "Add new page" link
     // unset($actions['page-new.php']);
   	// add quick link to our favorite plugin
@@ -2179,9 +2217,10 @@ function wpsc_fav_action($actions) {
 //duplicating a product
 function wpsc_duplicate() {
 	global $wpdb;
+_deprecated_function(__FUNCTION__, '3.8', 'WPSC Shopping Cart old' );
 	if (is_numeric($_GET['duplicate'])) {
 		$dup_id = $_GET['duplicate'];
-		$sql = " INSERT INTO ".WPSC_TABLE_PRODUCT_LIST."( `name` , `description` , `additional_description` , `price` , `weight` , `weight_unit` , `pnp` , `international_pnp` , `file` , `image` , `category` , `brand` , `quantity_limited` , `quantity` , `special` , `special_price` , `display_frontpage` , `notax` , `active` , `donation` , `no_shipping` , `thumbnail_image` , `thumbnail_state` ) SELECT `name` , `description` , `additional_description` , `price` , `weight` , `weight_unit` , `pnp` , `international_pnp` , `file` , `image` , `category` , `brand` , `quantity_limited` , `quantity` , `special` , `special_price` , `display_frontpage` , `notax` , `active` , `donation` , `no_shipping` , `thumbnail_image` , `thumbnail_state` FROM ".WPSC_TABLE_PRODUCT_LIST." WHERE id = '".$dup_id."' ";
+		$sql = " INSERT INTO ".WPSC_TABLE_PRODUCT_LIST."( `name` , `description` , `additional_description` , `price` , `weight` , `weight_unit` , `pnp` , `international_pnp` , `file` , `image` , `category` , `brand` , `quantity_limited` , `quantity` , `special` , `special_price` , `display_frontpage` , `notax` , `active` , `publish`, `donation` , `no_shipping` , `thumbnail_image` , `thumbnail_state` ) SELECT `name` , `description` , `additional_description` , `price` , `weight` , `weight_unit` , `pnp` , `international_pnp` , `file` , `image` , `category` , `brand` , `quantity_limited` , `quantity` , `special` , `special_price` , `display_frontpage` , `notax` , `active` , `publish`, `donation` , `no_shipping` , `thumbnail_image` , `thumbnail_state` FROM ".WPSC_TABLE_PRODUCT_LIST." WHERE id = '".$dup_id."' ";
 		$wpdb->query($sql);
 		$new_id= $wpdb->get_var("SELECT LAST_INSERT_ID() AS `id` FROM `".WPSC_TABLE_PRODUCT_LIST."` LIMIT 1");
 		

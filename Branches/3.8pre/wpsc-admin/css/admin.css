@@ -226,6 +226,9 @@ div.search-box input#page-search-input {
 	width: 84px;
 }
 
+#wpsc_product_list tr.wpsc_published { background-color: #fff }
+#wpsc_product_list tr.wpsc_not_published { background-color: #F2F2F2 }
+
 #wpsc_product_list tbody tr td.column-title {
 	border-right:none;
 }

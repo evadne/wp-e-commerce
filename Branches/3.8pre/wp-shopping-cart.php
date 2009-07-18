@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name:WP Shopping Cart
+Plugin Name:WP Shopping Cart3.8
 Plugin URI: http://www.instinct.co.nz
-Description: A plugin that provides a WordPress Shopping Cart. Contact <a href='http://www.instinct.co.nz/?p=16#support'>Instinct Entertainment</a> for support.
-Version: 3.7 RC 2
+Description: A plugin that provides a WordPress Shopping Cart. Contact <a href='http://www.instinct.co.nz/?p=16#support'>Instinct Entertainment</a> for support. <br />Click here to<a href='?wpsc_uninstall=ask'>Uninstall</a>.
+Version: 3.8.0
 Author: Instinct Entertainment
 Author URI: http://www.instinct.co.nz/e-commerce/
 */
@@ -12,23 +12,30 @@ Author URI: http://www.instinct.co.nz/e-commerce/
  * @package wp-e-commerce
 */
 // this is to make sure it sets up the table name constants correctly on activation
-global $wpdb;
+global $wpdb, $wp_version, $wpmu_version;
 
-define('WPSC_VERSION', '3.7');
-define('WPSC_MINOR_VERSION', '26');
+define('WPSC_VERSION', '3.8');
+define('WPSC_MINOR_VERSION', '0');
 
-define('WPSC_PRESENTABLE_VERSION', '3.7 RC 2');
+define('WPSC_PRESENTABLE_VERSION', '3.8 Dev');
 
 define('WPSC_DEBUG', false);
 define('WPSC_GATEWAY_DEBUG', false);
 
+/**
+ *	Determine and verify version
+ */
 $v1 = str_replace(array('_','-','+'),'.',strtolower($wp_version));
 $v1 = str_replace(array('alpha','beta','gamma'), array('a','b','g'), $v1);
 $v1 = preg_split("/([a-z]+)/i",$v1,-1, PREG_SPLIT_DELIM_CAPTURE);
 array_walk($v1, create_function('&$v', '$v = trim($v,". ");'));
 
-define('IS_WP25', version_compare($v1[0], '2.5', '>='));
-define('IS_WP27', version_compare($v1[0], '2.7', '>='));
+define('IS_WP25', version_compare($v1[0], '2.5', '>=') );
+define('IS_WP27', version_compare($v1[0], '2.7', '>=') );
+if(isset($wpmu_version)) {
+    define('IS_WPMU', 1);
+}
+
 
 // // we need to know where we are, rather than assuming where we are
 
@@ -40,10 +47,10 @@ $siteurl = get_option('siteurl');
 
 //Define the URL to the plugin folder
 define('WPSC_FOLDER', dirname(plugin_basename(__FILE__)));
-define('WPSC_URL', get_option('siteurl').'/wp-content/plugins/' . WPSC_FOLDER);
-
-if(isset($wpmu_version)) {
-    define('IS_WPMU', 1);
+if( IS_WP27 ) {
+	define('WPSC_URL', plugins_url(WPSC_FOLDER) );
+} else {
+	define('WPSC_URL', get_option('siteurl').'/wp-content/plugins/' . WPSC_FOLDER);
 }
 
 // include the selected language file
@@ -94,6 +101,9 @@ define('WPSC_TABLE_CATEGORISATION_GROUPS', "{$wp_table_prefix}wpsc_categorisatio
 define('WPSC_TABLE_VARIATION_COMBINATIONS', "{$wp_table_prefix}wpsc_variation_combinations");
 define('WPSC_TABLE_CLAIMED_STOCK', "{$wp_table_prefix}wpsc_claimed_stock");
 
+/**
+ * @todo - use IS_ADMIN, IS_AJAX to determine what really needs to be loaded
+ */
 
 // start including the rest of the plugin here
 require_once(WPSC_FILE_PATH.'/wpsc-includes/wpsc_query.php');
@@ -119,8 +129,8 @@ if (!IS_WP25) {
 
 
 /// OLD CODE INCLUDED HERE
+if( !defined('DOING_AJAX'))
 include_once('wp-shopping-cart.old.php');
-
 
 
 // if we are in the admin section, include the admin code
@@ -165,7 +175,6 @@ define('WPSC_CATEGORY_DIR', $wpsc_category_dir);
 define('WPSC_USER_UPLOADS_DIR', $wpsc_user_uploads_dir);
 define('WPSC_CACHE_DIR', $wpsc_cache_dir);
 define('WPSC_UPGRADES_DIR', $wpsc_upgrades_dir);
-
 
 /**
 * files that are uploaded as part of digital products are not directly downloaded, therefore there is no need for a URL constant for them
@@ -269,4 +278,5 @@ function wpsc_serialize_shopping_cart() {
   return true;
 }  
 add_action('shutdown','wpsc_serialize_shopping_cart');
+
 ?>
