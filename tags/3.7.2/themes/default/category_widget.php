@@ -14,10 +14,6 @@
 
 						<a href="<?php wpsc_print_category_url();?>" class="wpsc_category_link"><?php wpsc_print_category_name();?></a>
 
-						<?php/* if(get_option('wpsc_category_description')) :?>
-							<?php wpsc_print_category_description("<div class='wpsc_subcategory'>", "</div>"); ?>
-						<?php endif; */?>
-
 						<?php wpsc_print_subcategory("<ul>", "</ul>"); ?>
 					</li>
 			<?php wpsc_end_category_query(); ?>
