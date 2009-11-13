@@ -522,7 +522,7 @@ class wpsc_checkout {
 	
 
  		//exit('UserID >><pre>'.print_r($user_ID, true).'</pre>');
-		if($any_bad_inputs == false) {
+		if(($any_bad_inputs == false) && ($user_ID > 0)) {
 			$saved_data_sql = "SELECT * FROM `".$wpdb->usermeta."` WHERE `user_id` = '".$user_ID."' AND `meta_key` = 'wpshpcrt_usr_profile';";
 			$saved_data = $wpdb->get_row($saved_data_sql,ARRAY_A);
 			//echo "<pre>".print_r($meta_data,true)."</pre>";
