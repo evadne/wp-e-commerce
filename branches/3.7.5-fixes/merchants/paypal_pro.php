@@ -137,21 +137,23 @@ function gateway_paypal_pro($seperator, $sessionid){
 	$data['AMT']			= number_format($wpsc_cart->total_price,2);
 	$data['ITEMAMT']		= number_format($wpsc_cart->subtotal,2);
 	$data['SHIPPINGAMT']	= number_format($wpsc_cart->base_shipping,2);
-	$data['TAXAMT']			= number_format($wpsc_cart->total_tax);
+	$data['TAXAMT']			= number_format($wpsc_cart->total_tax, 2);
 	
 	// Ordered Items
-$discount = $wpsc_cart->cart_item->discount;
+	
+	//echo '<pre>'.print_r($wpsc_cart, true).'</pre>';
+	$discount = $wpsc_cart->coupons_amount;
 	//exit($discount);
 	if(($discount > 0)) {
 		$i = 1;
-		$data['AMT']			= number_format(sprintf("%01.2f", $wpsc_cart->calculate_total_price()),$decimal_places,'.','');
+		$data['AMT']			= number_format($wpsc_cart->total_price,2,'.','');
 
-		$data['ITEMAMT']		= number_format(sprintf("%01.2f", $wpsc_cart->calculate_total_price()),$decimal_places,'.','');
+		$data['ITEMAMT']		= number_format($wpsc_cart->total_price,2,'.','');
 
-		$data['SHIPPINGAMT']	= 0;
-		$data['TAXAMT']			= 0;
+		$data['SHIPPINGAMT']	= number_format(0,2);
+		$data['TAXAMT']			= number_format(0, 2);
 		$data['L_NAME'.$i] = "Your Shopping Cart";
-		$data['L_AMT'.$i] = number_format(sprintf("%01.2f", $wpsc_cart->calculate_total_price()),$decimal_places,'.','');
+		$data['L_AMT'.$i] = number_format($wpsc_cart->total_price,2,'.','');
 		$data['L_QTY'.$i] = 1;
 		// $data['item_number_'.$i] = 0;
 		$data['L_TAXAMT'.$i] = 0;
@@ -162,7 +164,7 @@ $discount = $wpsc_cart->cart_item->discount;
 		$data['L_AMT'.$i]			= number_format($Item->unit_price,2);
 		$data['L_NUMBER'.$i]		= $i;
 		$data['L_QTY'.$i]			= $Item->quantity;
-		$data['L_TAXAMT'.$i]		= number_format($Item->tax,2);
+		$data['L_TAXAMT'.$i]		= number_format(($Item->tax/$Item->quantity),2);
 	}
 	}
 	$transaction = "";
@@ -179,7 +181,7 @@ $discount = $wpsc_cart->cart_item->discount;
 	}
 //exit($transaction);
 	$response = send($transaction);
-	//exit('<pre>'.print_r($response, true).'</pre><pre>'.print_r($data, true).'</pre>');
+	exit('<pre>'.print_r($response, true).'</pre><pre>'.print_r($data, true).'</pre>');
 	if($response->ack == 'Success' || $response->ack == 'SuccessWithWarning'){
 		//redirect to  transaction page and store in DB as a order with accepted payment
 		$sql = "UPDATE `".WPSC_TABLE_PURCHASE_LOGS."` SET `processed`= '2' WHERE `sessionid`=".$sessionid;
