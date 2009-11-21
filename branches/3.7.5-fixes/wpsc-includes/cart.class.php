@@ -222,6 +222,15 @@ function wpsc_cart_item_quantity_single_prod($id) {
 	//exit('<pre>'.print_r($wpsc_cart, true).'</pre>');
 	return $wpsc_cart;
 }
+
+function wpsc_cart_item_custom_message() {
+	global $wpsc_cart;
+	if($wpsc_cart->cart_item->custom_message != null) {
+		return htmlentities(stripslashes($wpsc_cart->cart_item->custom_message), ENT_QUOTES, "UTF-8");
+	}
+	return false;
+}
+
 /**
 * cart item price function, no parameters
 * @return string the cart item price multiplied by the quantity, with a currency sign
