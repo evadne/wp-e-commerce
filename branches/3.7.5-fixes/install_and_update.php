@@ -311,6 +311,8 @@ function wpsc_install() {
 		}
 		$wp_rewrite->flush_rules();
 	}
+
+	wpsc_clean_categories();
     
     
   
