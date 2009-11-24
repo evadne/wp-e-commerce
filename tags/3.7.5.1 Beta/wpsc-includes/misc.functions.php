@@ -670,4 +670,37 @@ function wpsc_replace_reply_name($input) {
   return $output;
 }
 
+/**
+ * wpsc_clean_categories function,
+ * Replace the email address for the purchase receipts
+*/
+function wpsc_clean_categories() {
+	global $wpdb, $wp_rewrite;
+  $sql_query = "SELECT `id`, `name`, `active` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."`";
+	$sql_data = $wpdb->get_results($sql_query, ARRAY_A);
+	$updated = false;
+	foreach((array)$sql_data as $datarow) {
+	  if($datarow['active'] == 1) {
+	    $tidied_name = trim($datarow['name']);
+			$tidied_name = strtolower($tidied_name);
+			$url_name = sanitize_title($tidied_name);            
+			$similar_names = $wpdb->get_row("SELECT COUNT(*) AS `count`, MAX(REPLACE(`nice-name`, '$url_name', '')) AS `max_number` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `nice-name` REGEXP '^($url_name){1}(\d)*$' AND `id` NOT IN ('{$datarow['id']}') ", ARRAY_A);
+			$extension_number = '';
+			if($similar_names['count'] > 0) {
+				$extension_number = (int)$similar_names['max_number']+2;
+			}
+			$url_name .= $extension_number;
+			$wpdb->query("UPDATE `".WPSC_TABLE_PRODUCT_CATEGORIES."` SET `nice-name` = '$url_name' WHERE `id` = '{$datarow['id']}' LIMIT 1 ;");
+			$updated = true;
+	  } else if($datarow['active'] == 0) {
+		  $wpdb->query("UPDATE `".WPSC_TABLE_PRODUCT_CATEGORIES."` SET `nice-name` = '' WHERE `id` = '{$datarow['id']}' LIMIT 1 ;");
+		  $updated = true;
+	  }
+	}
+	$wp_rewrite->flush_rules();
+	return $updated;
+}
+
+
+
 ?>

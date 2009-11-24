@@ -1713,36 +1713,17 @@ exit();
 	add_action('admin_init', 'wpsc_update_page_urls');
 }
 
-function wpsc_clean_categories(){
+function wpsc_clean_categories_action(){
 global $wpdb, $wp_rewrite;
-  //exit("<pre>".print_r($check_category_names,true)."</pre>");
-  $sql_query = "SELECT `id`, `name`, `active` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."`";
-	$sql_data = $wpdb->get_results($sql_query,ARRAY_A);
-	foreach((array)$sql_data as $datarow) {	
-	  if($datarow['active'] == 1) {
-	    $tidied_name = trim($datarow['name']);
-			$tidied_name = strtolower($tidied_name);
-			$url_name = sanitize_title($tidied_name);            
-			$similar_names = $wpdb->get_row("SELECT COUNT(*) AS `count`, MAX(REPLACE(`nice-name`, '$url_name', '')) AS `max_number` FROM `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `nice-name` REGEXP '^($url_name){1}(\d)*$' AND `id` NOT IN ('{$datarow['id']}') ",ARRAY_A);
-			$extension_number = '';
-			if($similar_names['count'] > 0) {
-				$extension_number = (int)$similar_names['max_number']+2;
-			}
-			$url_name .= $extension_number;
-			$wpdb->query("UPDATE `".WPSC_TABLE_PRODUCT_CATEGORIES."` SET `nice-name` = '$url_name' WHERE `id` = '{$datarow['id']}' LIMIT 1 ;");
-			$updated;
-	  } else if($datarow['active'] == 0) {
-		  $wpdb->query("UPDATE `".WPSC_TABLE_PRODUCT_CATEGORIES."` SET `nice-name` = '' WHERE `id` = '{$datarow['id']}' LIMIT 1 ;");
-		  $updated;
-	  }
-	}
-	$wp_rewrite->flush_rules();
+
+	$updated = wpsc_clean_categories();
+	
 	$sendback = wp_get_referer();
 
 	if ( isset($updated) ) {
 		$sendback = add_query_arg('updated', $updated, $sendback);
 	}
-	if(isset($_SESSION['wpsc_settings_curr_page'])){
+	if(isset($_SESSION['wpsc_settings_curr_page'])) {
 			$sendback = add_query_arg('tab', $_SESSION['wpsc_settings_curr_page'], $sendback);
 	}
 	wp_redirect($sendback);
@@ -1750,7 +1731,7 @@ global $wpdb, $wp_rewrite;
 exit();
 }
  if($_REQUEST['wpsc_admin_action'] == 'clean_categories') {
-	add_action('admin_init', 'wpsc_clean_categories');
+	add_action('admin_init', 'wpsc_clean_categories_action');
 }
 
 //change the regions tax settings
