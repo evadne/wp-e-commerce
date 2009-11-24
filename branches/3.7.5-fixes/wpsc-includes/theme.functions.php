@@ -48,7 +48,7 @@ add_action('wp','wpsc_select_theme_functions',10,1);
 * enqueue all javascript and CSS for wp ecommerce
 */
 function wpsc_enqueue_user_script_and_css() {
-  global $wp_styles, $wpsc_theme_url, $wpsc_theme_path;
+  global $wp_styles, $wpsc_theme_url, $wpsc_theme_path, $wp_query, $wpsc_query;
 	/**
 	* added by xiligroup.dev to be compatible with touchshop
 	*/
@@ -70,6 +70,11 @@ function wpsc_enqueue_user_script_and_css() {
 			}
 		}
 		 
+		//exit("<pre>".print_r($wpsc_query, true)."</pre>");
+
+		$page_number = absint($wpsc_query->query_vars['page']);
+		$number_per_page = absint($wpsc_query->query_vars['number_per_page']);
+		$category_id = absint($wpsc_query->query_vars['category_id']);
 		if(is_ssl()) {
 			$siteurl = str_replace("http://", "https://", $siteurl);
 		}
@@ -95,7 +100,11 @@ function wpsc_enqueue_user_script_and_css() {
 		wp_enqueue_style( 'wpsc-theme-css', $theme_url, false, $version_identifier, 'all');
 		wp_enqueue_style( 'wpsc-theme-css-compatibility', WPSC_URL. '/themes/compatibility.css', false, $version_identifier, 'all');
 		wp_enqueue_style( 'wpsc-product-rater', WPSC_URL.'/js/product_rater.css', false, $version_identifier, 'all');
-		wp_enqueue_style( 'wp-e-commerce-dynamic', $siteurl."/index.php?wpsc_user_dynamic_css=true&category=$category_id" , false, $version_identifier, 'all' );
+		
+		$page_number = absint($wpsc_query->query_vars['page']);
+		$number_per_page = absint($wpsc_query->query_vars['number_per_page']);
+		$category_id = absint($wpsc_query->query_vars['category_id']);
+		wp_enqueue_style( 'wp-e-commerce-dynamic', $siteurl."/index.php?wpsc_user_dynamic_css=true&category_id=$category_id" , false, $version_identifier, 'all' );
 		wp_enqueue_style( 'wpsc-thickbox', WPSC_URL.'/js/thickbox.css', false, $version_identifier, 'all');
 		
 		
@@ -124,7 +133,7 @@ wp_enqueue_style( 'wpsc-ie-fixes', WPSC_URL.'/themes/wpsc-ie-fixes.css', false, 
 }
 
 if(strpos($_SERVER['SCRIPT_NAME'], "wp-admin") === false) {
-	add_action('init', 'wpsc_enqueue_user_script_and_css');
+	add_action('template_redirect', 'wpsc_enqueue_user_script_and_css', 20);
 }
 
 function wpsc_user_dynamic_js() { 
@@ -270,8 +279,37 @@ function wpsc_user_dynamic_css() {
 		}
       
     <?php
+    $category_sql = array();
+    $category_id = absint($_GET['category_id']);
+    if($category_id > 0) {
+			$category_sql['join'] = "JOIN `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."` AS `category`";
+			$category_sql['on'] = "`products`.`id` = `category`.`product_id` AND";
+			$category_sql['where'] = "`category`.`category_id` IN ('".$category_id."') AND";
+    } else {
+			$category_sql['join'] = "";
+			$category_sql['on'] = "";
+			$category_sql['where'] = "";
+
+    }
+
+
+
+    $product_image_size_list = $wpdb->get_results("SELECT
+    `products`.`id`,
+    `meta1`.`meta_value` AS `height`,
+    `meta2`.`meta_value` AS `width`
+    FROM `".WPSC_TABLE_PRODUCT_LIST."` AS `products` {$category_sql['join']}
+    JOIN `".WPSC_TABLE_PRODUCTMETA."` AS `meta1`
+    JOIN `".WPSC_TABLE_PRODUCTMETA."` AS `meta2`
+    ON {$category_sql['on']} `products`.`id` = `meta1`.`product_id`
+		AND  `products`.`id` = `meta2`.`product_id`
+    WHERE {$category_sql['where']} `products`.`thumbnail_state` IN(2, 3)
+    AND `meta1`.`meta_key` IN ('thumbnail_height')
+    AND `meta2`.`meta_key` IN ('thumbnail_width')
+    ", ARRAY_A);
+
     
-    $product_image_size_list = $wpdb->get_results("SELECT `products`.`id`, `meta1`.`meta_value` AS `height`, `meta2`.`meta_value` AS `width` FROM `".WPSC_TABLE_PRODUCT_LIST."` AS `products` INNER JOIN `".WPSC_TABLE_PRODUCTMETA."` AS `meta1` INNER JOIN `".WPSC_TABLE_PRODUCTMETA."` AS `meta2` ON `products`.`id` = `meta1`.`product_id` AND  `products`.`id` = `meta2`.`product_id`  WHERE `products`.`thumbnail_state` IN(0,2,3) AND `meta1`.`meta_key` IN ('thumbnail_height') AND `meta2`.`meta_key` IN ('thumbnail_width')", ARRAY_A);
+    //$product_image_size_list = $wpdb->get_results("SELECT `products`.`id`, `meta1`.`meta_value` AS `height`, `meta2`.`meta_value` AS `width` FROM `".WPSC_TABLE_PRODUCT_LIST."` AS `products` INNER JOIN `".WPSC_TABLE_PRODUCTMETA."` AS `meta1` INNER JOIN `".WPSC_TABLE_PRODUCTMETA."` AS `meta2` ON `products`.`id` = `meta1`.`product_id` AND  `products`.`id` = `meta2`.`product_id`  WHERE `products`.`thumbnail_state` IN(0,2,3) AND `meta1`.`meta_key` IN ('thumbnail_height') AND `meta2`.`meta_key` IN ('thumbnail_width')", ARRAY_A);
     //print_r($product_image_size_list);
     foreach((array)$product_image_size_list as $product_image_sizes) {
       $individual_thumbnail_height = $product_image_sizes['height']; 
@@ -297,15 +335,13 @@ function wpsc_user_dynamic_css() {
           echo "      }\n\r";
         }
 
-        
 				if(($individual_thumbnail_width > $thumbnail_width) || ($individual_thumbnail_height > $thumbnail_height)) {
 						echo "      div.default_product_display.product_view_$product_id  div.textcol div.imagecol a img{\n\r";
 						echo "            width: ".$individual_thumbnail_width."px;\n\r";
 						echo "            height: ".$individual_thumbnail_height."px;\n\r";
 						echo "      }\n\r";
 				}
-      }
-      
+      }   
     }
     
   if(is_numeric($_GET['brand']) || (get_option('show_categorybrands') == 3)) {

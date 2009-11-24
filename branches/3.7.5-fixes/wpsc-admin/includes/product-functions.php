@@ -249,7 +249,9 @@ function wpsc_insert_product($post_data, $wpsc_error = false) {
 
 	// and the images
 	wpsc_update_product_images($product_id, $post_data);
-	
+
+	//exit('<pre>'.print_r($post_data, true).'</pre>');
+
 	//and the alt currency
 	foreach((array)$post_data['newCurrency'] as $key =>$value){
 		wpsc_update_alt_product_currency($product_id, $value, $post_data['newCurrPrice'][$key]);
@@ -518,20 +520,27 @@ function wpsc_update_product_images($product_id, $post_data) {
 	/* Handle new image uploads here */
   if($post_data['files']['image']['tmp_name'] != '') {
 		$image = wpsc_item_process_image($product_id, $post_data['files']['image']['tmp_name'], str_replace(" ", "_", $post_data['files']['image']['name']), $post_data['width'], $post_data['height'], $post_data['image_resize']);
-		
 		$image_action = absint($post_data['image_resize']);
 		$image_width = $post_data['width'];
 		$image_height = $post_data['height'];
-	
 	} else {
 		$image_action = absint($post_data['gallery_resize']);
 		$image_width = $post_data['gallery_width'];
 		$image_height = $post_data['gallery_height'];
-		
+	}
+	$uploaded_image = null;
+	if($image_action == 3) {
+		if(file_exists($_FILES['gallery_thumbnailImage']['tmp_name'])) {
+			$uploaded_image =  $_FILES['gallery_thumbnailImage']['tmp_name'];
+		} else if(file_exists($_FILES['thumbnailImage']['tmp_name'])) {
+			$uploaded_image =  $_FILES['thumbnailImage']['tmp_name'];
+		} else {
+			$image_action = 0;
+		}
 	}
 	
 //    exit( "<pre>".print_r($image_action, true)."</pre>");
-	wpsc_resize_image_thumbnail($product_id, $image_action, $image_width, $image_height);
+	wpsc_resize_image_thumbnail($product_id, $image_action, $image_width, $image_height, $uploaded_image);
  	//exit( " <pre>".print_r($post_data, true)."</pre>");
 	
 	
@@ -550,6 +559,9 @@ function wpsc_update_product_images($product_id, $post_data) {
  */
 function wpsc_resize_image_thumbnail($product_id, $image_action= 0, $width = 0, $height = 0, $custom_image = null) {
   global $wpdb;
+
+	//exit("<pre>".print_r(func_get_args(), true)."</pre>");
+  
 	$image_id = $wpdb->get_var("SELECT `image` FROM `".WPSC_TABLE_PRODUCT_LIST."` WHERE `id` = '{$product_id}' LIMIT 1");
 	$image = $wpdb->get_var("SELECT `image` FROM `".WPSC_TABLE_PRODUCT_IMAGES."` WHERE `id` = '{$image_id}' LIMIT 1");
 	
@@ -594,19 +606,17 @@ function wpsc_resize_image_thumbnail($product_id, $image_action= 0, $width = 0, 
 				break;
 				
 				case 3:
-				  // replacing the thumbnail with a custom image is done here
-				  $uploaded_image = null;
-				    //exit($uploaded_image);
-				   if(file_exists($_FILES['gallery_thumbnailImage']['tmp_name'])) {
-						$uploaded_image =  $_FILES['gallery_thumbnailImage']['tmp_name'];
-				   } else if(file_exists($_FILES['thumbnailImage']['tmp_name'])) {
-						$uploaded_image =  $_FILES['thumbnailImage']['tmp_name'];
-				   }
-				  if($uploaded_image !== null) {
-				  
-						move_uploaded_file($uploaded_image, WPSC_THUMBNAIL_DIR.$image);
-				    //exit($uploaded_image);
-				  
+					$custom_image_name = '';
+				  if($custom_image !== null) {
+						if(move_uploaded_file($custom_image, WPSC_THUMBNAIL_DIR.$image)) {
+							$custom_image_name = $wpdb->escape(basename($image));
+							$image_input = WPSC_THUMBNAIL_DIR.$image;
+							if(function_exists('getimagesize')) {
+								$imagedata = getimagesize($image_input);
+								update_product_meta($product_id, 'thumbnail_width', (int)$imagedata[0]);
+								update_product_meta($product_id, 'thumbnail_height', (int)$imagedata[1]);
+							}
+						}
 				  }
 				break;
 			}
@@ -618,7 +628,7 @@ function wpsc_resize_image_thumbnail($product_id, $image_action= 0, $width = 0, 
 				$image_id = (int) $wpdb->insert_id;
 			}
 			
-			$sql="UPDATE `".WPSC_TABLE_PRODUCT_LIST."` SET `thumbnail_state` = '$image_action', `image` ='{$image_id}' WHERE `id`='{$product_id}' LIMIT 1";
+			$sql="UPDATE `".WPSC_TABLE_PRODUCT_LIST."` SET `thumbnail_state` = '$image_action', `image` = '{$image_id}', `thumbnail_image` = '{$custom_image_name}'  WHERE `id`='{$product_id}' LIMIT 1";
 			//exit($sql);
 			$wpdb->query($sql);
 		} else {

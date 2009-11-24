@@ -831,8 +831,11 @@ function wpsc_swfupload_images() {
 		if(($count >  0) && ( (strlen($previous_image) > 0) || (absint($product_id) < 1) ) ) {
 			// if there is more than one image
 			$success = move_uploaded_file($file['tmp_name'], WPSC_IMAGE_DIR.basename($file['name']));
+			wpsc_fix_permissions(WPSC_IMAGE_DIR.basename($file['name']));
+			
 			if ($product_id == '') {
 				copy(WPSC_IMAGE_DIR.basename($file['name']),WPSC_THUMBNAIL_DIR.basename($file['name']));
+				wpsc_fix_permissions(WPSC_THUMBNAIL_DIR.basename($file['name']));
 			}
 			$order++;
 			if ($success) {
@@ -856,7 +859,11 @@ function wpsc_swfupload_images() {
 				$image_id = $image_data['image_id'];
 			} else {
 				$success = move_uploaded_file($file['tmp_name'], WPSC_IMAGE_DIR.basename($file['name']));
+				wpsc_fix_permissions(WPSC_IMAGE_DIR.basename($file['name']));
+			
 				copy(WPSC_IMAGE_DIR.basename($file['name']),WPSC_THUMBNAIL_DIR.basename($file['name']));
+				wpsc_fix_permissions(WPSC_THUMBNAIL_DIR.basename($file['name']));
+			
 				$wpdb->query("INSERT INTO `".WPSC_TABLE_PRODUCT_IMAGES."` ( `product_id` , `image` , `width` , `height` , `image_order` ) VALUES( '$product_id','".basename($file['name'])."', '0', '0', '0')");
 				$src = basename($file['name']);
 			}
@@ -889,7 +896,11 @@ function wpsc_swfupload_images() {
 			$image_id = $image_data['image_id'];
 		} else {
 			$success = move_uploaded_file($file['tmp_name'], WPSC_IMAGE_DIR.basename($file['name']));
+			wpsc_fix_permissions(WPSC_IMAGE_DIR.basename($file['name']));
+			
 			copy(WPSC_IMAGE_DIR.basename($file['name']),WPSC_THUMBNAIL_DIR.basename($file['name']));
+			wpsc_fix_permissions(WPSC_THUMBNAIL_DIR.basename($file['name']));
+			
 			$wpdb->query("INSERT INTO `".WPSC_TABLE_PRODUCT_IMAGES."` ( `product_id` , `image` , `width` , `height` , `image_order` ) VALUES( '$product_id','".basename($file['name'])."', '0', '0', '0')");
 			$src = basename($file['name']);
 		}

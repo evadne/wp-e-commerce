@@ -595,6 +595,13 @@ function nzshpcrt_display_preview_image() {
 
 add_action('init', 'nzshpcrt_display_preview_image');
 
+
+function wpsc_fix_permissions($filename) {
+	$stat = stat( dirname( $filename ));
+	$perms = $stat['mode'] & 0000775;
+	@ chmod( $filename, $perms );
+}
+
 function wpsc_list_dir($dirname) {
   /*
   lists the provided directory, was nzshpcrt_listdir

@@ -35,7 +35,6 @@ function gateway_paypal_multiple($seperator, $sessionid) {
   $data['notify_url'] =urlencode(get_option('siteurl')."/?ipn_request=true");
   $data['rm'] = '2';
   //data['bn'] = 'Instinct-WP-e-commerce_ShoppingCart_EC';
-  
   // look up the currency codes and local price
 
   $currency_code = $wpdb->get_results("SELECT `code` FROM `".WPSC_TABLE_CURRENCY_LIST."` WHERE `id`='".get_option('currency_type')."' LIMIT 1",ARRAY_A);
