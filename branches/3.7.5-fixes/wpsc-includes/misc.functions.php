@@ -701,6 +701,4 @@ function wpsc_clean_categories() {
 	return $updated;
 }
 
-
-
 ?>
