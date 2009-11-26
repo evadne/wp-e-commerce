@@ -89,16 +89,19 @@ function gateway_paypal_pro($seperator, $sessionid){
 		if(($value['unique_name']=='billingstate') && $value['value'] != ''){
 			$sql = "SELECT `code` FROM `".WPSC_TABLE_REGION_TAX."` WHERE `name` ='".$value['value']."' LIMIT 1";
 			$data['STATE'] = $wpdb->get_var($sql);
-		}else{	
+		}else{
 			$data['STATE']='CA';
 		}
-		if(($value['unique_name']=='billingcountry') && $value['value'] != ''){		
+		if(($value['unique_name']=='billingcountry') && $value['value'] != ''){
 		
 			$data['COUNTRYCODE']	= $value['value'];
 		}		
 		if(($value['unique_name']=='billingpostcode') && $value['value'] != ''){
 			$data['ZIP']	= $value['value'];
-		}	
+		}
+
+		//
+		
 		if((($value['unique_name']=='shippingfirstname') && $value['value'] != '')){
 			$data1['SHIPTONAME1']	= $value['value'];
 		}
@@ -117,7 +120,6 @@ function gateway_paypal_pro($seperator, $sessionid){
 			$sql = "SELECT `code` FROM `".WPSC_TABLE_REGION_TAX."` WHERE `name` ='".$value['value']."' LIMIT 1";
 			$data['SHIPTOSTATE'] = $wpdb->get_var($sql);
 		}else{
-			$data['SHIPTOSTATE'] = 'CA';
 		}	
 		if(($value['unique_name']=='shippingcountry') && $value['value'] != ''){
 			$data['SHIPTOCOUNTRY']	= $value['value'];
@@ -125,10 +127,23 @@ function gateway_paypal_pro($seperator, $sessionid){
 		if(($value['unique_name']=='shippingpostcode') && $value['value'] != ''){
 			$data['SHIPTOZIP']	= $value['value'];
 		}	
-	
 		//exit($key.' > '.print_r($value,true));
 	}
 	$data['SHIPTONAME'] = $data1['SHIPTONAME1'].' '.$data1['SHIPTONAME2'];
+
+	if( ($data['SHIPTONAME'] == null) || ($data['SHIPTOSTREET'] == null) || ($data['SHIPTOCITY'] == null) ||
+			($data['SHIPTOSTATE'] == null) || ($data['SHIPTOCOUNTRY'] == null) || ($data['SHIPTOZIP'] == null)) {
+			// if any shipping details are empty, the order will simply fail, this deletes them all if one is empty
+			unset($data['SHIPTONAME']);
+			unset($data['SHIPTOSTREET']);
+			unset($data['SHIPTOCITY']);
+			unset($data['SHIPTOSTATE']);
+			unset($data['SHIPTOCOUNTRY']);
+			unset($data['SHIPTOZIP']);
+	} 
+
+
+	
 	$data['CREDITCARDTYPE'] = $_POST['cctype'];
 	$data['ACCT']			= $_POST['card_number'];
 	$data['EXPDATE']		= $_POST['expiry']['month'].$_POST['expiry']['year'];
@@ -140,20 +155,18 @@ function gateway_paypal_pro($seperator, $sessionid){
 	$data['TAXAMT']			= number_format($wpsc_cart->total_tax, 2);
 	
 	// Ordered Items
-	
-	//echo '<pre>'.print_r($wpsc_cart, true).'</pre>';
-	$discount = $wpsc_cart->coupons_amount;
+	$discount = $wpsc_cart->cart_item->discount;
 	//exit($discount);
 	if(($discount > 0)) {
 		$i = 1;
-		$data['AMT']			= number_format($wpsc_cart->total_price,2,'.','');
+		$data['AMT']			= number_format(sprintf("%01.2f", $wpsc_cart->calculate_total_price()),$decimal_places,'.','');
 
-		$data['ITEMAMT']		= number_format($wpsc_cart->total_price,2,'.','');
+		$data['ITEMAMT']		= number_format(sprintf("%01.2f", $wpsc_cart->calculate_total_price()),$decimal_places,'.','');
 
-		$data['SHIPPINGAMT']	= number_format(0,2);
-		$data['TAXAMT']			= number_format(0, 2);
+		$data['SHIPPINGAMT']	= 0;
+		$data['TAXAMT']			= 0;
 		$data['L_NAME'.$i] = "Your Shopping Cart";
-		$data['L_AMT'.$i] = number_format($wpsc_cart->total_price,2,'.','');
+		$data['L_AMT'.$i] = number_format(sprintf("%01.2f", $wpsc_cart->calculate_total_price()),$decimal_places,'.','');
 		$data['L_QTY'.$i] = 1;
 		// $data['item_number_'.$i] = 0;
 		$data['L_TAXAMT'.$i] = 0;
@@ -164,7 +177,7 @@ function gateway_paypal_pro($seperator, $sessionid){
 		$data['L_AMT'.$i]			= number_format($Item->unit_price,2);
 		$data['L_NUMBER'.$i]		= $i;
 		$data['L_QTY'.$i]			= $Item->quantity;
-		$data['L_TAXAMT'.$i]		= number_format(($Item->tax/$Item->quantity),2);
+		$data['L_TAXAMT'.$i]		= number_format($Item->tax,2);
 	}
 	}
 	$transaction = "";
@@ -181,7 +194,7 @@ function gateway_paypal_pro($seperator, $sessionid){
 	}
 //exit($transaction);
 	$response = send($transaction);
-//	exit('<pre>'.print_r($response, true).'</pre><pre>'.print_r($data, true).'</pre>');
+	//exit('<pre>'.print_r($response, true).'</pre><pre>'.print_r($data, true).'</pre>');
 	if($response->ack == 'Success' || $response->ack == 'SuccessWithWarning'){
 		//redirect to  transaction page and store in DB as a order with accepted payment
 		$sql = "UPDATE `".WPSC_TABLE_PURCHASE_LOGS."` SET `processed`= '2' WHERE `sessionid`=".$sessionid;
@@ -203,11 +216,11 @@ function gateway_paypal_pro($seperator, $sessionid){
 
 function send ($transaction) {
 	$connection = curl_init();
-	if (get_option('paypal_pro_testmode') == "on"){
-		curl_setopt($connection,CURLOPT_URL,"https://api-3t.sandbox.paypal.com/nvp"); // Sandbox testing
-	}else{
-		curl_setopt($connection,CURLOPT_URL,"https://api-3t.paypal.com/nvp"); // Live		
-	}
+ 	if (get_option('paypal_pro_testmode') == "on"){
+ 		curl_setopt($connection,CURLOPT_URL,"https://api-3t.sandbox.paypal.com/nvp"); // Sandbox testing
+ 	}else{
+		curl_setopt($connection,CURLOPT_URL,"https://api-3t.paypal.com/nvp"); // Live
+ 	}
 	$useragent = 'WP e-Commerce plugin';
 	curl_setopt($connection, CURLOPT_SSL_VERIFYPEER, 0); 
 	curl_setopt($connection, CURLOPT_SSL_VERIFYHOST, 0); 
@@ -222,7 +235,7 @@ function send ($transaction) {
 	curl_setopt($connection, CURLOPT_RETURNTRANSFER, 1);
 	$buffer = curl_exec($connection);
 	curl_close($connection);
-
+	//echo $buffer;
 	$Response = response($buffer);
 	return $Response;
 }
