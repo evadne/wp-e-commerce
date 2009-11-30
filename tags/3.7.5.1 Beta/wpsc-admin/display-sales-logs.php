@@ -29,8 +29,8 @@ if(!isset($purchlogs)){
 		<?php //screen_icon(); ?>
 		<h2><?php echo wp_specialchars( TXT_WPSC_PURCHASELOG ); ?> </h2>
 		<?php //START OF PURCHASE LOG DEFAULT VIEW ?>
-		<?php if(!isset($_REQUEST['purchaselog_id'])){
-
+		<?php
+		if(!isset($_REQUEST['purchaselog_id'])) {
 		  	$columns = array(
 		  		'cb' => '<input type="checkbox" />',
 					'date' => 'Date',
