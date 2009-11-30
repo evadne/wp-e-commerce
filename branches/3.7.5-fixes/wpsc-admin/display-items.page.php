@@ -442,7 +442,7 @@ function wpsc_admin_category_dropdown() {
 	
 	$concat = "<input type='hidden' name='page' value='{$_GET['page']}' />\r\n";
 	$concat .= "<select name='category_id' id='category_select'>".$options."</select>\r\n";
-	$concat .= "<button class='button' id='submit_category_select'>Filter</button>\r\n";
+	$concat .= "<input type='submit' class='button' id='submit_category_select' name='Filter' value='Filter' />\r\n";
 	return $concat;
 }
 

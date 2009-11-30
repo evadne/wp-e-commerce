@@ -1289,7 +1289,7 @@ function wpsc_purchlog_edit_status($purchlog_id='', $purchlog_status='') {
 		$purchlog_status = absint($_POST['purchlog_status']);
 	}
 		
-	$log_data = $wpdb->get_row("SELECT `processed` FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `id` = '{$purchlog_id}' LIMIT 1",ARRAY_A);
+	$log_data = $wpdb->get_row("SELECT `processed`, `sessionid` FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `id` = '{$purchlog_id}' LIMIT 1",ARRAY_A);
 	if (($purchlog_id==2) && function_exists('wpsc_member_activate_subscriptions')){
 		wpsc_member_activate_subscriptions($_POST['id']);
 	}
