@@ -171,14 +171,13 @@ function gateway_paypal_pro($seperator, $sessionid){
 		// $data['item_number_'.$i] = 0;
 		$data['L_TAXAMT'.$i] = 0;
 	} else {
-
-	foreach($wpsc_cart->cart_items as $i => $Item) {
-		$data['L_NAME'.$i]			= $Item->product_name;
-		$data['L_AMT'.$i]			= number_format($Item->unit_price,2);
-		$data['L_NUMBER'.$i]		= $i;
-		$data['L_QTY'.$i]			= $Item->quantity;
-		$data['L_TAXAMT'.$i]		= number_format($Item->tax,2);
-	}
+		foreach($wpsc_cart->cart_items as $i => $Item) {
+			$data['L_NAME'.$i]			= $Item->product_name;
+			$data['L_AMT'.$i]			= number_format($Item->unit_price,2);
+			$data['L_NUMBER'.$i]		= $i;
+			$data['L_QTY'.$i]			= $Item->quantity;
+			$data['L_TAXAMT'.$i]		= number_format($Item->tax,2);
+		}
 	}
 	$transaction = "";
 	foreach($data as $key => $value) {
@@ -203,7 +202,8 @@ function gateway_paypal_pro($seperator, $sessionid){
 		unset($_SESSION['WpscGatewayErrorMessage']);
 		$_SESSION['paypalpro'] = 'success';
 		header("Location: ".get_option('transact_url').$seperator."sessionid=".$sessionid);
-	}else{
+		exit();
+	} else {
 		//redirect back to checkout page with errors
 		$sql = "UPDATE `".WPSC_TABLE_PURCHASE_LOGS."` SET `processed`= '5' WHERE `sessionid`=".$sessionid;
 		$wpdb->query($sql);
