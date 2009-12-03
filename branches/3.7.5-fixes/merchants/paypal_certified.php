@@ -85,7 +85,7 @@ $ack = strtoupper($resArray["ACK"]);
 }
 function paypal_certified_currencyconverter(){
 	global $wpdb;
-	$currency_code = $wpdb->get_results("SELECT `code` FROM `".WPSC_TABLE_CURRENCY_LIST."` WHERE `id`='".get_option('currency_type')."' LIMIT 1",ARRAY_A);
+	$currency_code = $wpdb->get_results("SELECT `code` FROM `".WPSC_TABLE_CURRENCY_LIST."` WHERE `id`='".absint(get_option('currency_type'))."' LIMIT 1",ARRAY_A);
 	$local_currency_code = $currency_code[0]['code'];
 	$paypal_currency_code = get_option('paypal_curcode');
 	if($paypal_currency_code == '') {

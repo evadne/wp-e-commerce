@@ -18,9 +18,7 @@
  */
 function wpsc_get_state_by_id($id, $return_value){
 	global $wpdb;
-	
-	$sql = "SELECT `".$return_value."` FROM `".WPSC_TABLE_REGION_TAX."` WHERE `id`=".$id;
-	$value = $wpdb->get_var($sql);
+	$value = $wpdb->get_var("SELECT `".$return_value."` FROM `".WPSC_TABLE_REGION_TAX."` WHERE `id` IN('".absint($id)."') LIMIT 1");
 	return $value;
 }
  
