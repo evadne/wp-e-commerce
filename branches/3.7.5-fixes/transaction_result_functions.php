@@ -238,17 +238,23 @@ function transaction_results($sessionid, $echo_to_screen = true, $transaction_id
 
 						switch($form_data['type']) {
 							case "country":
-							$report_user .= $form_data['name'].": ".wpsc_get_country($form_field['value'])."\n";
-							$report_user .= TXT_WPSC_STATE.": ".wpsc_get_region($purchase_log['billing_region'])."\n";
+								$delivery_region_count = $wpdb->get_var("SELECT COUNT(`regions`.`id`) FROM `".WPSC_TABLE_REGION_TAX."` AS `regions` INNER JOIN `".WPSC_TABLE_CURRENCY_LIST."` AS `country` ON `country`.`id` = `regions`.`country_id` WHERE `country`.`isocode` IN('".$wpdb->escape( $purchase_log['billing_country'])."')");
+								if(is_numeric($purchase_log['shipping_region']) && ($delivery_region_count > 0)) {
+									$report_user .= TXT_WPSC_STATE.": ".wpsc_get_region($purchase_log['billing_region'])."\n";
+								}
+								$report_user .= $form_data['name'].": ".wpsc_get_country($form_field['value'])."\n";
 							break;
 							
 							case "delivery_country":
-							$report_user .= $form_data['name'].": ".wpsc_get_country($form_field['value'])."\n";
-							$report_user .= TXT_WPSC_DELIVERY_STATE.": ".wpsc_get_region($purchase_log['shipping_region'])."\n";
+								$delivery_region_count = $wpdb->get_var("SELECT COUNT(`regions`.`id`) FROM `".WPSC_TABLE_REGION_TAX."` AS `regions` INNER JOIN `".WPSC_TABLE_CURRENCY_LIST."` AS `country` ON `country`.`id` = `regions`.`country_id` WHERE `country`.`isocode` IN('".$wpdb->escape( $purchase_log['shipping_country'])."')");
+								if(is_numeric($purchase_log['shipping_region']) && ($delivery_region_count > 0)) {
+									$report_user .= TXT_WPSC_DELIVERY_STATE.": ".wpsc_get_region($purchase_log['shipping_region'])."\n";
+								}
+								$report_user .= $form_data['name'].": ".wpsc_get_country($form_field['value'])."\n";
 							break;
 							
 							default:
-							$report_user .= $form_data['name'].": ".$form_field['value']."\n";
+								$report_user .= $form_data['name'].": ".$form_field['value']."\n";
 							break;
 						}
 					}

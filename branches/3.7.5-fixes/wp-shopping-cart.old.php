@@ -1130,7 +1130,8 @@ if(($_POST['ajax'] == "true") || ($_GET['ajax'] == "true")) {
       $output .= "    <item>\n\r";
       $output .= "      <title>".htmlentities(stripslashes($product['name']), ENT_NOQUOTES, 'UTF-8')."</title>\n\r";
       $output .= "      <link>$purchase_link</link>\n\r";
-      $output .= "      <description>".htmlentities(stripslashes($product['description']), ENT_NOQUOTES, 'UTF-8')."</description>\n\r";
+      //$output .= "      <description>".htmlentities(stripslashes($product['description']), ENT_NOQUOTES, 'UTF-8')."</description>\n\r";
+      $output .= "      <description><![CDATA[\n".htmlentities(stripslashes($product['description']), ENT_NOQUOTES, 'UTF-8')."\n]]></description>\n\r";
       $output .= "      <pubDate>".date("r")."</pubDate>\n\r";
       $output .= "      <guid>$purchase_link</guid>\n\r"; 
       if($product['thumbnail_image'] != null) {
