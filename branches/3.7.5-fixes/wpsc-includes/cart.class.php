@@ -929,7 +929,12 @@ class wpsc_cart {
 	 * @return boolean true on sucess, false on failure
 	*/
   function remove_item($key) {
+		global $wpdb;
     if(isset($this->cart_items[$key])) {
+			$cart_item = &$this->cart_items[$key];
+			
+			$wpdb->query($wpdb->prepare("DELETE FROM `".WPSC_TABLE_CLAIMED_STOCK."` WHERE `product_id` IN ('%s') AND`variation_stock_id` IN ('%s') AND `cart_id` IN ('%s') LIMIT 1;",$cart_item->product_id, $cart_item->priceandstock_id, $this->unique_id));
+    
 			unset($this->cart_items[$key]);
 	    $this->cart_items = array_values($this->cart_items);
 			$this->cart_item_count = count($this->cart_items);
