@@ -335,7 +335,7 @@ function wpsc_user_dynamic_css() {
           echo "      }\n\r";
         }
 
-				if(($individual_thumbnail_width > $thumbnail_width) || ($individual_thumbnail_height > $thumbnail_height)) {
+				if(($individual_thumbnail_width != $thumbnail_width) || ($individual_thumbnail_height != $thumbnail_height)) {
 						echo "      div.default_product_display.product_view_$product_id  div.textcol div.imagecol a img{\n\r";
 						echo "            width: ".$individual_thumbnail_width."px;\n\r";
 						echo "            height: ".$individual_thumbnail_height."px;\n\r";
