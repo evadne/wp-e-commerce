@@ -340,11 +340,11 @@ class wpsc_checkout {
 	*/
   function form_field() {
 		global $wpdb, $user_ID;
-		//$meta_data[$form_field['id']]
-
-		if((count($_SESSION['wpsc_checkout_saved_values']) <= 0) && ($user_ID > 0)) {
-			$_SESSION['wpsc_checkout_saved_values'] = get_usermeta($user_ID, 'wpshpcrt_usr_profile');
-		}
+		
+ 		if((count($_SESSION['wpsc_checkout_saved_values']) <= 0) && ($user_ID > 0)) {
+ 			$_SESSION['wpsc_checkout_saved_values'] = get_usermeta($user_ID, 'wpshpcrt_usr_profile');
+ 		}
+		
 		$saved_form_data = htmlentities(stripslashes($_SESSION['wpsc_checkout_saved_values'][$this->checkout_item->id]), ENT_QUOTES);
 		switch($this->checkout_item->type) {
 			case "address":

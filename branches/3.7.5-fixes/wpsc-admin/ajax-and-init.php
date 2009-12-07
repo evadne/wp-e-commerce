@@ -1234,8 +1234,12 @@ if($_REQUEST['wpsc_admin_action'] == 'clear_locks') {
  
  function wpsc_purchlog_filter_by(){
  	//exit('filter is triggered'.print_r($_POST, true));
- 	wpsc_change_purchlog_view($_POST['view_purchlogs_by'], $_POST['view_purchlogs_by_status']);
- } 
+		if(isset($_POST['view_purchlogs_by']) || isset($_POST['view_purchlogs_by_status'])) {
+			wpsc_change_purchlog_view($_POST['view_purchlogs_by'], $_POST['view_purchlogs_by_status']);
+		} else if(isset($_GET['view_purchlogs_by']) || isset($_GET['view_purchlogs_by_status'])) {
+			wpsc_change_purchlog_view($_GET['view_purchlogs_by'], $_GET['view_purchlogs_by_status']);
+		}
+	}
  
  if($_REQUEST['wpsc_admin_action'] == 'purchlog_filter_by') {
 	add_action('admin_init', 'wpsc_purchlog_filter_by');
@@ -1304,7 +1308,7 @@ function wpsc_purchlog_edit_status($purchlog_id='', $purchlog_status='') {
 	if(($purchlog_id > $log_data['processed']) && ($log_data['processed'] < 2)) {
 		transaction_results($log_data['sessionid'],false);
 	}
-	wpsc_change_purchlog_view('all');
+	//wpsc_change_purchlog_view('all');
 	if($_REQUEST['ajax'] == true){
 		exit("1");
 	}

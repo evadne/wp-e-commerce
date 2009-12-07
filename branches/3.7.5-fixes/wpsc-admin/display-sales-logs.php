@@ -24,13 +24,19 @@ if(!isset($purchlogs)){
 	}
 
  function wpsc_display_sales_log_index() {
+   global $purchlogs;
   	?>
 	<div class="wrap">
 		<?php //screen_icon(); ?>
 		<h2><?php echo wp_specialchars( TXT_WPSC_PURCHASELOG ); ?> </h2>
 		<?php //START OF PURCHASE LOG DEFAULT VIEW ?>
 		<?php
-		if(!isset($_REQUEST['purchaselog_id'])) {
+
+		 if(isset($_GET['view_purchlogs_by']) || isset($_GET['view_purchlogs_by_status'])) {
+			wpsc_change_purchlog_view($_GET['view_purchlogs_by'], $_GET['view_purchlogs_by_status']);
+		}
+		
+			if(!isset($_REQUEST['purchaselog_id'])) {
 		  	$columns = array(
 		  		'cb' => '<input type="checkbox" />',
 					'date' => 'Date',
