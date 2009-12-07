@@ -177,7 +177,7 @@ function gateway_paypal_pro($seperator, $sessionid){
 		$data['L_AMT'.$i]			= number_format($Item->unit_price,2);
 		$data['L_NUMBER'.$i]		= $i;
 		$data['L_QTY'.$i]			= $Item->quantity;
-		$data['L_TAXAMT'.$i]		= number_format($Item->tax,2);
+		$data['L_TAXAMT'.$i]		= 0;//number_format($Item->tax,2);
 	}
 	}
 	$transaction = "";
