@@ -203,6 +203,8 @@ global $wpsc_query, $wpdb;
 									<?php if(wpsc_product_on_special()) : ?>
 										<span class='oldprice'><?php echo TXT_WPSC_PRICE; ?>: <?php echo wpsc_product_normal_price(); ?></span><br />
 									<?php endif; ?>
+									<span class="pricedisplay">	<?php echo wpsc_convert_currency($wpsc_query->product['price']); ?></span><?php echo TXT_WPSC_PRICE; ?> in NZD:  <br/>
+								
 									<span id="product_price_<?php echo wpsc_the_product_id(); ?>" class="pricedisplay"><?php echo wpsc_the_product_price(); ?></span><?php echo TXT_WPSC_PRICE; ?>:  <br/>
 									<?php if(get_option('display_pnp') == 1) : ?>
 										<span class="pricedisplay"><?php echo wpsc_product_postage_and_packaging(); ?></span><?php echo TXT_WPSC_PNP; ?>:  <br />
