@@ -1070,7 +1070,7 @@ function edit_multiple_image_gallery($product_data) {
 	<?php
 	$num = 0;
 	if(function_exists('gold_shpcrt_display_gallery') && ($product_data['id'] > 0)) {
-    $values = $wpdb->get_results("SELECT * FROM `".WPSC_TABLE_PRODUCT_IMAGES."` WHERE `product_id` = '{$product_data['id']}' AND `id` NOT IN ('{$main_image['id']}') ORDER BY image_order ASC",ARRAY_A);
+    $values = $wpdb->get_results("SELECT * FROM `".WPSC_TABLE_PRODUCT_IMAGES."` WHERE `product_id` = '{$product_data['id']}' AND `id` NOT IN ('{$main_image['id']}') ORDER BY  CAST(`image_order` AS SIGNED INT) ASC",ARRAY_A);
     
     //echo "<pre>".print_r($values,true)."</pre>";
     

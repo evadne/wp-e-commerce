@@ -862,10 +862,10 @@ strong.cattitles{
  */
  
   
-div.wpcart_gallery img
-  {
+div.wpcart_gallery img {
   margin-right: 5px;
-  }
+  margin-bottom: 5px;
+}
   
 /*
  * Fancy notification styling
