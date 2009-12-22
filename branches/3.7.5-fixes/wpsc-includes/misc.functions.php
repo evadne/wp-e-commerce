@@ -198,6 +198,25 @@ add_filter('aioseop_keywords', 'wpsc_set_aioseop_keywords');
 
 
 
+
+function wpsc_insert_canonical_url() {
+	$wpsc_url = wpsc_change_canonical_url(null);
+	echo "<link rel='canonical' href='$wpsc_url' />\n";
+}
+
+function wpsc_canonical_url() {
+	$wpsc_url = wpsc_change_canonical_url(null);
+	if($wpsc_url != null) {
+		remove_action( 'wp_head', 'rel_canonical' );
+		add_action( 'wp_head', 'wpsc_insert_canonical_url');
+	}
+}
+add_action( 'template_redirect', 'wpsc_canonical_url' );
+
+
+
+
+
 /**
 * wpsc_populate_also_bought_list function, runs on checking out, populates the also bought list.
 */
