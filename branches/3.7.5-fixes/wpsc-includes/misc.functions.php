@@ -135,7 +135,6 @@ function wpsc_change_canonical_url($url) {
 			}
     }
   }
-  //echo "<pre>".print_r($wpsc_query->is_single,true)."</pre>";
   return $url;
 }
 add_filter('aioseop_canonical_url', 'wpsc_change_canonical_url');
@@ -205,8 +204,9 @@ function wpsc_insert_canonical_url() {
 }
 
 function wpsc_canonical_url() {
+	global $aioseop_options;
 	$wpsc_url = wpsc_change_canonical_url(null);
-	if($wpsc_url != null) {
+	if(($wpsc_url != null) && ((count($aioseop_options) <= 1) || (($aioseop_options['aiosp_can'] != '1' && $aioseop_options['aiosp_can'] != 'on'))) ) {
 		remove_action( 'wp_head', 'rel_canonical' );
 		add_action( 'wp_head', 'wpsc_insert_canonical_url');
 	}
