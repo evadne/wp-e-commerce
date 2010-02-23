@@ -498,6 +498,7 @@ if($_REQUEST['wpsc_action'] == 'cart_html_page') {
 function wpsc_submit_checkout() {
   global $wpdb, $wpsc_cart, $user_ID,$nzshpcrt_gateways, $wpsc_shipping_modules, $wpsc_gateways;
   //echo "break redirect";
+  	do_action('wpsc_before_submit_checkout');
 	$_SESSION['wpsc_checkout_misc_error_messages'] = array();
 	$wpsc_checkout = new wpsc_checkout();
 	//exit('coupons:'.$wpsc_cart->coupons_name);
@@ -583,7 +584,7 @@ function wpsc_submit_checkout() {
 		$total = $wpsc_cart->calculate_total_price();
 		$sql = "INSERT INTO `".WPSC_TABLE_PURCHASE_LOGS."` (`totalprice`,`statusno`, `sessionid`, `user_ID`, `date`, `gateway`, `billing_country`,`shipping_country`, `billing_region`, `shipping_region`, `base_shipping`,`shipping_method`, `shipping_option`, `plugin_version`, `discount_value`, `discount_data`,`find_us`) VALUES ('$total' ,'0', '{$sessionid}', '".(int)$user_ID."', UNIX_TIMESTAMP(), '{$submitted_gateway}', '{$wpsc_cart->delivery_country}', '{$wpsc_cart->selected_country}','{$wpsc_cart->selected_region}', '{$wpsc_cart->delivery_region}', '{$base_shipping}', '{$wpsc_cart->selected_shipping_method}', '{$wpsc_cart->selected_shipping_option}', '".WPSC_VERSION."', '{$wpsc_cart->coupons_amount}','{$wpsc_cart->coupons_name}', '{$find_us}')";
 		
-		//exit($sql);
+		//exit($sql.'<br /><pre>'.print_r($wpsc_cart, true).'</pre>');
 		$wpdb->query($sql);
 		
 		

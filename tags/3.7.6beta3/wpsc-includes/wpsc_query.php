@@ -1076,6 +1076,9 @@ class WPSC_Query {
 	
 	var $is_single = false;
 	var $is_search = false;
+	
+	
+	
 
 	/**
 	 * The WPSC query constructor, if no query is passed to it, it makes one from the WP_Query data
@@ -2074,7 +2077,9 @@ class WPSC_Query {
 
 	///////////////////////////////////////////////////////////////////////////////////////
 	/* 	END OF btray77 code for pagination */
-	
+	function wpsc_query_end_of_class(){
+		do_action('wpsc_query_end_of_class');
+	}
 }
 			
 ?>

@@ -574,6 +574,10 @@ class wpsc_cart {
 	var $coupons_name = '';
 	var $coupons_amount = 0;
 	
+	//currency values
+	var $currency_conversion = 0;
+	var $use_currency_converter = false;
+	
   function wpsc_cart() {
     global $wpdb, $wpsc_shipping_modules;
     $coupon = 'percentage'; 
@@ -1140,6 +1144,7 @@ class wpsc_cart {
 	
 	
 	}
+		$total = apply_filters('wpsc_convert_tax_prices', $total);
 		return $total;
   }
   
@@ -1209,6 +1214,7 @@ class wpsc_cart {
     }else{
 			$total = 0;
     }
+    $total = apply_filters('wpsc_convert_total_shipping',$total);
     return $total;
   }
   
@@ -1334,7 +1340,7 @@ class wpsc_cart {
 			$output = $currency_sign.'  '.$price;
 			break;
 		}
-	
+		$output = apply_filters('wpsc_price_display_changer', $output);
 		return $output;  
   }
   
@@ -1689,7 +1695,8 @@ class wpsc_cart_item {
 		if(count($variation_names) > 0) {
 			$product_name .= " (".implode(", ",$variation_names).")";
 		}
-
+		$price = apply_filters('wpsc_do_convert_price', $price);
+		//exit('<pre>'.print_r($this, true).'</pre>');
 		$this->product_name = $product_name;
 		$this->priceandstock_id = $priceandstock_id;
 		$this->is_donation = (bool)$product['donation'];
@@ -1703,9 +1710,10 @@ class wpsc_cart_item {
 		} else {
 			$this->unit_price = $price;
 		}
+		
 		$this->weight = $weight;
 		$this->total_price = $this->unit_price * $this->quantity;
-
+		
 		$category_data = $wpdb->get_results("SELECT `".WPSC_TABLE_PRODUCT_CATEGORIES."`.`id`,`".WPSC_TABLE_PRODUCT_CATEGORIES."`.`nice-name`  FROM `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."` , `".WPSC_TABLE_PRODUCT_CATEGORIES."` WHERE `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`product_id` IN ('".$product['id']."') AND `".WPSC_TABLE_ITEM_CATEGORY_ASSOC."`.`category_id` = `".WPSC_TABLE_PRODUCT_CATEGORIES."`.`id` AND `".WPSC_TABLE_PRODUCT_CATEGORIES."`.`active` IN('1')", ARRAY_A);
 
 		$this->category_list = array();

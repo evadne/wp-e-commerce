@@ -494,13 +494,16 @@ if(!isset($purchlogs)){
  function get_purchaselogs_content(){
  	global $purchlogs;
  	while(wpsc_have_purch_items()) : wpsc_the_purch_item();	
- 	//exit('<pre>'.print_r($_SESSION, true).'</pre>');
+ 	exit('<pre>'.print_r($purchlogs, true).'</pre>');
  	?>
  	<tr>
  		<th class="check-column" scope="row"><input type='checkbox' name='purchlogids[]' class='editcheckbox' value='<?php echo wpsc_the_purch_item_id(); ?>' /></th>
  		<td><?php echo wpsc_the_purch_item_date(); ?></td> <!--Date -->
  		<td><?php echo wpsc_the_purch_item_name(); ?></td> <!--Name/email -->
- 		<td><?php echo nzshpcrt_currency_display(wpsc_the_purch_item_price(), true); ?></td><!-- Amount -->
+ 		<td><?php echo nzshpcrt_currency_display(wpsc_the_purch_item_price(), true); 
+ 			do_action('wpsc_additional_sales_amount_info');
+ 		?>
+ 		</td><!-- Amount -->
  		<td><a href='<?php echo htmlentities(add_query_arg('purchaselog_id', wpsc_the_purch_item_id())) ; ?>'><?php echo wpsc_the_purch_item_details();?> Items</a></td><!-- Details -->
  		<td>
  		<?php if(wpsc_purchlogs_is_google_checkout() == false){ ?>
