@@ -494,7 +494,7 @@ if(!isset($purchlogs)){
  function get_purchaselogs_content(){
  	global $purchlogs;
  	while(wpsc_have_purch_items()) : wpsc_the_purch_item();	
- 	exit('<pre>'.print_r($purchlogs, true).'</pre>');
+// 	exit('<pre>'.print_r($_SESSION, true).'</pre>');
  	?>
  	<tr>
  		<th class="check-column" scope="row"><input type='checkbox' name='purchlogids[]' class='editcheckbox' value='<?php echo wpsc_the_purch_item_id(); ?>' /></th>
