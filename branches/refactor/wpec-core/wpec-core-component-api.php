@@ -250,16 +250,11 @@ class WPEC_Component {
 	 *
 	 * Template files are stored like $template/$slug/$screen
 	 *
-	 * Examples:	/wpec-default/members/index
-	 *				/wpec-default/members/my-friends
+	 * Examples:	/wpec-default/products/index
+	 *				/wpec-default/products/hoodies
 	 *
-	 *				/wpec-default/groups/index
-	 *				/wpec-default/groups/my-groups
-	 *
-	 *				/wpec-default/blogs/index
-	 *				/wpec-default/blogs/create
-	 *
-	 *				/wpec-default/activity/index
+	 *				/wpec-default/vendors/
+	 *				/wpec-default/vendors/coupons
 	 *
 	 * @uses wpec_core_load_template Loads the appropriate template file
 	 * @uses do_action Calls (id)_screen_$screen action
@@ -284,18 +279,8 @@ class WPEC_Component {
 	 *
 	 * Template files are stored like $template/$slug/single/$screen
 	 *
-	 * Examples:	/wpec-default/members/single/my-friends
-	 *				/wpec-default/members/single/friends-activity
-	 *
-	 *				/wpec-default/groups/single/my-groups
-	 *				/wpec-default/groups/single/groups-activity
-	 *
-	 *				/wpec-default/forums/single/edit
-	 *				/wpec-default/forums/single/topic
-	 *
-	 *				/wpec-default/activity/single/my-activity
-	 *				/wpec-default/activity/single/friends-activity
-	 *				/wpec-default/activity/single/blogs-activity
+	 * Examples:	/wpec-default/products/single/
+	 *				/wpec-default/products/single/whatever
 	 *
 	 * @uses this->screen Loads template for single item
 	 * @param bool $screen
