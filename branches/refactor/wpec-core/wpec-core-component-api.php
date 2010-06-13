@@ -231,7 +231,7 @@ class WPEC_Component {
 	 *
 	 * Calls the component action to add navigation to the WordPress admin area
 	 *
-	 * @uses is_site_admin Check if the current user is a super admin
+	 * @uses is_super_admin Check if the current user is a super admin
 	 * @global object $wpdb
 	 * @global array $wpec
 	 */
@@ -239,7 +239,7 @@ class WPEC_Component {
 
 		// Quick permission check
 		// @todo Remove this and setup with proper permissions function
-		if ( !is_site_admin() )
+		if ( !is_super_admin() )
 			return false;
 
 		do_action( $this->id . '_admin_menu' );
