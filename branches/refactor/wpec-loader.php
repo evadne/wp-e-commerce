@@ -9,6 +9,13 @@ Author URI: http://www.instinct.co.nz/e-commerce/
 */
 
 /**
+ * Current WP e-Commerce version
+ *
+ * Plugins can also use this as a low impact way to see if WPeC is loaded.
+ */
+define( 'WPEC_VERSION', 'refactor' );
+
+/**
  * wpec_ready()
  *
  * Action to call when WP e-Commerce is ready to extend. External dependent
