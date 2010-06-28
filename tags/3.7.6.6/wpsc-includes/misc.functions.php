@@ -762,14 +762,15 @@ function wpsc_readfile_chunked($filename, $retbytes = true) {
 
 function wpsc_clear_stock_claims( ) {
 	global $wpdb;
-	///wp_mail('thomas.howard@gmail.com', 'test hourly cron', 'wpsc_clear_stock_claims ran');
+
 	/// Delete the old claims on stock
 	$old_claimed_stock_timestamp = mktime((date('H') - 1), date('i'), date('s'), date('m'), date('d'), date('Y'));
 	$old_claimed_stock_datetime = date("Y-m-d H:i:s", $old_claimed_stock_timestamp);
 	$wpdb->query("DELETE FROM `".WPSC_TABLE_CLAIMED_STOCK."` WHERE `last_activity` < '{$old_claimed_stock_datetime}' AND `cart_submitted` IN ('0')");
+//	wp_mail('jghazally@gmail.com', 'test hourly cron1', 'wpsc_clear_stock_claims ran'."DELETE FROM `".WPSC_TABLE_CLAIMED_STOCK."` WHERE `last_activity` < '{$old_claimed_stock_datetime}' AND `cart_submitted` IN ('0')");
 }
 add_action('wpsc_daily_cron_tasks', 'wpsc_clear_stock_claims');
-
+add_action('wpsc_hourly_cron_tasks', 'wpsc_clear_stock_claims');
 /**
  * Description Check PHP version to Compare
  * @access public

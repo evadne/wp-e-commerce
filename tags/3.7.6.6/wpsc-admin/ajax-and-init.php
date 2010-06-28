@@ -1939,21 +1939,15 @@ function wpsc_checkout_settings(){
 	    if(is_array($_POST['wpsc_checkout_option_label'])){
 	    		
 	    	foreach($_POST['wpsc_checkout_option_label'] as $form_id=> $values){
-
 					foreach((array)$values as $key => $form_option){
 						$form_option = str_ireplace("'", "",$form_option);
 						$form_val = str_ireplace("'", "",sanitize_title($_POST['wpsc_checkout_option_value'][$form_id][$key]));
 						$options[$form_option] = $form_val;
 					}
+				$options = serialize($options);
+				$sql = "UPDATE `".WPSC_TABLE_CHECKOUT_FORMS."` SET `options`='".$options."' WHERE id=".$form_id;
+				$wpdb->query($sql);
 			}
-			
-
-		//	exit('<pre>'.print_r($options,true).'</pre>');						
-			$options = serialize($options);
-
-			$sql = "UPDATE `".WPSC_TABLE_CHECKOUT_FORMS."` SET `options`='".$options."' WHERE id=".$form_id;
-
-			$wpdb->query($sql);
 
 	    }
 	    
@@ -2165,7 +2159,7 @@ function wpsc_mass_resize_thumbnails() {
 	}
 	//$wpdb->query("DELETE FROM `".WPSC_TABLE_PRODUCT_IMAGES."` WHERE `product_id` IN('0')");
 	
-  $_SESSION['wpsc_thumbnails_resized'] = true;
+    $_SESSION['wpsc_thumbnails_resized'] = true;
 	$sendback = wp_get_referer();
 	$sendback = add_query_arg('tab', $_SESSION['wpsc_settings_curr_page'], remove_query_arg('tab', $sendback));
 	wp_redirect($sendback);
